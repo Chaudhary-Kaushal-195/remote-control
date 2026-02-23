@@ -4,92 +4,315 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dr. Vice - Virtual Controller System</title>
+    <title>Dr. Vice - Ultimate Game Hub</title>
     <style>
+        :root {
+            --neon-blue: #0ffffa;
+            --neon-pink: #f092ff;
+            --neon-red: #ff0055;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
         body {
-            background: #0a0015;
+            background: #05000a;
             color: #fff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             margin: 0;
             overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Animated Grid Background */
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(var(--glass-border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--glass-border) 1px, transparent 1px);
+            background-size: 50px 50px;
+            perspective: 500px;
+            transform: rotateX(60deg) translateY(-200px);
+            z-index: -1;
+            opacity: 0.3;
+            animation: grid-scroll 10s linear infinite;
+        }
+
+        @keyframes grid-scroll {
+            from {
+                background-position: 0 0;
+            }
+
+            to {
+                background-position: 0 100px;
+            }
         }
 
         .container {
+            position: relative;
+            z-index: 1;
+            width: 90%;
+            max-width: 600px;
             text-align: center;
+        }
+
+        .header h1 {
+            font-size: 4rem;
+            margin: 0;
+            letter-spacing: 12px;
+            background: linear-gradient(to bottom, #fff, var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 20px 40px rgba(15, 255, 250, 0.3);
+        }
+
+        .header p {
+            font-size: 14px;
+            letter-spacing: 4px;
+            opacity: 0.5;
+            margin-bottom: 50px;
+        }
+
+        .main-hero {
+            display: grid;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            border-radius: 24px;
+            text-decoration: none;
+            color: #fff;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .card.primary {
+            border-left: 4px solid var(--neon-blue);
+        }
+
+        .card.secondary {
+            border-left: 4px solid var(--neon-pink);
+        }
+
+        .card-info {
+            text-align: left;
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .card-desc {
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        .card-icon {
+            font-size: 40px;
+            opacity: 0.8;
+        }
+
+        /* Settings Icon */
+        .settings-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            transition: 0.3s;
+        }
+
+        .settings-btn:hover {
+            transform: rotate(90deg) scale(1.1);
+            border-color: var(--neon-pink);
+        }
+
+        /* Settings Modal */
+        #settings-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(30px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #0a0a0a;
+            border: 1px solid var(--glass-border);
+            width: 90%;
+            max-width: 450px;
+            border-radius: 30px;
             padding: 40px;
-            border: 2px solid #f092ff;
-            border-radius: 20px;
-            background: rgba(255, 146, 255, 0.05);
-            box-shadow: 0 0 50px rgba(240, 146, 255, 0.2);
-            max-width: 500px;
+            box-shadow: 0 0 100px rgba(240, 146, 255, 0.1);
         }
 
-        h1 {
-            color: #0ffffa;
-            text-shadow: 0 0 15px #0ffffa;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-            letter-spacing: 2px;
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
         }
 
-        .btn {
-            display: block;
+        .setting-label {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        select,
+        input[type="range"] {
+            background: #1a1a1a;
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-family: inherit;
+        }
+
+        .close-modal {
+            margin-top: 30px;
             width: 100%;
             padding: 15px;
-            margin: 15px 0;
-            font-size: 1.2em;
+            background: var(--neon-pink);
+            border: none;
+            border-radius: 12px;
             font-weight: bold;
-            text-decoration: none;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-        }
-
-        .btn-game {
-            background: rgba(15, 255, 250, 0.1);
-            border: 1px solid #0ffffa;
-            color: #0ffffa;
-        }
-
-        .btn-game:hover {
-            background: #0ffffa;
+            cursor: pointer;
             color: #000;
-            box-shadow: 0 0 20px #0ffffa;
-        }
-
-        .btn-control {
-            background: rgba(240, 146, 255, 0.1);
-            border: 1px solid #f092ff;
-            color: #f092ff;
-        }
-
-        .btn-control:hover {
-            background: #f092ff;
-            color: #000;
-            box-shadow: 0 0 20px #f092ff;
-        }
-
-        p {
-            opacity: 0.6;
-            font-size: 0.9em;
-            margin-top: 20px;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <h1>DR. VICE</h1>
-        <a href="cargame.html" class="btn btn-game">🎮 START CAR GAME</a>
-        <a href="controller.html?mode=manual" class="btn btn-control">🤳 OPEN REMOTE APP <span
-                style="font-size:10px; opacity:0.6; display:block;">(MOBILE ONLY)</span></a>
-        <p>A Professional Peer-to-Peer Controller System</p>
+    <div class="bg-grid"></div>
+
+    <div class="container" id="main-content">
+        <div class="header">
+            <h1>DR. VICE</h1>
+            <p>ADVANCED P2P RACING HUB</p>
+        </div>
+
+        <div class="main-hero">
+            <a href="cargame.html" class="card primary">
+                <div class="card-info">
+                    <div class="card-title">LAUNCH GAME</div>
+                    <div class="card-desc">Start the desktop experience</div>
+                </div>
+                <div class="card-icon">🎮</div>
+            </a>
+
+            <a href="controller.html?mode=manual" class="card secondary">
+                <div class="card-info">
+                    <div class="card-title">MOBILE REMOTE</div>
+                    <div class="card-desc">Connect phone steering</div>
+                </div>
+                <div class="card-icon">🤳</div>
+            </a>
+        </div>
+
+        <p style="font-size: 10px; opacity: 0.3; margin-top: 50px;">VERSION 2.0 ULTIMATE</p>
     </div>
+
+    <div class="settings-btn" onclick="toggleSettings()">⚙️</div>
+
+    <div id="settings-modal" onclick="event.target === this && toggleSettings()">
+        <div class="modal-content">
+            <h2 style="margin-top:0; color:var(--neon-pink);">HUB SETTINGS</h2>
+
+            <div class="setting-row">
+                <div class="setting-label">Steering Mode</div>
+                <select id="setting-steering" onchange="saveSettings()">
+                    <option value="wheel">Analog Wheel</option>
+                    <option value="buttons">Left/Right Buttons</option>
+                    <option value="gyro">Gyro Only (Pro)</option>
+                </select>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-label">Speed Format</div>
+                <select id="setting-units" onchange="saveSettings()">
+                    <option value="kph">KPH (Kilometers)</option>
+                    <option value="mph">MPH (Miles)</option>
+                </select>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-label">Engine Volume</div>
+                <input type="range" id="setting-engine-vol" min="0" max="100" value="80" onchange="saveSettings()">
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-label">Music Volume</div>
+                <input type="range" id="setting-music-vol" min="0" max="100" value="50" onchange="saveSettings()">
+            </div>
+
+            <button class="close-modal" onclick="toggleSettings()">APPLY & CLOSE</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleSettings() {
+            const modal = document.getElementById('settings-modal');
+            const isVisible = modal.style.getComputedStyle ? getComputedStyle(modal).display === 'flex' : modal.style.display === 'flex';
+            modal.style.display = isVisible ? 'none' : 'flex';
+            if (!isVisible) loadSettings();
+        }
+
+        function saveSettings() {
+            const settings = {
+                steering: document.getElementById('setting-steering').value,
+                units: document.getElementById('setting-units').value,
+                engineVol: document.getElementById('setting-engine-vol').value,
+                musicVol: document.getElementById('setting-music-vol').value
+            };
+            localStorage.setItem('drViceSettings', JSON.stringify(settings));
+        }
+
+        function loadSettings() {
+            const saved = localStorage.getItem('drViceSettings');
+            if (saved) {
+                const s = JSON.parse(saved);
+                document.getElementById('setting-steering').value = s.steering || 'wheel';
+                document.getElementById('setting-units').value = s.units || 'kph';
+                document.getElementById('setting-engine-vol').value = s.engineVol || 80;
+                document.getElementById('setting-music-vol').value = s.musicVol || 50;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadSettings);
+    </script>
 </body>
 
 </html>

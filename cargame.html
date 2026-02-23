@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dr. Vice - Final Visual Build</title>
     <style>
+        :root {
+            --neon-blue: #0ffffa;
+            --neon-pink: #f092ff;
+        }
+
         body {
             margin: 0;
             overflow: hidden;
@@ -213,7 +218,41 @@
             font-weight: 900;
         }
 
-        /* QR Overlay */
+        /* Modern HUD */
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(10, 0, 21, 0.85);
+            border: 1px solid var(--neon-blue);
+            padding: 15px;
+            border-radius: 12px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            min-width: 220px;
+            box-shadow: 0 0 15px rgba(15, 255, 250, 0.2);
+        }
+
+        .hud-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #f092ff;
+            color: #f092ff;
+            padding: 6px 12px;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            transition: 0.2s;
+            text-transform: uppercase;
+        }
+
+        .hud-btn:hover {
+            background: #f092ff;
+            color: #000;
+            box-shadow: 0 0 10px #f092ff;
+        }
+
         #qr-overlay {
             position: fixed;
             top: 50%;
@@ -278,16 +317,20 @@
 <body>
 
     <div id="hud">
-        <b>#HU DR. VICE - (NEON BMW)</b><br>
-        SPEED: val < <span id="speed-box" onclick="toggleGyro()">speed: 0 (GYRO: OFF)</span>
-            <span id="remote-box" onclick="setupRemote()"
-                style="background: rgba(255,100,255,0.1); border: 1px solid #f092ff; padding: 0px 4px; color: #f092ff; font-size: 14px; margin-left: 5px; cursor: pointer; pointer-events: auto;">REMOTE:
-                OFF</span>
-            <div class="hud-meta">{ toncsct [ speed ] > thres @. 01660.0.3
-                impurts > gaicthsct hot, {posvelat 100./0105W20/400/0660/tod 2170.01, widpuls},
-                { totveID [ ammd. > ayt, (hrees bwgt 0.3
-                impurts > gaicinsct hot, {posvelat 100./0105W20/400/0060/tod 2310.01, widpuls},
-                },</div>
+        <b style="color:#0ffffa; letter-spacing:1px; font-size:12px;"># DR. VICE PRO RACING</b><br>
+        <div id="speed-box" style="font-size: 28px; margin-top:5px; font-weight:900; color:#fff;">0 KPH</div>
+        <div id="unit-label" style="font-size: 10px; opacity:0.6; margin-bottom:10px;">unit: KPH</div>
+
+        <div style="display:flex; gap:10px;">
+            <button class="hud-btn" id="cam-btn" onclick="cycleCamera()">🎥 VIEW: NORMAL</button>
+            <button id="remote-box" class="hud-btn" onclick="setupRemote()">🤳 SYNC PHONE</button>
+        </div>
+
+        <div id="debug-info"
+            style="font-size:9px; color:rgba(255,255,255,0.4); margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
+            CONTROLS: WASD / ARROWS<br>
+            CAM: C | ORBIT: DRAG MOUSE
+        </div>
     </div>
 
     <div id="sound-overlay" onclick="initAudio()">
@@ -339,12 +382,38 @@
 
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0a0015);
-        scene.fog = new THREE.FogExp2(0x0a0015, 0.03);
+        scene.background = new THREE.Color(0x05000a);
+        scene.fog = new THREE.FogExp2(0x05000a, 0.03);
+
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
+
+        // --- GLOBAL SETTINGS & SYNC ---
+        let gameSettings = {
+            steering: 'wheel',
+            units: 'kph',
+            engineVol: 80,
+            musicVol: 50
+        };
+
+        function loadGlobalSettings() {
+            const saved = localStorage.getItem('drViceSettings');
+            if (saved) gameSettings = JSON.parse(saved);
+        }
+        loadGlobalSettings();
+
+        // --- CAMERA MODES ---
+        let cameraMode = 0; // 0: Normal, 1: Inside, 2: Near
+        const cameraModes = ["NORMAL", "INSIDE", "ACTION"];
+
+        window.cycleCamera = () => {
+            cameraMode = (cameraMode + 1) % 3;
+            const btn = document.getElementById('cam-btn');
+            if (btn) btn.innerText = `🎥 VIEW: ${cameraModes[cameraMode]}`;
+        };
 
         scene.add(new THREE.GridHelper(2000, 100, 0x00ffff, 0x222222));
         scene.add(new THREE.AmbientLight(0xffffff, 1.0));
@@ -496,6 +565,12 @@
             peer.on('connection', (c) => {
                 conn = c;
                 remoteBox.innerText = "CONTROLLER CONNECTED";
+
+                // SEND CONFIG TO CONTROLLER
+                conn.on('open', () => {
+                    conn.send({ type: 'config', config: gameSettings });
+                });
+
                 conn.on('data', (data) => {
                     if (data.type === 'gyro') {
                         gyroActive = true;
@@ -595,37 +670,59 @@
             gyroTilt = Math.max(-45, Math.min(45, tilt)) * 4;
         }
 
+        // --- MOUSE/TOUCH ORBIT ---
+        let orbitX = 0, orbitY = 0.5, isOrbiting = false;
+        window.addEventListener('mousedown', () => isOrbiting = true);
+        window.addEventListener('mouseup', () => isOrbiting = false);
+        window.addEventListener('mousemove', (e) => {
+            if (isOrbiting) {
+                orbitX -= e.movementX * 0.005;
+                orbitY = Math.max(0.1, Math.min(1.5, orbitY + e.movementY * 0.005));
+            }
+        });
+
         const getAngle = (tx, ty) => {
             const r = wheelZone.getBoundingClientRect();
             return Math.atan2(ty - (r.top + r.height / 2), tx - (r.left + r.width / 2));
         };
 
         window.addEventListener('touchstart', (e) => {
-            for (let t of e.changedTouches) {
-                if (t.target.closest('#gas')) inputs.fwd = true;
-                if (t.target.closest('#brake')) inputs.bwd = true;
-                const r = wheelZone.getBoundingClientRect();
-                if (t.clientX >= r.left && t.clientX <= r.right && t.clientY >= r.top && t.clientY <= r.bottom) {
-                    activeId = t.identifier; lastAngle = getAngle(t.clientX, t.clientY);
+            if (e.touches.length === 2) {
+                isOrbiting = true;
+            } else {
+                for (let t of e.changedTouches) {
+                    if (t.target.closest('#gas')) inputs.fwd = true;
+                    if (t.target.closest('#brake')) inputs.bwd = true;
+                    const r = wheelZone.getBoundingClientRect();
+                    if (t.clientX >= r.left && t.clientX <= r.right && t.clientY >= r.top && t.clientY <= r.bottom) {
+                        activeId = t.identifier; lastAngle = getAngle(t.clientX, t.clientY);
+                    }
                 }
             }
         }, { passive: false });
 
         window.addEventListener('touchmove', (e) => {
-            for (let t of e.changedTouches) {
-                if (t.identifier === activeId) {
-                    const cur = getAngle(t.clientX, t.clientY);
-                    let d = cur - lastAngle;
-                    if (d > Math.PI) d -= Math.PI * 2; if (d < -Math.PI) d += Math.PI * 2;
-                    wheelAngle = Math.max(-180, Math.min(180, wheelAngle + (d * 180 / Math.PI) * 1.3));
-                    visual.style.transform = `rotate(${wheelAngle}deg)`;
-                    lastAngle = cur;
+            if (isOrbiting && e.touches.length === 2) {
+                // Orbit logic for 2-finger touch
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                orbitX += dx * 0.0001;
+            } else {
+                for (let t of e.changedTouches) {
+                    if (t.identifier === activeId) {
+                        const cur = getAngle(t.clientX, t.clientY);
+                        let d = cur - lastAngle;
+                        if (d > Math.PI) d -= Math.PI * 2; if (d < -Math.PI) d += Math.PI * 2;
+                        wheelAngle = Math.max(-180, Math.min(180, wheelAngle + (d * 180 / Math.PI) * 1.3));
+                        visual.style.transform = `rotate(${wheelAngle}deg)`;
+                        lastAngle = cur;
+                    }
                 }
             }
             e.preventDefault();
         }, { passive: false });
 
         window.addEventListener('touchend', (e) => {
+            if (e.touches.length < 2) isOrbiting = false;
             for (let t of e.changedTouches) {
                 if (t.target.closest('#gas')) inputs.fwd = false;
                 if (t.target.closest('#brake')) inputs.bwd = false;
@@ -639,6 +736,7 @@
             if (['ArrowLeft', 'a', 'A'].includes(e.key)) inputs.left = true;
             if (['ArrowRight', 'd', 'D'].includes(e.key)) inputs.right = true;
             if (e.key === ' ') { inputs.brake = true; e.preventDefault(); }
+            if (e.key.toLowerCase() === 'c') cycleCamera();
         });
 
         window.addEventListener('keyup', (e) => {
@@ -651,7 +749,7 @@
 
         // --- AUDIO ENGINE ---
         let audioCtx, engineBuffer, engineSource, engineG;
-        let isAudioInit = false;
+        let musicG, isAudioInit = false;
 
         window.initAudio = async () => {
             if (isAudioInit) return;
@@ -659,8 +757,15 @@
             overlay.style.display = 'none';
 
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+            // Engine Gain
             engineG = audioCtx.createGain();
             engineG.connect(audioCtx.destination);
+
+            // Music Gain
+            musicG = audioCtx.createGain();
+            musicG.connect(audioCtx.destination);
+            musicG.gain.value = (gameSettings.musicVol / 100) * 0.4;
 
             try {
                 const response = await fetch('engine.mp3');
@@ -668,11 +773,35 @@
                 engineBuffer = await audioCtx.decodeAudioData(arrayBuffer);
 
                 startEngine();
+                startProceduralMusic();
                 isAudioInit = true;
             } catch (e) {
                 console.error("Audio Load Error:", e);
+                // Start music anyway if engine fails
+                startProceduralMusic();
+                isAudioInit = true;
             }
         };
+
+        function startProceduralMusic() {
+            // Simple Synthwave Loop (Procedural)
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(55, audioCtx.currentTime); // A1 Bass
+
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            osc.connect(gain);
+            gain.connect(musicG);
+            osc.start();
+
+            // Simple Pattern
+            setInterval(() => {
+                const now = audioCtx.currentTime;
+                const freq = [55, 65, 73, 82][Math.floor(Math.random() * 4)];
+                osc.frequency.exponentialRampToValueAtTime(freq, now + 0.1);
+            }, 500);
+        }
 
         function startEngine() {
             engineSource = audioCtx.createBufferSource();
@@ -737,12 +866,38 @@
                 if (i < 2) w.anchor.rotation.y = -(wheelAngle / 180) * 0.7;
             });
 
-            const offset = new THREE.Vector3(0, 4.0, -9).applyMatrix4(car.matrixWorld);
-            camera.position.lerp(offset, 0.12);
-            camera.lookAt(car.position.x, car.position.y + 0.5, car.position.z);
+            // Camera System
+            let camTarget = new THREE.Vector3();
+            let camPos = new THREE.Vector3();
+
+            if (cameraMode === 0) { // NORMAL
+                camPos.set(0, 4, -9);
+                camTarget.set(0, 0.5, 0);
+            } else if (cameraMode === 1) { // INSIDE
+                camPos.set(0, 1.3, 0.5);
+                camTarget.set(0, 1.2, 5);
+            } else { // ACTION (Near)
+                camPos.set(0, 2, -6);
+                camTarget.set(0, 0.5, 0);
+            }
+
+            // Apply Orbit Rotation
+            const orbitMatrix = new THREE.Matrix4().makeRotationY(orbitX);
+            camPos.applyMatrix4(orbitMatrix);
+
+            const worldPos = camPos.applyMatrix4(car.matrixWorld);
+            const worldTarget = camTarget.applyMatrix4(car.matrixWorld);
+
+            camera.position.lerp(worldPos, 0.12);
+            camera.lookAt(worldTarget);
 
             renderer.render(scene, camera);
-            speedBox.innerText = `speed: ${Math.round(Math.abs(speed * 200))} (GYRO: ${gyroActive ? 'ON' : 'OFF'})`;
+
+            // HUD Units Logic
+            const rawSpeed = Math.abs(speed * 200);
+            const displaySpeed = gameSettings.units === 'mph' ? Math.round(rawSpeed * 0.62) : Math.round(rawSpeed);
+            speedBox.innerText = `${displaySpeed} ${gameSettings.units.toUpperCase()}`;
+            document.getElementById('unit-label').innerText = `unit: ${gameSettings.units.toUpperCase()}`;
 
             // Backfire Logic (Sudden brake or release at high speed)
             if (speed > 0.05 && (inputs.brake || inputs.bwd || (!inputs.fwd && Math.random() < 0.01))) {
@@ -762,9 +917,10 @@
             // Engine Audio Modulation
             if (isAudioInit) {
                 const pitch = 0.5 + (Math.abs(speed) * 15);
-                const vol = 0.1 + (inputs.fwd ? 0.3 : 0);
+                const baseVol = (gameSettings.engineVol / 100) * 0.3;
+                const activeVol = inputs.fwd ? baseVol : (baseVol * 0.3);
                 engineSource.playbackRate.value = THREE.MathUtils.lerp(engineSource.playbackRate.value, pitch, 0.1);
-                engineG.gain.value = THREE.MathUtils.lerp(engineG.gain.value, vol, 0.1);
+                engineG.gain.value = THREE.MathUtils.lerp(engineG.gain.value, activeVol, 0.1);
             }
         }
         animate();

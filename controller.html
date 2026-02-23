@@ -226,6 +226,49 @@
             max-width: 400px;
             line-height: 1.5;
         }
+
+        /* Button Steering Mode */
+        #button-steering {
+            display: none;
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85%;
+            height: 140px;
+            z-index: 50;
+            gap: 20px;
+        }
+
+        .steer-btn {
+            flex: 1;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #f092ff;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            color: #f092ff;
+            -webkit-user-select: none;
+            user-select: none;
+            transition: 0.1s;
+        }
+
+        .steer-btn:active {
+            background: #f092ff;
+            color: #000;
+            box-shadow: 0 0 30px #f092ff;
+        }
+
+        #pedal-zone {
+            position: absolute;
+            bottom: 220px;
+            right: 40px;
+            display: flex;
+            gap: 20px;
+        }
     </style>
     <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
@@ -270,10 +313,15 @@
             <div id="wheel-inner"></div>
         </div>
 
-        <div class="pedal-group">
-            <div id="reverse" class="pedal"><span class="label">REVERSE</span>REV</div>
-            <div id="brake" class="pedal"><span class="label">BRAKE</span>STOP</div>
-            <div id="gas" class="pedal"><span class="label">GAS</span>GAS</div>
+        <div id="button-steering">
+            <div class="steer-btn" id="steer-left">⬅️</div>
+            <div class="steer-btn" id="steer-right">➡️</div>
+        </div>
+
+        <div id="pedal-zone" class="pedal-group">
+            <div id="reverse" class="pedal" style="--c:#00ffff; height:80px;">REV</div>
+            <div id="brake" class="pedal" style="--c:#f092ff; height:90px; width:70px;">STOP</div>
+            <div id="gas" class="pedal" style="--c:#0ffffa; height:120px;">GAS</div>
         </div>
     </div>
 
@@ -325,6 +373,13 @@
                     status.innerText = "STATUS: CONNECTED (ACTIVE)";
                     vibrate([50, 50, 50]);
                     setupPedals();
+                    setupSteeringListeners();
+                });
+
+                conn.on('data', (data) => {
+                    if (data.type === 'config') {
+                        applyGameConfig(data.config);
+                    }
                 });
 
                 conn.on('error', (err) => {
@@ -470,14 +525,44 @@
             const brake = document.getElementById('brake');
             const reverse = document.getElementById('reverse');
 
-            gas.addEventListener('touchstart', () => { conn.send({ type: 'pedal', pedal: 'fwd', active: true }); vibrate(20); });
+            gas.addEventListener('touchstart', (e) => { e.preventDefault(); conn.send({ type: 'pedal', pedal: 'fwd', active: true }); vibrate(20); });
             gas.addEventListener('touchend', () => conn.send({ type: 'pedal', pedal: 'fwd', active: false }));
 
-            brake.addEventListener('touchstart', () => { conn.send({ type: 'pedal', pedal: 'brake', active: true }); vibrate(70); });
+            brake.addEventListener('touchstart', (e) => { e.preventDefault(); conn.send({ type: 'pedal', pedal: 'brake', active: true }); vibrate(70); });
             brake.addEventListener('touchend', () => conn.send({ type: 'pedal', pedal: 'brake', active: false }));
 
-            reverse.addEventListener('touchstart', () => { conn.send({ type: 'pedal', pedal: 'bwd', active: true }); vibrate(40); });
+            reverse.addEventListener('touchstart', (e) => { e.preventDefault(); conn.send({ type: 'pedal', pedal: 'bwd', active: true }); vibrate(40); });
             reverse.addEventListener('touchend', () => conn.send({ type: 'pedal', pedal: 'bwd', active: false }));
+        }
+
+        function setupSteeringListeners() {
+            const left = document.getElementById('steer-left');
+            const right = document.getElementById('steer-right');
+
+            left.addEventListener('touchstart', (e) => { e.preventDefault(); conn.send({ type: 'pedal', pedal: 'left', active: true }); vibrate(30); });
+            left.addEventListener('touchend', () => conn.send({ type: 'pedal', pedal: 'left', active: false }));
+
+            right.addEventListener('touchstart', (e) => { e.preventDefault(); conn.send({ type: 'pedal', pedal: 'right', active: true }); vibrate(30); });
+            right.addEventListener('touchend', () => conn.send({ type: 'pedal', pedal: 'right', active: false }));
+        }
+
+        function applyGameConfig(config) {
+            const wheel = document.getElementById('wheel-zone');
+            const buttons = document.getElementById('button-steering');
+            const pedals = document.getElementById('pedal-zone');
+
+            // Reset vis
+            wheel.style.display = 'none';
+            buttons.style.display = 'none';
+
+            if (config.steering === 'wheel') {
+                wheel.style.display = 'flex';
+                pedals.style.bottom = '40px'; // Reset for wheel center
+            } else if (config.steering === 'buttons') {
+                buttons.style.display = 'flex';
+                pedals.style.bottom = '220px'; // Lift for buttons
+            }
+            // 'gyro' mode hides both steering UIs
         }
 
         function vibrate(ms) {

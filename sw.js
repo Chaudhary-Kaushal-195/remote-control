@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-control-v8'; // Mobile restriction fix
+const CACHE_NAME = 'dr-control-v10'; // Ultimate Overhaul
 const ASSETS = [
   'index.html',
   'controller.html',
