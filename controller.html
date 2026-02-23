@@ -251,6 +251,8 @@
             window.location.href = 'index.html';
         }
 
+        let peer = null, conn = null;
+        let gyroActive = false;
         const status = document.getElementById('status');
         const wheelInner = document.getElementById('wheel-inner');
         const tiltDisplay = document.getElementById('debug-tilt');

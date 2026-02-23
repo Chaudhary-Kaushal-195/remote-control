@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-control-v5'; // Final forced update for Android
+const CACHE_NAME = 'dr-control-v6'; // Forced update for connection fix
 const ASSETS = [
   'index.html',
   'controller.html',
