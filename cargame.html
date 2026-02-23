@@ -1129,7 +1129,7 @@
             musicG.gain.value = (gameSettings.musicVol / 100) * 0.4;
 
             try {
-                const response = await fetch('engine.mp3');
+                const response = await fetch('toyota-supra-buornut.mp3'); // Supra 2JZ Sound
                 const arrayBuffer = await response.arrayBuffer();
                 engineBuffer = await audioCtx.decodeAudioData(arrayBuffer);
 
@@ -1334,12 +1334,15 @@
                 if (strip.position.z > 1.8) strip.position.z = -2;
             });
 
-            // Engine Audio Modulation
+            // Engine Audio Modulation (Supra 2JZ Tuning)
             if (isAudioInit) {
-                const pitch = 0.5 + (Math.abs(speed) * 15);
-                const baseVol = (gameSettings.engineVol / 100) * 0.3;
-                const activeVol = inputs.fwd ? baseVol : (baseVol * 0.3);
-                engineSource.playbackRate.value = THREE.MathUtils.lerp(engineSource.playbackRate.value, pitch, 0.1);
+                // Supra sound samples are often higher pitch by default, adjust multipliers for 2JZ scream
+                const pitch = 0.4 + (Math.abs(speed) * 12);
+                const baseVol = (gameSettings.engineVol / 100) * 0.4;
+                const activeVol = inputs.fwd ? baseVol : (baseVol * 0.4);
+
+                // Smoother transitions for the higher-revving sound
+                engineSource.playbackRate.value = THREE.MathUtils.lerp(engineSource.playbackRate.value, pitch, 0.15);
                 engineG.gain.value = THREE.MathUtils.lerp(engineG.gain.value, activeVol, 0.1);
             }
         }

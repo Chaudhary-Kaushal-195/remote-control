@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-control-v17'; // Responsive Scaling & Click Fix
+const CACHE_NAME = 'dr-control-v18'; // Toyota Supra 2JZ Sound
 const ASSETS = [
   'index.html',
   'controller.html',
