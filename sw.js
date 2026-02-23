@@ -3,7 +3,8 @@ const ASSETS = [
   'controller.html',
   'manifest.json',
   'https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js',
-  'https://unpkg.com/html5-qrcode'
+  'https://unpkg.com/html5-qrcode',
+  'engine.mp3'
 ];
 
 self.addEventListener('install', (e) => {

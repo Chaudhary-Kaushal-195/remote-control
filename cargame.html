@@ -244,6 +244,33 @@
             cursor: pointer;
             text-decoration: underline;
         }
+
+        /* Sound Overlay */
+        #sound-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 5000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        #sound-overlay h1 {
+            color: #0ffffa;
+            margin: 0;
+        }
+
+        #sound-overlay p {
+            color: #f092ff;
+            margin-top: 10px;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -261,6 +288,11 @@
                 { totveID [ ammd. > ayt, (hrees bwgt 0.3
                 impurts > gaicinsct hot, {posvelat 100./0105W20/400/0060/tod 2310.01, widpuls},
                 },</div>
+    </div>
+
+    <div id="sound-overlay" onclick="initAudio()">
+        <h1>🏎️ DR. VICE</h1>
+        <p>TAP TO START SOUND & ENGINE</p>
     </div>
 
     <div id="qr-overlay">
@@ -399,6 +431,20 @@
             roller.add(logo); anchor.add(roller); car.add(anchor);
             wheels.push({ anchor, roller });
         });
+
+        // --- EXHAUST & BACKFIRE ---
+        const exhaust = new THREE.Group();
+        exhaust.position.set(0.65, 0.45, -2.12); // Right side exhaust
+        car.add(exhaust);
+
+        const backfireLight = new THREE.PointLight(0xff5500, 0, 5);
+        exhaust.add(backfireLight);
+
+        const flameGeo = new THREE.SphereGeometry(0.15, 8, 8);
+        const flameMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0 });
+        const flame = new THREE.Mesh(flameGeo, flameMat);
+        exhaust.add(flame);
+
         scene.add(car);
 
         // --- REMOTE SYNC (PEERJS) ---
@@ -601,6 +647,59 @@
             if (['ArrowRight', 'd', 'D'].includes(e.key)) inputs.right = false;
         });
 
+        // --- AUDIO ENGINE ---
+        let audioCtx, engineBuffer, engineSource, engineG;
+        let isAudioInit = false;
+
+        window.initAudio = async () => {
+            if (isAudioInit) return;
+            const overlay = document.getElementById('sound-overlay');
+            overlay.style.display = 'none';
+
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            engineG = audioCtx.createGain();
+            engineG.connect(audioCtx.destination);
+
+            try {
+                const response = await fetch('engine.mp3');
+                const arrayBuffer = await response.arrayBuffer();
+                engineBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+                startEngine();
+                isAudioInit = true;
+            } catch (e) {
+                console.error("Audio Load Error:", e);
+            }
+        };
+
+        function startEngine() {
+            engineSource = audioCtx.createBufferSource();
+            engineSource.buffer = engineBuffer;
+            engineSource.loop = true;
+            engineSource.connect(engineG);
+            engineSource.start(0);
+            engineG.gain.value = 0.1; // Idle
+        }
+
+        let backfireTick = 0;
+        function triggerBackfire() {
+            if (!isAudioInit) return;
+            backfireTick = 10; // 10 frames of flame
+
+            // Pop sound (short modulation)
+            const pop = audioCtx.createOscillator();
+            const popG = audioCtx.createGain();
+            pop.type = 'triangle';
+            pop.frequency.setValueAtTime(100, audioCtx.currentTime);
+            pop.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.1);
+            popG.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            popG.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
+            pop.connect(popG);
+            popG.connect(audioCtx.destination);
+            pop.start();
+            pop.stop(audioCtx.currentTime + 0.1);
+        }
+
         function animate() {
             requestAnimationFrame(animate);
             if (activeId === null) {
@@ -633,6 +732,29 @@
 
             renderer.render(scene, camera);
             speedBox.innerText = `speed: ${Math.round(Math.abs(speed * 200))} (GYRO: ${gyroActive ? 'ON' : 'OFF'})`;
+
+            // Backfire Logic (Sudden brake or release at high speed)
+            if (speed > 0.05 && (inputs.bwd || (!inputs.fwd && Math.random() < 0.01))) {
+                if (Math.random() < 0.05) triggerBackfire();
+            }
+
+            if (backfireTick > 0) {
+                backfireTick--;
+                backfireLight.intensity = 5 * (backfireTick / 10);
+                flame.scale.setScalar(1 + Math.random() * 2);
+                flame.material.opacity = (backfireTick / 10);
+            } else {
+                backfireLight.intensity = 0;
+                flame.material.opacity = 0;
+            }
+
+            // Engine Audio Modulation
+            if (isAudioInit) {
+                const pitch = 0.5 + (Math.abs(speed) * 15);
+                const vol = 0.1 + (inputs.fwd ? 0.3 : 0);
+                engineSource.playbackRate.value = THREE.MathUtils.lerp(engineSource.playbackRate.value, pitch, 0.1);
+                engineG.gain.value = THREE.MathUtils.lerp(engineG.gain.value, vol, 0.1);
+            }
         }
         animate();
     </script>
