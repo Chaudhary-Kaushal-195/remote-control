@@ -418,11 +418,8 @@
             peer.on('open', (id) => {
                 console.log('Laptop Peer ID:', id);
 
-                // Use GitHub Pages URL if available, fallback to local origin
-                const baseUrl = window.location.href.includes('github.io')
-                    ? "https://Chaudhary-Kaushal-195.github.io/remote-control/controller.html"
-                    : `${window.location.origin}/controller.html`;
-
+                // Auto-detect the base URL for the controller app
+                const baseUrl = window.location.href.split('cargame.html')[0] + 'controller.html';
                 const url = `${baseUrl}?hostId=${id}`;
                 remoteBox.innerText = `ID: ${id} (CLICK FOR QR)`;
                 remoteBox.style.background = "rgba(0, 255, 255, 0.1)";

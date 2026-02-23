@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-control-v2'; // Bumped version to force update
+const CACHE_NAME = 'dr-control-v3'; // Bumped for Vercel deployment
 const ASSETS = [
   'controller.html',
   'manifest.json',
