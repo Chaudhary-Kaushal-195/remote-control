@@ -134,6 +134,8 @@
             display: flex;
             align-items: flex-end;
             gap: 30px;
+            /* Container relative for absolute handbrake positioning */
+            position: relative;
         }
 
         .pedal {
@@ -159,25 +161,30 @@
         }
 
         #handbrake {
-            width: 50px;
-            height: 160px;
+            width: 140px;
+            height: 40px;
             border-color: #ff4400;
             color: #ff4400;
             box-shadow: 0 0 15px rgba(255, 68, 0, 0.4);
             border-radius: 25px;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(255, 68, 0, 0.2));
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.8), rgba(255, 68, 0, 0.2));
             z-index: 55;
-            margin-right: -10px;
-            /* Overlap slightly */
+            position: absolute;
+            bottom: 180px;
+            /* Positioned above the gas pedal */
+            right: 0px;
+            /* Aligned with gas pedal */
+            flex-direction: row;
+            /* Horizontal stripes */
         }
 
         #handbrake .stripe {
-            width: 70%;
-            height: 8px;
+            height: 70%;
+            width: 8px;
             background: none;
             border: 2px solid #ff4400;
             border-radius: 4px;
-            margin: 6px 0;
+            margin: 0 6px;
             box-shadow: inset 0 0 5px rgba(255, 68, 0, 0.5);
         }
 
@@ -185,26 +192,7 @@
             background: #ff4400;
         }
 
-        #brake {
-            width: 70px;
-            height: 90px;
-            border-color: #f092ff;
-            color: #f092ff;
-            box-shadow: 0 0 12px rgba(240, 146, 255, 0.4);
-        }
-
-        #brake .stripe {
-            width: 60%;
-            height: 8px;
-            background: none;
-            border: 1.5px solid #f092ff;
-            border-radius: 3px;
-            margin: 4px 0;
-        }
-
-        #brake .stripe.active {
-            background: #f092ff;
-        }
+        /* Regular brake pedal removed */
 
         #gas {
             width: 70px;
@@ -490,8 +478,7 @@
             }
 
             .ui-container {
-                transform: scale(0.9);
-                /* Upscaled from 0.55 */
+                transform: scale(0.65);
                 transform-origin: bottom right;
                 bottom: 10px;
                 right: 15px;
@@ -499,11 +486,10 @@
             }
 
             #steering-zone {
-                transform: scale(0.85);
-                /* Upscaled from 0.5 */
+                transform: scale(1.15);
                 transform-origin: bottom left;
-                bottom: 15px;
-                left: 15px;
+                bottom: 25px;
+                left: 20px;
             }
 
             #pause-btn {
@@ -672,17 +658,12 @@
 
     <div class="ui-container">
         <div id="handbrake" class="pedal">
-            <div class="pedal-label" style="color:#ff4400; top: -30px; font-size: 13px;">E-BRAKE</div>
+            <div class="pedal-label" style="color:#ff4400; top: -20px; font-size: 13px;">E-BRAKE</div>
             <div class="stripe"></div>
             <div class="stripe"></div>
             <div class="stripe"></div>
         </div>
-        <div id="brake" class="pedal">
-            <div class="pedal-label" style="color:#0ffffa">#Gas</div>
-            <div class="stripe"></div>
-            <div class="stripe active"></div>
-            <div class="stripe"></div>
-        </div>
+        <!-- Brake pedal removed -->
         <div id="gas" class="pedal">
             <div class="pedal-label">GAS</div>
             <div class="stripe"></div>
@@ -1018,7 +999,7 @@
         // --- CONTROLS ---
         let speed = 0, wheelAngle = 0, activeId = null, lastAngle = 0;
         let gyroActive = false, gyroTilt = 0;
-        const inputs = { fwd: false, bwd: false, left: false, right: false, brake: false, handbrake: false };
+        const inputs = { fwd: false, bwd: false, left: false, right: false, handbrake: false };
         const wheelZone = document.getElementById('steering-zone'), visual = document.getElementById('wheel-visual');
         const speedBox = document.getElementById('speed-box');
 
@@ -1075,7 +1056,6 @@
             } else {
                 for (let t of e.changedTouches) {
                     if (t.target.closest('#gas')) inputs.fwd = true;
-                    if (t.target.closest('#brake')) inputs.bwd = true;
                     if (t.target.closest('#handbrake')) inputs.handbrake = true;
                     const r = wheelZone.getBoundingClientRect();
                     if (t.clientX >= r.left && t.clientX <= r.right && t.clientY >= r.top && t.clientY <= r.bottom) {
@@ -1109,7 +1089,6 @@
             if (e.touches.length < 2) isOrbiting = false;
             for (let t of e.changedTouches) {
                 if (t.target.closest('#gas')) inputs.fwd = false;
-                if (t.target.closest('#brake')) inputs.bwd = false;
                 if (t.target.closest('#handbrake')) inputs.handbrake = false;
                 if (t.identifier === activeId) activeId = null;
             }
@@ -1176,9 +1155,9 @@
             if (inputs.fwd) speed += 0.009;
             if (inputs.bwd) speed -= 0.009; // Reverse is slower now
 
-            // Brake Logic
-            if (inputs.brake || inputs.handbrake) {
-                let brakeForce = inputs.handbrake ? 0.04 : 0.02; // Handbrake stops faster
+            // Brake Logic (Now exclusively E-Brake)
+            if (inputs.handbrake) {
+                let brakeForce = 0.04; // Handbrake stops faster
                 if (speed > 0) speed = Math.max(0, speed - brakeForce);
                 if (speed < 0) speed = Math.min(0, speed + brakeForce);
             }
