@@ -161,7 +161,37 @@
             display: none;
             z-index: 101;
         }
+
+        #reader-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0015;
+            z-index: 2000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #reader {
+            width: 90%;
+            max-width: 400px;
+            border: 2px solid #f092ff;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .scan-btn {
+            background: #f092ff !important;
+            color: #000 !important;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
     </style>
+    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 
 <body>
@@ -172,10 +202,21 @@
 
     <div id="overlay">
         <h1 style="color:#0ffffa; margin-bottom:10px;">DR. CONTROL</h1>
-        <p style="font-size:12px; margin-bottom:30px; opacity:0.8;">ENTER LAPTOP ID TO CONNECT</p>
+        <p style="font-size:12px; margin-bottom:20px; opacity:0.8;">SCAN OR ENTER LAPTOP ID</p>
+
+        <button class="scan-btn" onclick="startScanning()">🤳 SCAN QR CODE</button>
+
+        <div style="margin: 15px 0; opacity: 0.5;">— OR —</div>
+
         <input type="text" id="hostIdInput" placeholder="Enter ID (e.g. a1b2)">
-        <button onclick="connectToHost()">CONNECT WIRELESS</button>
+        <button onclick="connectToHost()">CONNECT MANUALLY</button>
         <p style="font-size:10px; margin-top:40px; color:#f092ff;">TIP: Make sure Bluetooth or WiFi is on.</p>
+    </div>
+
+    <div id="reader-container">
+        <h2 style="color:#0ffffa;">POINT AT LAPTOP</h2>
+        <div id="reader"></div>
+        <button onclick="stopScanning()" style="margin-top:30px; background:rgba(255,255,255,0.1);">CANCEL</button>
     </div>
 
     <div id="ui-container">
@@ -240,6 +281,61 @@
                     alert("Error: " + err.type);
                 }
             });
+        }
+
+        // Auto-connect if ID is in URL
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            const hostId = params.get('hostId');
+            if (hostId) {
+                document.getElementById('hostIdInput').value = hostId;
+                // Small delay to ensure PeerJS load if needed
+                setTimeout(connectToHost, 500);
+            }
+        };
+
+        // QR SCANNER LOGIC
+        let html5QrCode = null;
+
+        function startScanning() {
+            document.getElementById('reader-container').style.display = 'flex';
+            html5QrCode = new Html5Qrcode("reader");
+            const config = {
+                fps: 10,
+                qrbox: { width: 250, height: 250 },
+                aspectRatio: 1.0
+            };
+
+            html5QrCode.start(
+                { facingMode: "environment" },
+                config,
+                (decodedText) => {
+                    // Success!
+                    document.getElementById('hostIdInput').value = decodedText.trim().toLowerCase();
+                    stopScanning();
+                    connectToHost();
+                },
+                (errorMessage) => {
+                    // parse error, ignore it.
+                }
+            ).catch((err) => {
+                alert("Camera error: " + err);
+                stopScanning();
+            });
+        }
+
+        function stopScanning() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('reader-container').style.display = 'none';
+                    html5QrCode = null;
+                }).catch(() => {
+                    document.getElementById('reader-container').style.display = 'none';
+                    html5QrCode = null;
+                });
+            } else {
+                document.getElementById('reader-container').style.display = 'none';
+            }
         }
 
         function startGyro() {

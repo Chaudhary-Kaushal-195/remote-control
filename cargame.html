@@ -428,11 +428,11 @@
                 remoteBox.style.background = "rgba(0, 255, 255, 0.1)";
                 remoteBox.style.color = "#0ffffa";
 
-                // Generate QR Code
+                // Generate QR Code (ID only)
                 const qrContainer = document.getElementById('qr-code');
                 qrContainer.innerHTML = "";
                 new QRCode(qrContainer, {
-                    text: url,
+                    text: id, // Just the ID
                     width: 200,
                     height: 200,
                     colorDark: "#000000",
