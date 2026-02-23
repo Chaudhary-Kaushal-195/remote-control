@@ -525,15 +525,15 @@
         winTrim.position.set(0, 1.0, -0.1); car.add(winTrim);
         const winTrim2 = winTrim.clone(); winTrim2.position.y = 1.5; car.add(winTrim2);
 
-        // Colorful Underglow (Movement Aware)
+        // Colorful Underglow (Enhanced Movement Aware)
         const underglowGroup = new THREE.Group();
-        const colors = [0x0ffffa, 0xf092ff, 0xffaa00, 0x00ff00];
+        const colors = [0x0ffffa, 0xf092ff, 0xffaa00, 0x00ff00, 0xff00ff, 0x00ffff];
         const underglowStrips = [];
-        for (let i = 0; i < 10; i++) {
-            const stripGeo = new THREE.BoxGeometry(1.8, 0.02, 0.2);
-            const stripMat = new THREE.MeshBasicMaterial({ color: colors[i % colors.length], transparent: true, opacity: 0.8 });
+        for (let i = 0; i < 15; i++) {
+            const stripGeo = new THREE.BoxGeometry(2.2, 0.02, 0.15);
+            const stripMat = new THREE.MeshBasicMaterial({ color: colors[i % colors.length], transparent: true, opacity: 0.9 });
             const strip = new THREE.Mesh(stripGeo, stripMat);
-            strip.position.set(0, 0.22, (i * 0.4) - 1.8);
+            strip.position.set(0, 0.22, (i * 0.3) - 2.2);
             underglowGroup.add(strip);
             underglowStrips.push(strip);
         }
@@ -567,19 +567,17 @@
             const roller = new THREE.Group();
             roller.add(new THREE.Mesh(wGeo, new THREE.MeshStandardMaterial({ color: 0x111111 })));
 
-            // Dotted Neon Rim
-            const dottedRim = new THREE.Group();
-            const dotCount = 12;
-            for (let j = 0; j < dotCount; j++) {
-                const angle = (j / dotCount) * Math.PI * 2;
-                const dotGeo = new THREE.SphereGeometry(0.04, 8, 8);
-                const dotMat = new THREE.MeshBasicMaterial({ color: (j % 2 === 0) ? 0x0ffffa : 0x000000 });
-                const dot = new THREE.Mesh(dotGeo, dotMat);
-                dot.position.set(0, Math.cos(angle) * 0.55, Math.sin(angle) * 0.55);
-                dottedRim.add(dot);
+            // Neon Strips across the tire (Left to Right)
+            const stripCount = 8;
+            for (let j = 0; j < stripCount; j++) {
+                const angle = (j / stripCount) * Math.PI * 2;
+                const stripGeo = new THREE.BoxGeometry(0.52, 0.03, 0.15);
+                const stripMat = new THREE.MeshBasicMaterial({ color: (j % 2 === 0) ? 0x0ffffa : 0xf092ff });
+                const strip = new THREE.Mesh(stripGeo, stripMat);
+                strip.position.set(0, Math.cos(angle) * 0.56, Math.sin(angle) * 0.56);
+                strip.rotation.x = angle;
+                roller.add(strip);
             }
-            dottedRim.position.x = (p.x > 0) ? 0.27 : -0.27;
-            roller.add(dottedRim);
 
             // BMW Logo
             const logo = new THREE.Group();
