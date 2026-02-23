@@ -1203,17 +1203,17 @@
             }
 
             // Physics
-            if (inputs.fwd) speed += 0.009;
-            if (inputs.bwd) speed -= 0.009; // Reverse is slower now
+            if (inputs.fwd) speed += 0.025; // Accelerate faster for higher top speed
+            if (inputs.bwd) speed -= 0.015; // Reverse
 
             // Brake Logic (Now exclusively E-Brake)
             if (inputs.handbrake) {
-                let brakeForce = 0.04; // Handbrake stops faster
+                let brakeForce = 0.08; // Handbrake needs to be stronger for high speeds
                 if (speed > 0) speed = Math.max(0, speed - brakeForce);
                 if (speed < 0) speed = Math.min(0, speed + brakeForce);
             }
 
-            speed *= inputs.handbrake ? 0.95 : 0.985; // Extra friction for e-brake
+            speed *= inputs.handbrake ? 0.95 : 0.99; // Less natural friction (0.99) allows top speed of ~450-500 KPH
 
             car.translateZ(speed);
             car.rotation.y -= (wheelAngle / 180) * 0.05 * (speed * 4);
@@ -1257,7 +1257,7 @@
             document.getElementById('unit-label').innerText = `unit: ${gameSettings.units.toUpperCase()}`;
 
             // Analog Needle & Arc Logic (Multi-Gauge Clusters)
-            const maxSpeed = 200;
+            const maxSpeed = 550; // New limit for the dial to show up to 500+ KPH
             const needleAngle = -120 + ((rawSpeed / maxSpeed) * 240);
             const speedNeedleGrp = document.getElementById('speed-needle-grp');
             if (speedNeedleGrp) speedNeedleGrp.setAttribute('transform', `rotate(${needleAngle}, 50, 50)`);
@@ -1269,7 +1269,7 @@
             }
 
             // RPM Logic (Simulated)
-            let targetRpm = 800 + (rawSpeed * 40);
+            let targetRpm = 800 + (rawSpeed * 15); // Adjust RPM scaling for the new 550 KPH limit
             if (inputs.fwd) targetRpm += 3000 * (1 - (rawSpeed / maxSpeed));
             rpm = THREE.MathUtils.lerp(rpm, targetRpm, 0.1);
             const rpmAngle = -120 + ((rpm / 8000) * 240);
@@ -1277,7 +1277,7 @@
             if (rpmNeedleGrp) rpmNeedleGrp.setAttribute('transform', `rotate(${rpmAngle}, 50, 50)`);
 
             // Fuel Logic (Slow depletion)
-            if (rawSpeed > 1) fuelLevel -= 0.0005;
+            if (rawSpeed > 1) fuelLevel -= 0.001;
             const fuelAngle = 45 - (fuelLevel / 100 * 90);
             const fuelNeedleGrp = document.getElementById('fuel-needle-grp');
             if (fuelNeedleGrp) fuelNeedleGrp.setAttribute('transform', `rotate(${fuelAngle}, 50, 50)`);
@@ -1294,11 +1294,12 @@
             if (speed < -0.01) {
                 gear = "R";
             } else if (rawSpeed > 0.1) {
-                if (rawSpeed < 30) gear = "1";
-                else if (rawSpeed < 65) gear = "2";
-                else if (rawSpeed < 100) gear = "3";
-                else if (rawSpeed < 140) gear = "4";
-                else gear = "5";
+                if (rawSpeed < 80) gear = "1";
+                else if (rawSpeed < 170) gear = "2";
+                else if (rawSpeed < 270) gear = "3";
+                else if (rawSpeed < 370) gear = "4";
+                else if (rawSpeed < 470) gear = "5";
+                else gear = "6";
             }
             document.getElementById('gear-box').innerText = gear;
 
@@ -1331,6 +1332,7 @@
                 else if (gear === "3") gearIndex = 3;
                 else if (gear === "4") gearIndex = 4;
                 else if (gear === "5") gearIndex = 5;
+                else if (gear === "6") gearIndex = 6;
                 engineSoundSystem.shiftGear('set', gearIndex);
 
                 engineSoundSystem.update(0.016, speed * 200);
