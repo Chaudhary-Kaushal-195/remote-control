@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-control-v11'; // CSS compatibility fix
+const CACHE_NAME = 'dr-control-v12'; // Visual refinements & Analog Gauges
 const ASSETS = [
   'index.html',
   'controller.html',

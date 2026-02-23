@@ -234,24 +234,43 @@
             pointer-events: auto;
         }
 
-        .hud-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid #f092ff;
-            color: #f092ff;
-            padding: 6px 12px;
-            margin-top: 10px;
-            cursor: pointer;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: bold;
-            transition: 0.2s;
-            text-transform: uppercase;
+        /* Analog Speedometer */
+        .gauge-container {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            width: 180px;
+            height: 180px;
+            background: rgba(10, 0, 21, 0.85);
+            border: 2px solid var(--neon-blue);
+            border-radius: 50%;
+            z-index: 6000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 25px rgba(15, 255, 250, 0.3);
         }
 
-        .hud-btn:hover {
-            background: #f092ff;
-            color: #000;
-            box-shadow: 0 0 10px #f092ff;
+        #speed-needle {
+            transition: transform 0.1s ease-out;
+            transform-origin: 50% 50%;
+        }
+
+        .gear-display {
+            position: absolute;
+            bottom: 35px;
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--neon-pink);
+            text-shadow: 0 0 10px var(--neon-pink);
+        }
+
+        #pause-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 6001;
         }
 
         #qr-overlay {
@@ -311,6 +330,31 @@
             color: #f092ff;
             margin-top: 10px;
         }
+
+        /* Pause Overlay */
+        #pause-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 0, 21, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 7000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pause-content {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            border: 2px solid var(--neon-blue);
+            text-align: center;
+            box-shadow: 0 0 50px rgba(15, 255, 250, 0.2);
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -326,13 +370,37 @@
             <button class="hud-btn" id="cam-btn" onclick="initAudio(); cycleCamera();">🎥 VIEW: NORMAL</button>
             <button id="remote-box" class="hud-btn" onclick="initAudio(); setupRemote();">🤳 SYNC PHONE</button>
         </div>
+    </div>
 
-        <div id="debug-info"
-            style="font-size:9px; color:rgba(255,255,255,0.4); margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
-            CONTROLS: WASD / ARROWS<br>
-            CAM: C | ORBIT: DRAG MOUSE
+    <div class="gauge-container">
+        <svg width="160" height="160" viewBox="0 0 100 100">
+            <!-- Background Arc -->
+            <path d="M 20 80 A 40 40 0 1 1 80 80" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"
+                stroke-linecap="round" />
+            <!-- Active Speed Arc -->
+            <path id="speed-arc" d="M 20 80 A 40 40 0 1 1 80 80" fill="none" stroke="var(--neon-blue)" stroke-width="8"
+                stroke-linecap="round" stroke-dasharray="188" stroke-dashoffset="188" />
+
+            <!-- Center Needle -->
+            <line x1="50" y1="50" x2="50" y2="15" stroke="var(--neon-pink)" stroke-width="3" stroke-linecap="round"
+                id="speed-needle" transform="rotate(-120, 50, 50)" />
+            <circle cx="50" cy="50" r="5" fill="var(--neon-pink)" />
+        </svg>
+        <div id="gear-box" class="gear-display">N</div>
+    </div>
+
+    <div id="pause-overlay">
+        <div class="pause-content">
+            <h1 style="color:var(--neon-blue); margin-bottom:10px;">GAME PAUSED</h1>
+            <p style="color:#fff; opacity:0.7; margin-bottom:30px;">TAKE A BREATH, CHAMP.</p>
+            <button class="hud-btn" style="padding:15px 40px; font-size:16px;" onclick="togglePause()">RESUME
+                RACE</button>
+            <button class="hud-btn" style="display:block; margin:20px auto 0; opacity:0.6;"
+                onclick="window.location.href='index.html'">EXIT TO HUB</button>
         </div>
     </div>
+
+    <button id="pause-btn" class="hud-btn" onclick="togglePause()">⏸ PAUSE</button>
 
     <div id="sound-overlay" onclick="initAudio()">
         <h1>🏎️ DR. VICE</h1>
@@ -392,6 +460,14 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
+        let isPaused = false;
+        window.togglePause = () => {
+            isPaused = !isPaused;
+            document.getElementById('pause-btn').innerText = isPaused ? "▶ RESUME" : "⏸ PAUSE";
+            const overlay = document.getElementById('pause-overlay');
+            if (overlay) overlay.style.display = isPaused ? 'flex' : 'none';
+        };
+
         // --- GLOBAL SETTINGS & SYNC ---
         let gameSettings = {
             steering: 'wheel',
@@ -449,11 +525,19 @@
         winTrim.position.set(0, 1.0, -0.1); car.add(winTrim);
         const winTrim2 = winTrim.clone(); winTrim2.position.y = 1.5; car.add(winTrim2);
 
-        // Underglow
-        const glowGeo = new THREE.BoxGeometry(1.8, 0.05, 3.8);
-        const glowMesh = new THREE.Mesh(glowGeo, cyanNeon);
-        glowMesh.position.y = 0.22;
-        car.add(glowMesh);
+        // Colorful Underglow (Movement Aware)
+        const underglowGroup = new THREE.Group();
+        const colors = [0x0ffffa, 0xf092ff, 0xffaa00, 0x00ff00];
+        const underglowStrips = [];
+        for (let i = 0; i < 10; i++) {
+            const stripGeo = new THREE.BoxGeometry(1.8, 0.02, 0.2);
+            const stripMat = new THREE.MeshBasicMaterial({ color: colors[i % colors.length], transparent: true, opacity: 0.8 });
+            const strip = new THREE.Mesh(stripGeo, stripMat);
+            strip.position.set(0, 0.22, (i * 0.4) - 1.8);
+            underglowGroup.add(strip);
+            underglowStrips.push(strip);
+        }
+        car.add(underglowGroup);
 
         // Bumpers & Mirrors
         const bumper = new THREE.Mesh(new THREE.BoxGeometry(2.05, 0.25, 0.15), paintMat);
@@ -483,10 +567,19 @@
             const roller = new THREE.Group();
             roller.add(new THREE.Mesh(wGeo, new THREE.MeshStandardMaterial({ color: 0x111111 })));
 
-            // Neon Rim
-            const rim = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.05, 16, 32), cyanNeon);
-            rim.rotation.y = Math.PI / 2; rim.position.x = (p.x > 0) ? 0.27 : -0.27;
-            roller.add(rim);
+            // Dotted Neon Rim
+            const dottedRim = new THREE.Group();
+            const dotCount = 12;
+            for (let j = 0; j < dotCount; j++) {
+                const angle = (j / dotCount) * Math.PI * 2;
+                const dotGeo = new THREE.SphereGeometry(0.04, 8, 8);
+                const dotMat = new THREE.MeshBasicMaterial({ color: (j % 2 === 0) ? 0x0ffffa : 0x000000 });
+                const dot = new THREE.Mesh(dotGeo, dotMat);
+                dot.position.set(0, Math.cos(angle) * 0.55, Math.sin(angle) * 0.55);
+                dottedRim.add(dot);
+            }
+            dottedRim.position.x = (p.x > 0) ? 0.27 : -0.27;
+            roller.add(dottedRim);
 
             // BMW Logo
             const logo = new THREE.Group();
@@ -837,6 +930,10 @@
 
         function animate() {
             requestAnimationFrame(animate);
+            if (isPaused) {
+                renderer.render(scene, camera);
+                return;
+            }
             if (activeId === null) {
                 if (gyroActive) {
                     wheelAngle = wheelAngle * 0.9 + gyroTilt * 0.1; // smoothed
@@ -903,6 +1000,31 @@
             speedBox.innerText = `${displaySpeed} ${gameSettings.units.toUpperCase()}`;
             document.getElementById('unit-label').innerText = `unit: ${gameSettings.units.toUpperCase()}`;
 
+            // Analog Needle & Arc Logic
+            const maxSpeed = 200;
+            const needleAngle = -120 + ((rawSpeed / maxSpeed) * 240);
+            const needle = document.getElementById('speed-needle');
+            if (needle) needle.setAttribute('transform', `rotate(${needleAngle}, 50, 50)`);
+
+            const arc = document.getElementById('speed-arc');
+            if (arc) {
+                const offset = 188 - (Math.min(1, rawSpeed / maxSpeed) * 188);
+                arc.style.strokeDashoffset = offset;
+            }
+
+            // Gear Logic
+            let gear = "N";
+            if (speed < -0.01) {
+                gear = "R";
+            } else if (rawSpeed > 0.1) {
+                if (rawSpeed < 30) gear = "1";
+                else if (rawSpeed < 65) gear = "2";
+                else if (rawSpeed < 100) gear = "3";
+                else if (rawSpeed < 140) gear = "4";
+                else gear = "5";
+            }
+            document.getElementById('gear-box').innerText = gear;
+
             // Backfire Logic (Sudden brake or release at high speed)
             if (speed > 0.05 && (inputs.brake || inputs.bwd || (!inputs.fwd && Math.random() < 0.01))) {
                 if (Math.random() < 0.05) triggerBackfire();
@@ -917,6 +1039,15 @@
                 backfireLight.intensity = 0;
                 flame.material.opacity = 0;
             }
+
+            // Animate Colorful Underglow (Scrolling + Idle Shimmer)
+            const shimmer = Math.sin(Date.now() * 0.005) * 0.1;
+            underglowStrips.forEach((strip, idx) => {
+                strip.position.z -= (speed * 2) + (shimmer * 0.1);
+                strip.material.opacity = 0.6 + (Math.sin(Date.now() * 0.003 + idx) * 0.2);
+                if (strip.position.z < -2) strip.position.z = 1.8;
+                if (strip.position.z > 1.8) strip.position.z = -2;
+            });
 
             // Engine Audio Modulation
             if (isAudioInit) {
