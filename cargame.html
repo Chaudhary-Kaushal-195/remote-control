@@ -713,7 +713,7 @@
             musicVol: 50
         };
 
-        function toggleSettings() {
+        window.toggleSettings = () => {
             const modal = document.getElementById('settings-modal');
             const isVisible = modal.style.display === 'flex';
             if (isVisible) {
@@ -722,9 +722,9 @@
                 modal.style.display = 'flex';
                 loadSettingsToModal();
             }
-        }
+        };
 
-        function saveSettings() {
+        window.saveSettings = () => {
             gameSettings.steering = document.getElementById('setting-steering').value;
             gameSettings.units = document.getElementById('setting-units').value;
             gameSettings.engineVol = document.getElementById('setting-engine-vol').value;
@@ -732,7 +732,11 @@
 
             localStorage.setItem('drViceSettings', JSON.stringify(gameSettings));
             // Apply live engine volume is handled dynamically in EngineSoundSystem update
-        }
+            if (window.engineSoundSystem) {
+                // Instantly update volume if system is active
+                // Update will catch masterVol on next frame
+            }
+        };
 
         function loadSettingsToModal() {
             const saved = localStorage.getItem('drViceSettings');
