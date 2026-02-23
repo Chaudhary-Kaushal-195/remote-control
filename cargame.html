@@ -496,16 +496,8 @@
             peer.on('connection', (c) => {
                 conn = c;
                 remoteBox.innerText = "CONTROLLER CONNECTED";
-                conn.on('data', (data) => {
-                    if (data.type === 'gyro') {
-                        gyroActive = true;
-                        gyroTilt = data.tilt;
-                    }
-                    if (data.type === 'pedal') {
-                        inputs[data.pedal] = data.active;
-                    }
-                });
             });
+        });
         };
 
         if (role === 'controller') {
@@ -560,7 +552,7 @@
         // --- CONTROLS ---
         let speed = 0, wheelAngle = 0, activeId = null, lastAngle = 0;
         let gyroActive = false, gyroTilt = 0;
-        const inputs = { fwd: false, bwd: false, left: false, right: false };
+        const inputs = { fwd: false, bwd: false, left: false, right: false, brake: false };
         const wheelZone = document.getElementById('steering-zone'), visual = document.getElementById('wheel-visual');
         const speedBox = document.getElementById('speed-box');
 
@@ -638,6 +630,7 @@
             if (['ArrowDown', 's', 'S'].includes(e.key)) inputs.bwd = true;
             if (['ArrowLeft', 'a', 'A'].includes(e.key)) inputs.left = true;
             if (['ArrowRight', 'd', 'D'].includes(e.key)) inputs.right = true;
+            if (e.key === ' ') { inputs.brake = true; e.preventDefault(); }
         });
 
         window.addEventListener('keyup', (e) => {
@@ -645,6 +638,7 @@
             if (['ArrowDown', 's', 'S'].includes(e.key)) inputs.bwd = false;
             if (['ArrowLeft', 'a', 'A'].includes(e.key)) inputs.left = false;
             if (['ArrowRight', 'd', 'D'].includes(e.key)) inputs.right = false;
+            if (e.key === ' ') inputs.brake = false;
         });
 
         // --- AUDIO ENGINE ---
@@ -714,9 +708,18 @@
                 }
                 visual.style.transform = `rotate(${wheelAngle}deg)`;
             }
+
+            // Physics
             if (inputs.fwd) speed += 0.009;
-            if (inputs.bwd) speed -= 0.018;
-            speed *= 0.985;
+            if (inputs.bwd) speed -= 0.009; // Reverse is slower now
+
+            // Brake Logic
+            if (inputs.brake) {
+                if (speed > 0) speed = Math.max(0, speed - 0.02);
+                if (speed < 0) speed = Math.min(0, speed + 0.02);
+            }
+
+            speed *= 0.985; // Natural friction
 
             car.translateZ(speed);
             car.rotation.y -= (wheelAngle / 180) * 0.05 * (speed * 4);
@@ -734,7 +737,7 @@
             speedBox.innerText = `speed: ${Math.round(Math.abs(speed * 200))} (GYRO: ${gyroActive ? 'ON' : 'OFF'})`;
 
             // Backfire Logic (Sudden brake or release at high speed)
-            if (speed > 0.05 && (inputs.bwd || (!inputs.fwd && Math.random() < 0.01))) {
+            if (speed > 0.05 && (inputs.brake || inputs.bwd || (!inputs.fwd && Math.random() < 0.01))) {
                 if (Math.random() < 0.05) triggerBackfire();
             }
 

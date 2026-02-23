@@ -67,7 +67,7 @@
         }
 
         .pedal {
-            width: 70px;
+            width: 80px;
             border-radius: 12px;
             border: 3px solid;
             background: rgba(0, 0, 0, 0.5);
@@ -76,17 +76,27 @@
             justify-content: center;
             font-weight: bold;
             position: relative;
+            transition: transform 0.1s, background 0.1s;
         }
 
-        #brake {
+        #reverse {
             height: 100px;
             border-color: #f092ff;
             color: #f092ff;
-            box-shadow: 0 0 15px rgba(240, 146, 255, 0.4);
+            opacity: 0.7;
+        }
+
+        #brake {
+            height: 120px;
+            width: 100px;
+            border-color: #ff0055;
+            color: #ff0055;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
         }
 
         #gas {
             height: 160px;
+            width: 90px;
             border-color: #0ffffa;
             color: #0ffffa;
             box-shadow: 0 0 15px rgba(15, 255, 250, 0.4);
@@ -94,7 +104,7 @@
 
         .pedal:active {
             transform: scale(0.95);
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .label {
@@ -226,7 +236,8 @@
         </div>
 
         <div class="pedal-group">
-            <div id="brake" class="pedal"><span class="label">BRAKE</span>BRK</div>
+            <div id="reverse" class="pedal"><span class="label">REVERSE</span>REV</div>
+            <div id="brake" class="pedal"><span class="label">BRAKE</span>STOP</div>
             <div id="gas" class="pedal"><span class="label">GAS</span>GAS</div>
         </div>
     </div>
@@ -409,12 +420,16 @@
         function setupPedals() {
             const gas = document.getElementById('gas');
             const brake = document.getElementById('brake');
+            const reverse = document.getElementById('reverse');
 
             gas.addEventListener('touchstart', () => { conn.send({ type: 'pedal', pedal: 'fwd', active: true }); vibrate(20); });
             gas.addEventListener('touchend', () => conn.send({ type: 'pedal', pedal: 'fwd', active: false }));
 
-            brake.addEventListener('touchstart', () => { conn.send({ type: 'pedal', pedal: 'bwd', active: true }); vibrate(50); });
-            brake.addEventListener('touchend', () => conn.send({ type: 'pedal', pedal: 'bwd', active: false }));
+            brake.addEventListener('touchstart', () => { conn.send({ type: 'pedal', pedal: 'brake', active: true }); vibrate(70); });
+            brake.addEventListener('touchend', () => conn.send({ type: 'pedal', pedal: 'brake', active: false }));
+
+            reverse.addEventListener('touchstart', () => { conn.send({ type: 'pedal', pedal: 'bwd', active: true }); vibrate(40); });
+            reverse.addEventListener('touchend', () => conn.send({ type: 'pedal', pedal: 'bwd', active: false }));
         }
 
         function vibrate(ms) {
