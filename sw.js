@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-control-v10'; // Ultimate Overhaul
+const CACHE_NAME = 'dr-control-v11'; // CSS compatibility fix
 const ASSETS = [
   'index.html',
   'controller.html',
