@@ -1,14 +1,19 @@
-const CACHE_NAME = 'dr-control-v1';
+const CACHE_NAME = 'dr-control-v2'; // Bumped version to force update
 const ASSETS = [
   'controller.html',
   'manifest.json',
-  'https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js'
+  'https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js',
+  'https://unpkg.com/html5-qrcode'
 ];
 
 self.addEventListener('install', (e) => {
+  self.skipWaiting();
   e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
 });
 
 self.addEventListener('fetch', (e) => {
-  e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
+  // Network First strategy
+  e.respondWith(
+    fetch(e.request).catch(() => caches.match(e.request))
+  );
 });
