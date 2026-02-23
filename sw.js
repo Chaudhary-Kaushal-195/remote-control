@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-control-v7'; // Enforce Landscape lock
+const CACHE_NAME = 'dr-control-v8'; // Mobile restriction fix
 const ASSETS = [
   'index.html',
   'controller.html',

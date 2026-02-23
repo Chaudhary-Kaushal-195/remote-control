@@ -201,6 +201,31 @@
             font-weight: bold;
             margin-bottom: 10px;
         }
+
+        /* Compatibility Overlay */
+        #desktop-blocker {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #0a0015;
+            z-index: 5000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #desktop-blocker h1 {
+            color: #ff0055;
+            text-shadow: 0 0 15px #ff0055;
+        }
+
+        #desktop-blocker p {
+            color: #f092ff;
+            max-width: 400px;
+            line-height: 1.5;
+        }
     </style>
     <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
@@ -230,6 +255,16 @@
         <button onclick="stopScanning()" style="margin-top:30px; background:rgba(255,255,255,0.1);">CANCEL</button>
     </div>
 
+    <div id="desktop-blocker">
+        <h1>⚠️ INCOMPATIBLE DEVICE</h1>
+        <p>This Remote App requires <b>Gyroscope Sensors</b> and <b>Touch Controls</b> found only on mobile phones and
+            tablets.</p>
+        <p style="font-size: 14px; opacity: 0.7;">Please open this link on your <b>Smartphone</b> to play!</p>
+        <button onclick="window.location.href='index.html'"
+            style="margin-top:20px; background:rgba(255,255,255,0.1); color:#fff; border:1px solid #fff;">BACK TO
+            HUB</button>
+    </div>
+
     <div id="ui-container">
         <div id="wheel-zone">
             <div id="wheel-inner"></div>
@@ -249,6 +284,12 @@
             !window.location.search.includes('mode=manual') &&
             !window.location.href.includes('localhost')) {
             window.location.href = 'index.html';
+        }
+
+        // Desktop Restriction Check
+        const isDesktop = !('ontouchstart' in window) || (window.innerWidth > 1024);
+        if (isDesktop && !window.location.href.includes('localhost')) {
+            document.getElementById('desktop-blocker').style.display = 'flex';
         }
 
         let peer = null, conn = null;
