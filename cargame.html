@@ -678,6 +678,7 @@
 
     <script type="module">
         import * as THREE from 'three';
+        import { EngineSoundSystem } from './EngineSoundSystem.js';
 
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
@@ -728,11 +729,7 @@
             gameSettings.musicVol = document.getElementById('setting-music-vol').value;
 
             localStorage.setItem('drViceSettings', JSON.stringify(gameSettings));
-            // Apply live engine volume
-            if (isAudioInit) {
-                const baseVol = (gameSettings.engineVol / 100) * 0.3;
-                engineG.gain.value = baseVol;
-            }
+            // Apply live engine volume is handled dynamically in EngineSoundSystem update
         }
 
         function loadSettingsToModal() {
@@ -1108,22 +1105,26 @@
             if (e.key === ' ') inputs.brake = false;
         });
 
-        // --- AUDIO ENGINE (DISABLED) ---
-        let isAudioInit = true;
-        let lastThrottle = false;
+        // --- AUDIO ENGINE ---
+        let isAudioInit = false;
+        let engineSoundSystem = null;
 
         window.initAudio = () => {
             const overlay = document.getElementById('sound-overlay');
             if (overlay) overlay.style.display = 'none';
+            if (!engineSoundSystem) {
+                engineSoundSystem = new EngineSoundSystem(camera, car);
+                isAudioInit = true;
+                window.engineSoundSystem = engineSoundSystem;
+            } else if (engineSoundSystem.audioContext.state === 'suspended') {
+                engineSoundSystem.audioContext.resume();
+            }
         };
 
-        function triggerTurboFlutter() { }
-        function triggerBoostLaunch() { }
-
         let backfireTick = 0;
-        function triggerBackfire() {
+        window.triggerBackfireVisual = function () {
             backfireTick = 10; // visual flame only
-        }
+        };
 
         function animate() {
             requestAnimationFrame(animate);
@@ -1243,10 +1244,7 @@
             }
             document.getElementById('gear-box').innerText = gear;
 
-            // Backfire Logic (Sudden brake or release at high speed)
-            if (speed > 0.05 && (inputs.brake || inputs.bwd || (!inputs.fwd && Math.random() < 0.01))) {
-                if (Math.random() < 0.05) triggerBackfire();
-            }
+            // Backfire Logic is now handled via Sound Engine (triggerBackfireVisual)
 
             if (backfireTick > 0) {
                 backfireTick--;
@@ -1267,7 +1265,18 @@
                 if (strip.position.z > 1.8) strip.position.z = -2;
             });
 
-            // Audio disabled
+            if (engineSoundSystem) {
+                engineSoundSystem.setThrottle(inputs.fwd ? 1.0 : 0.0);
+
+                let gearIndex = 1;
+                if (gear === "2") gearIndex = 2;
+                else if (gear === "3") gearIndex = 3;
+                else if (gear === "4") gearIndex = 4;
+                else if (gear === "5") gearIndex = 5;
+                engineSoundSystem.shiftGear('set', gearIndex);
+
+                engineSoundSystem.update(0.016, speed * 200);
+            }
         }
         animate();
     </script>
