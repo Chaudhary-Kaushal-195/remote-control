@@ -496,8 +496,16 @@
             peer.on('connection', (c) => {
                 conn = c;
                 remoteBox.innerText = "CONTROLLER CONNECTED";
+                conn.on('data', (data) => {
+                    if (data.type === 'gyro') {
+                        gyroActive = true;
+                        gyroTilt = (data.tilt || 0);
+                    }
+                    if (data.type === 'pedal') {
+                        inputs[data.pedal] = data.active;
+                    }
+                });
             });
-        });
         };
 
         if (role === 'controller') {
