@@ -227,10 +227,11 @@
             border: 1px solid var(--neon-blue);
             padding: 15px;
             border-radius: 12px;
-            z-index: 100;
+            z-index: 6000;
             backdrop-filter: blur(10px);
             min-width: 220px;
             box-shadow: 0 0 15px rgba(15, 255, 250, 0.2);
+            pointer-events: auto;
         }
 
         .hud-btn {
@@ -322,8 +323,8 @@
         <div id="unit-label" style="font-size: 10px; opacity:0.6; margin-bottom:10px;">unit: KPH</div>
 
         <div style="display:flex; gap:10px;">
-            <button class="hud-btn" id="cam-btn" onclick="cycleCamera()">🎥 VIEW: NORMAL</button>
-            <button id="remote-box" class="hud-btn" onclick="setupRemote()">🤳 SYNC PHONE</button>
+            <button class="hud-btn" id="cam-btn" onclick="initAudio(); cycleCamera();">🎥 VIEW: NORMAL</button>
+            <button id="remote-box" class="hud-btn" onclick="initAudio(); setupRemote();">🤳 SYNC PHONE</button>
         </div>
 
         <div id="debug-info"
@@ -524,7 +525,10 @@
         const hostId = urlParams.get('hostId');
 
         window.setupRemote = () => {
-            if (peer) return;
+            if (peer) {
+                document.getElementById('qr-overlay').style.display = 'flex';
+                return;
+            }
             if (window.location.protocol === 'file:') {
                 alert("CRITICAL: You are running this as a local file. Your phone CANNOT connect to a 'file://' link. \n\n Please use: http://localhost:8000/cargame.html instead!");
                 return;
