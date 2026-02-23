@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-control-v20'; // Supra Backfire Boom
+const CACHE_NAME = 'dr-control-v21'; // Neutral Idle Audio Fix
 const ASSETS = [
   'index.html',
   'controller.html',
