@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dr. Vice - Final Visual Build</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #05000a;
+            font-family: 'Courier New', monospace;
+            user-select: none;
+            touch-action: none;
+            color: #fff;
+        }
+
+        /* HUD - Exactly like top-left of reference image */
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #0ffffa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            pointer-events: none;
+            z-index: 100;
+            font-size: 18px;
+            line-height: 1.4;
+        }
+
+        #hud b {
+            color: #0ffffa;
+            font-weight: 900;
+        }
+
+        #speed-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 0px 4px;
+            color: #fff;
+            font-size: 14px;
+            margin-left: 5px;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        #speed-box:active {
+            background: rgba(0, 255, 255, 0.2);
+        }
+
+        .hud-meta {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            white-space: pre;
+            margin-top: 10px;
+            font-weight: normal;
+        }
+
+        /* STEERING WHEEL - Realistic pink icon style from image */
+        #steering-zone {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            width: 140px;
+            height: 140px;
+            z-index: 50;
+        }
+
+        #wheel-visual {
+            width: 100%;
+            height: 100%;
+            border: 3px solid #f092ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(240, 146, 255, 0.4);
+            position: relative;
+        }
+
+        #wheel-visual::after {
+            /* Inner ring */
+            content: "";
+            position: absolute;
+            width: 88%;
+            height: 88%;
+            border: 1.5px solid #f092ff;
+            border-radius: 50%;
+            box-shadow: inset 0 0 5px rgba(240, 146, 255, 0.2);
+        }
+
+        .spoke-center {
+            width: 30px;
+            height: 22px;
+            border: 2px solid #f092ff;
+            border-radius: 50% 50% 40% 40%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .spoke-center::before {
+            content: "";
+            position: absolute;
+            width: 12px;
+            height: 3px;
+            background: #f092ff;
+            border-radius: 2px;
+        }
+
+        .spoke-hand {
+            position: absolute;
+            width: 68%;
+            height: 38%;
+            border: 2px solid #f092ff;
+            border-radius: 30% 30% 70% 70%;
+            top: 40%;
+        }
+
+        /* PEDALS - Matching exact icon shapes and glows */
+        .ui-container {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            display: flex;
+            align-items: flex-end;
+            gap: 30px;
+        }
+
+        .pedal {
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 2px solid;
+            background: rgba(0, 0, 0, 0.5);
+            font-size: 14px;
+            position: relative;
+        }
+
+        .pedal-label {
+            position: absolute;
+            top: -25px;
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: #fff;
+            opacity: 0.9;
+        }
+
+        .clutch {
+            width: 40px;
+            height: 110px;
+            border-color: #f092ff;
+            box-shadow: 0 0 10px rgba(240, 146, 255, 0.3);
+        }
+
+        .clutch .stripe {
+            width: 60%;
+            height: 6px;
+            border: 1.5px solid #f092ff;
+            border-radius: 3px;
+            margin: 4px 0;
+        }
+
+        #brake {
+            width: 70px;
+            height: 90px;
+            border-color: #f092ff;
+            color: #f092ff;
+            box-shadow: 0 0 12px rgba(240, 146, 255, 0.4);
+        }
+
+        #brake .stripe {
+            width: 60%;
+            height: 8px;
+            background: none;
+            border: 1.5px solid #f092ff;
+            border-radius: 3px;
+            margin: 4px 0;
+        }
+
+        #brake .stripe.active {
+            background: #f092ff;
+        }
+
+        #gas {
+            width: 70px;
+            height: 150px;
+            color: #0ffffa;
+            border: 2px solid;
+            border-image: linear-gradient(to top, #0ffffa, #f092ff) 1;
+            box-shadow: 0 0 15px rgba(15, 255, 250, 0.3);
+        }
+
+        #gas .stripe {
+            width: 60%;
+            height: 10px;
+            border: 1.5px solid #0ffffa;
+            border-radius: 3px;
+            margin: 6px 0;
+        }
+
+        #gas .pedal-label {
+            color: #f092ff;
+            top: 12px;
+            font-size: 14px;
+            font-weight: 900;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="hud">
+        <b>#HU DR. VICE - (NEON BMW)</b><br>
+        SPEED: val < <span id="speed-box" onclick="toggleGyro()">speed: 0 (GYRO: OFF)</span>
+            <span id="remote-box" onclick="setupRemote()"
+                style="background: rgba(255,100,255,0.1); border: 1px solid #f092ff; padding: 0px 4px; color: #f092ff; font-size: 14px; margin-left: 5px; cursor: pointer; pointer-events: auto;">REMOTE:
+                OFF</span>
+            <div class="hud-meta">{ toncsct [ speed ] > thres @. 01660.0.3
+                impurts > gaicthsct hot, {posvelat 100./0105W20/400/0660/tod 2170.01, widpuls},
+                { totveID [ ammd. > ayt, (hrees bwgt 0.3
+                impurts > gaicinsct hot, {posvelat 100./0105W20/400/0060/tod 2310.01, widpuls},
+                },</div>
+    </div>
+
+    <div id="steering-zone">
+        <div id="wheel-visual">
+            <div class="spoke-center"></div>
+            <div class="spoke-hand"></div>
+        </div>
+    </div>
+
+    <div class="ui-container">
+        <div class="pedal clutch">
+            <div class="stripe"></div>
+            <div class="stripe"></div>
+        </div>
+        <div id="brake" class="pedal">
+            <div class="pedal-label" style="color:#0ffffa">#Gas</div>
+            <div class="stripe"></div>
+            <div class="stripe active"></div>
+            <div class="stripe"></div>
+        </div>
+        <div id="gas" class="pedal">
+            <div class="pedal-label">GAS</div>
+            <div class="stripe"></div>
+            <div class="stripe"></div>
+            <div class="stripe"></div>
+            <div class="stripe"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        // --- SCENE SETUP ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a0015);
+        scene.fog = new THREE.FogExp2(0x0a0015, 0.03);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        scene.add(new THREE.GridHelper(2000, 100, 0x00ffff, 0x222222));
+        scene.add(new THREE.AmbientLight(0xffffff, 1.0));
+
+        // --- CAR ASSEMBLY (BMW E30 NEON) ---
+        const car = new THREE.Group();
+        const paintMat = new THREE.MeshStandardMaterial({ color: 0xc1006e, roughness: 0.2, metalness: 0.8 });
+        const cyanNeon = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+        const windowMat = new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 0, metalness: 1, transparent: true, opacity: 0.8 });
+        const tailMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+
+        // Chassis - Main Body
+        const bodyGeo = new THREE.BoxGeometry(2.0, 0.7, 4.2);
+        const bodyMesh = new THREE.Mesh(bodyGeo, paintMat);
+        bodyMesh.position.y = 0.6;
+        car.add(bodyMesh);
+
+        // Cabin (E30 Boxy Style)
+        const cabinGeo = new THREE.BoxGeometry(1.7, 0.6, 2.0);
+        const cabinMesh = new THREE.Mesh(cabinGeo, paintMat);
+        cabinMesh.position.set(0, 1.25, -0.1);
+        car.add(cabinMesh);
+
+        // Windows with Cyan Outline
+        const winGeo = new THREE.BoxGeometry(1.72, 0.5, 1.8);
+        const winMesh = new THREE.Mesh(winGeo, windowMat);
+        winMesh.position.set(0, 1.25, -0.1);
+        car.add(winMesh);
+
+        // Neon Trims (Windows)
+        const winTrim = new THREE.Mesh(new THREE.BoxGeometry(1.73, 0.05, 1.82), cyanNeon);
+        winTrim.position.set(0, 1.0, -0.1); car.add(winTrim);
+        const winTrim2 = winTrim.clone(); winTrim2.position.y = 1.5; car.add(winTrim2);
+
+        // Underglow
+        const glowGeo = new THREE.BoxGeometry(1.8, 0.05, 3.8);
+        const glowMesh = new THREE.Mesh(glowGeo, cyanNeon);
+        glowMesh.position.y = 0.22;
+        car.add(glowMesh);
+
+        // Bumpers & Mirrors
+        const bumper = new THREE.Mesh(new THREE.BoxGeometry(2.05, 0.25, 0.15), paintMat);
+        bumper.position.set(0, 0.45, 2.1); car.add(bumper);
+        const bumperR = bumper.clone(); bumperR.position.z = -2.11; car.add(bumperR);
+
+        const mirror = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.18, 0.1), paintMat);
+        mirror.position.set(1.1, 1.1, 0.7); car.add(mirror);
+        const mirrorL = mirror.clone(); mirrorL.position.x = -1.1; car.add(mirrorL);
+
+        // Taillights (More detailed E30 style)
+        const tlGroup = new THREE.Group();
+        const tlMesh = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.3, 0.1), tailMat);
+        const tlOrange = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.3, 0.11), new THREE.MeshBasicMaterial({ color: 0xffaa00 }));
+        tlOrange.position.x = 0.15; tlMesh.add(tlOrange);
+        tlGroup.add(tlMesh);
+
+        const tlL = tlGroup.clone(); tlL.position.set(0.65, 0.65, -2.12); car.add(tlL);
+        const tlR = tlGroup.clone(); tlR.position.set(-0.65, 0.65, -2.12); car.add(tlR);
+
+        // WHEELS (BMW Neon Logo Style)
+        const wheels = [];
+        const wGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.5, 32);
+        wGeo.rotateZ(Math.PI / 2);
+        [{ x: 1.0, z: 1.3 }, { x: -1.0, z: 1.3 }, { x: 1.0, z: -1.3 }, { x: -1.0, z: -1.3 }].forEach((p) => {
+            const anchor = new THREE.Group(); anchor.position.set(p.x, 0.55, p.z);
+            const roller = new THREE.Group();
+            roller.add(new THREE.Mesh(wGeo, new THREE.MeshStandardMaterial({ color: 0x111111 })));
+
+            // Neon Rim
+            const rim = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.05, 16, 32), cyanNeon);
+            rim.rotation.y = Math.PI / 2; rim.position.x = (p.x > 0) ? 0.27 : -0.27;
+            roller.add(rim);
+
+            // BMW Logo
+            const logo = new THREE.Group();
+            const qGeo = new THREE.CircleGeometry(0.48, 32, 0, Math.PI / 2);
+            for (let i = 0; i < 4; i++) {
+                const q = new THREE.Mesh(qGeo, (i % 2 === 0) ? new THREE.MeshBasicMaterial({ color: 0xffffff }) : new THREE.MeshBasicMaterial({ color: 0x0044aa }));
+                q.rotation.y = Math.PI / 2; q.rotation.x = -i * (Math.PI / 2);
+                logo.add(q);
+            }
+            logo.position.x = (p.x > 0) ? 0.28 : -0.28;
+            if (p.x < 0) logo.rotation.y = Math.PI;
+            roller.add(logo); anchor.add(roller); car.add(anchor);
+            wheels.push({ anchor, roller });
+        });
+        scene.add(car);
+
+        // --- REMOTE SYNC (PEERJS) ---
+        let peer = null, conn = null;
+        const remoteBox = document.getElementById('remote-box');
+        const urlParams = new URLSearchParams(window.location.search);
+        const role = urlParams.get('role'); // 'controller'
+        const hostId = urlParams.get('hostId');
+
+        window.setupRemote = () => {
+            if (peer) return;
+            if (window.location.protocol === 'file:') {
+                alert("CRITICAL: You are running this as a local file. Your phone CANNOT connect to a 'file://' link. \n\n Please use: http://localhost:8000/cargame.html instead!");
+                return;
+            }
+            peer = new Peer();
+            peer.on('open', (id) => {
+                console.log('Laptop Peer ID:', id);
+                const url = `${window.location.origin}${window.location.pathname}?role=controller&hostId=${id}`;
+                remoteBox.innerText = `ID: ${id} (CLICK TO COPY LINK)`;
+                remoteBox.style.background = "rgba(0, 255, 255, 0.1)";
+                remoteBox.style.color = "#0ffffa";
+                remoteBox.onclick = () => {
+                    navigator.clipboard.writeText(url);
+                    alert("Controller Link Copied! \n\n 1. Open Chrome/Safari on your phone.\n 2. Paste this link into the ADDRESS BAR.");
+                };
+            });
+            peer.on('error', (err) => {
+                console.error('PeerJS Error:', err);
+                remoteBox.innerText = "REMOTE ERROR: " + err.type;
+                remoteBox.style.background = "rgba(255, 0, 0, 0.2)";
+                alert("Connection Error: Check if you have internet for signaling server.");
+            });
+            peer.on('connection', (c) => {
+                conn = c;
+                remoteBox.innerText = "CONTROLLER CONNECTED";
+                conn.on('data', (data) => {
+                    if (data.type === 'gyro') {
+                        gyroActive = true;
+                        gyroTilt = data.tilt;
+                    }
+                    if (data.type === 'pedal') {
+                        inputs[data.pedal] = data.active;
+                    }
+                });
+            });
+        };
+
+        if (role === 'controller') {
+            document.body.style.background = "#1a002a";
+            // Hide 3D game for controller mode
+            setTimeout(() => {
+                if (renderer && renderer.domElement) renderer.domElement.style.display = 'none';
+                const hud = document.getElementById('hud');
+                if (hud) hud.style.display = 'none';
+            }, 100);
+
+            const startController = (id) => {
+                peer = new Peer();
+                peer.on('open', () => {
+                    conn = peer.connect(id);
+                    conn.on('open', () => {
+                        alert("CONNECTED! Tilt phone to steer.");
+                        gyroActive = true;
+                        window.addEventListener('deviceorientation', (e) => {
+                            let tilt = -e.gamma;
+                            if (window.orientation === 90) tilt = e.beta;
+                            if (window.orientation === -90) tilt = -e.beta;
+                            conn.send({ type: 'gyro', tilt: Math.max(-45, Math.min(45, tilt)) * 4 });
+                        }, true);
+                    });
+                    conn.on('close', () => alert("Link Lost"));
+                });
+            };
+
+            if (hostId) {
+                startController(hostId);
+            } else {
+                const manualId = prompt("Enter the ID shown on your Laptop screen:");
+                if (manualId) startController(manualId);
+            }
+
+            // Override pedal listeners to send data
+            window.addEventListener('touchstart', (e) => {
+                for (let t of e.changedTouches) {
+                    if (t.target.closest('#gas')) conn?.send({ type: 'pedal', pedal: 'fwd', active: true });
+                    if (t.target.closest('#brake')) conn?.send({ type: 'pedal', pedal: 'bwd', active: true });
+                }
+            });
+            window.addEventListener('touchend', (e) => {
+                for (let t of e.changedTouches) {
+                    if (t.target.closest('#gas')) conn?.send({ type: 'pedal', pedal: 'fwd', active: false });
+                    if (t.target.closest('#brake')) conn?.send({ type: 'pedal', pedal: 'bwd', active: false });
+                }
+            });
+        }
+
+        // --- CONTROLS ---
+        let speed = 0, wheelAngle = 0, activeId = null, lastAngle = 0;
+        let gyroActive = false, gyroTilt = 0;
+        const inputs = { fwd: false, bwd: false, left: false, right: false };
+        const wheelZone = document.getElementById('steering-zone'), visual = document.getElementById('wheel-visual');
+        const speedBox = document.getElementById('speed-box');
+
+        window.toggleGyro = async () => {
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                try {
+                    const response = await DeviceOrientationEvent.requestPermission();
+                    if (response === 'granted') startGyro();
+                } catch (e) { console.error(e); }
+            } else {
+                startGyro();
+            }
+        };
+
+        function startGyro() {
+            gyroActive = !gyroActive;
+            if (gyroActive) {
+                window.addEventListener('deviceorientation', handleGyro, true);
+                speedBox.style.borderColor = "#0ffffa";
+            } else {
+                window.removeEventListener('deviceorientation', handleGyro, true);
+                speedBox.style.borderColor = "rgba(255,255,255,0.4)";
+                gyroTilt = 0;
+            }
+        }
+
+        function handleGyro(e) {
+            // landspace orientation: tilt is around the vertical axis
+            let tilt = -e.gamma; // Inverted
+            if (window.orientation === 90) tilt = e.beta; // Inverted from -e.beta
+            if (window.orientation === -90) tilt = -e.beta; // Inverted from e.beta
+            gyroTilt = Math.max(-45, Math.min(45, tilt)) * 4;
+        }
+
+        const getAngle = (tx, ty) => {
+            const r = wheelZone.getBoundingClientRect();
+            return Math.atan2(ty - (r.top + r.height / 2), tx - (r.left + r.width / 2));
+        };
+
+        window.addEventListener('touchstart', (e) => {
+            for (let t of e.changedTouches) {
+                if (t.target.closest('#gas')) inputs.fwd = true;
+                if (t.target.closest('#brake')) inputs.bwd = true;
+                const r = wheelZone.getBoundingClientRect();
+                if (t.clientX >= r.left && t.clientX <= r.right && t.clientY >= r.top && t.clientY <= r.bottom) {
+                    activeId = t.identifier; lastAngle = getAngle(t.clientX, t.clientY);
+                }
+            }
+        }, { passive: false });
+
+        window.addEventListener('touchmove', (e) => {
+            for (let t of e.changedTouches) {
+                if (t.identifier === activeId) {
+                    const cur = getAngle(t.clientX, t.clientY);
+                    let d = cur - lastAngle;
+                    if (d > Math.PI) d -= Math.PI * 2; if (d < -Math.PI) d += Math.PI * 2;
+                    wheelAngle = Math.max(-180, Math.min(180, wheelAngle + (d * 180 / Math.PI) * 1.3));
+                    visual.style.transform = `rotate(${wheelAngle}deg)`;
+                    lastAngle = cur;
+                }
+            }
+            e.preventDefault();
+        }, { passive: false });
+
+        window.addEventListener('touchend', (e) => {
+            for (let t of e.changedTouches) {
+                if (t.target.closest('#gas')) inputs.fwd = false;
+                if (t.target.closest('#brake')) inputs.bwd = false;
+                if (t.identifier === activeId) activeId = null;
+            }
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (['ArrowUp', 'w', 'W'].includes(e.key)) inputs.fwd = true;
+            if (['ArrowDown', 's', 'S'].includes(e.key)) inputs.bwd = true;
+            if (['ArrowLeft', 'a', 'A'].includes(e.key)) inputs.left = true;
+            if (['ArrowRight', 'd', 'D'].includes(e.key)) inputs.right = true;
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (['ArrowUp', 'w', 'W'].includes(e.key)) inputs.fwd = false;
+            if (['ArrowDown', 's', 'S'].includes(e.key)) inputs.bwd = false;
+            if (['ArrowLeft', 'a', 'A'].includes(e.key)) inputs.left = false;
+            if (['ArrowRight', 'd', 'D'].includes(e.key)) inputs.right = false;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (activeId === null) {
+                if (gyroActive) {
+                    wheelAngle = wheelAngle * 0.9 + gyroTilt * 0.1; // smoothed
+                } else if (inputs.left) {
+                    wheelAngle = Math.max(-180, wheelAngle - 5);
+                } else if (inputs.right) {
+                    wheelAngle = Math.min(180, wheelAngle + 5);
+                } else {
+                    wheelAngle *= 0.88;
+                }
+                visual.style.transform = `rotate(${wheelAngle}deg)`;
+            }
+            if (inputs.fwd) speed += 0.009;
+            if (inputs.bwd) speed -= 0.018;
+            speed *= 0.985;
+
+            car.translateZ(speed);
+            car.rotation.y -= (wheelAngle / 180) * 0.05 * (speed * 4);
+
+            wheels.forEach((w, i) => {
+                w.roller.rotation.x += speed * 3.5;
+                if (i < 2) w.anchor.rotation.y = -(wheelAngle / 180) * 0.7;
+            });
+
+            const offset = new THREE.Vector3(0, 4.0, -9).applyMatrix4(car.matrixWorld);
+            camera.position.lerp(offset, 0.12);
+            camera.lookAt(car.position.x, car.position.y + 0.5, car.position.z);
+
+            renderer.render(scene, camera);
+            speedBox.innerText = `speed: ${Math.round(Math.abs(speed * 200))} (GYRO: ${gyroActive ? 'ON' : 'OFF'})`;
+        }
+        animate();
+    </script>
+</body>
+
+</html>
