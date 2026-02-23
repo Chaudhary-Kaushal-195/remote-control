@@ -134,7 +134,6 @@
             display: flex;
             align-items: flex-end;
             gap: 30px;
-            /* Container relative for absolute handbrake positioning */
             position: relative;
         }
 
@@ -161,21 +160,20 @@
         }
 
         #handbrake {
-            width: 140px;
-            height: 40px;
+            width: 130px;
+            height: 48px;
             border-color: #ff4400;
             color: #ff4400;
             box-shadow: 0 0 15px rgba(255, 68, 0, 0.4);
-            border-radius: 25px;
-            background: linear-gradient(to right, rgba(0, 0, 0, 0.8), rgba(255, 68, 0, 0.2));
+            border-radius: 20px;
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.9), rgba(255, 68, 0, 0.3));
             z-index: 55;
             position: absolute;
-            bottom: 180px;
-            /* Positioned above the gas pedal */
-            right: 0px;
-            /* Aligned with gas pedal */
+            bottom: 165px;
+            /* Sits right above the gas pedal */
+            right: -25px;
+            /* Center horizontally over the 70px gas pedal */
             flex-direction: row;
-            /* Horizontal stripes */
         }
 
         #handbrake .stripe {
