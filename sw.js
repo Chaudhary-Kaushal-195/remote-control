@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-control-v12'; // Visual refinements & Analog Gauges
+const CACHE_NAME = 'dr-control-v14'; // Advanced Transparent Dashboard
 const ASSETS = [
   'index.html',
   'controller.html',

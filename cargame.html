@@ -234,36 +234,74 @@
             pointer-events: auto;
         }
 
-        /* Analog Speedometer */
-        .gauge-container {
+        /* Analog Dashboard Cluster */
+        .dash-cluster {
             position: absolute;
-            bottom: 40px;
-            left: 40px;
-            width: 180px;
-            height: 180px;
-            background: rgba(10, 0, 21, 0.85);
-            border: 2px solid var(--neon-blue);
-            border-radius: 50%;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: flex-end;
+            gap: 15px;
             z-index: 6000;
+            pointer-events: none;
+        }
+
+        .gauge-pod {
+            background: rgba(255, 255, 255, 0.05);
+            /* Transparent */
+            border: 2px solid rgba(15, 255, 250, 0.3);
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 25px rgba(15, 255, 250, 0.3);
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 15px rgba(15, 255, 250, 0.1);
+            position: relative;
         }
 
-        #speed-needle {
-            transition: transform 0.1s ease-out;
-            transform-origin: 50% 50%;
+        .gauge-main {
+            width: 180px;
+            height: 180px;
+            border-width: 3px;
+            border-color: var(--neon-blue);
+        }
+
+        .gauge-sub {
+            width: 120px;
+            height: 120px;
+            border-color: rgba(240, 146, 255, 0.4);
+        }
+
+        .gauge-mini {
+            width: 80px;
+            height: 80px;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .gauge-needle {
+            transition: transform 0.05s ease-out;
+            transform-origin: 50px 50px;
+            /* Pivot around SVG center */
+        }
+
+        .dash-label {
+            position: absolute;
+            bottom: 25px;
+            font-size: 10px;
+            font-weight: bold;
+            color: #fff;
+            text-transform: uppercase;
+            opacity: 0.8;
         }
 
         .gear-display {
             position: absolute;
-            bottom: 35px;
-            font-size: 24px;
+            bottom: 50px;
+            font-size: 32px;
             font-weight: 900;
             color: var(--neon-pink);
-            text-shadow: 0 0 10px var(--neon-pink);
+            text-shadow: 0 0 15px var(--neon-pink);
         }
 
         #pause-btn {
@@ -372,21 +410,57 @@
         </div>
     </div>
 
-    <div class="gauge-container">
-        <svg width="160" height="160" viewBox="0 0 100 100">
-            <!-- Background Arc -->
-            <path d="M 20 80 A 40 40 0 1 1 80 80" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"
-                stroke-linecap="round" />
-            <!-- Active Speed Arc -->
-            <path id="speed-arc" d="M 20 80 A 40 40 0 1 1 80 80" fill="none" stroke="var(--neon-blue)" stroke-width="8"
-                stroke-linecap="round" stroke-dasharray="188" stroke-dashoffset="188" />
+    <div class="dash-cluster">
+        <!-- TEMP GAUGE -->
+        <div class="gauge-pod gauge-mini">
+            <svg width="70" height="70" viewBox="0 0 100 100">
+                <path d="M 30 70 A 30 30 0 1 1 70 70" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6"
+                    stroke-linecap="round" />
+                <line x1="50" y1="50" x2="50" y2="20" stroke="#ff4400" stroke-width="3" class="gauge-needle"
+                    id="temp-needle" transform="rotate(-90, 50, 50)" />
+            </svg>
+            <div class="dash-label" style="bottom:12px; font-size:8px;">TEMP</div>
+        </div>
 
-            <!-- Center Needle -->
-            <line x1="50" y1="50" x2="50" y2="15" stroke="var(--neon-pink)" stroke-width="3" stroke-linecap="round"
-                id="speed-needle" transform="rotate(-120, 50, 50)" />
-            <circle cx="50" cy="50" r="5" fill="var(--neon-pink)" />
-        </svg>
-        <div id="gear-box" class="gear-display">N</div>
+        <!-- FUEL GAUGE -->
+        <div class="gauge-pod gauge-sub">
+            <svg width="100" height="100" viewBox="0 0 100 100">
+                <path d="M 25 75 A 35 35 0 1 1 75 75" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"
+                    stroke-linecap="round" />
+                <line x1="50" y1="50" x2="50" y2="20" stroke="#ffaa00" stroke-width="4" class="gauge-needle"
+                    id="fuel-needle" transform="rotate(45, 50, 50)" />
+            </svg>
+            <div class="dash-label">FUEL</div>
+        </div>
+
+        <!-- MAIN SPEEDO -->
+        <div class="gauge-pod gauge-main">
+            <svg width="160" height="160" viewBox="0 0 100 100">
+                <path d="M 20 80 A 40 40 0 1 1 80 80" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"
+                    stroke-linecap="round" />
+                <path id="speed-arc" d="M 20 80 A 40 40 0 1 1 80 80" fill="none" stroke="var(--neon-blue)"
+                    stroke-width="8" stroke-linecap="round" stroke-dasharray="188" stroke-dashoffset="188" />
+                <line x1="50" y1="50" x2="50" y2="15" stroke="var(--neon-pink)" stroke-width="4" class="gauge-needle"
+                    id="speed-needle" transform="rotate(-120, 50, 50)" />
+                <circle cx="50" cy="50" r="6" fill="var(--neon-pink)" />
+                <text x="50" y="80" text-anchor="middle" fill="#fff" font-size="10" font-weight="900"
+                    opacity="0.6">MPH</text>
+            </svg>
+            <div id="gear-box" class="gear-display">N</div>
+        </div>
+
+        <!-- TACHOMETER (RPM) -->
+        <div class="gauge-pod gauge-sub">
+            <svg width="100" height="100" viewBox="0 0 100 100">
+                <path d="M 25 75 A 35 35 0 1 1 75 75" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"
+                    stroke-linecap="round" />
+                <path d="M 65 31 A 35 35 0 0 1 75 75" fill="none" stroke="#ff0000" stroke-width="8"
+                    stroke-linecap="round" opacity="0.5" />
+                <line x1="50" y1="50" x2="50" y2="20" stroke="#0ffffa" stroke-width="4" class="gauge-needle"
+                    id="rpm-needle" transform="rotate(-110, 50, 50)" />
+            </svg>
+            <div class="dash-label">RPM</div>
+        </div>
     </div>
 
     <div id="pause-overlay">
@@ -461,6 +535,10 @@
         document.body.appendChild(renderer.domElement);
 
         let isPaused = false;
+        let fuelLevel = 100;
+        let engineTemp = 20; // Starts cold
+        let rpm = 0;
+
         window.togglePause = () => {
             isPaused = !isPaused;
             document.getElementById('pause-btn').innerText = isPaused ? "▶ RESUME" : "⏸ PAUSE";
@@ -998,17 +1076,38 @@
             speedBox.innerText = `${displaySpeed} ${gameSettings.units.toUpperCase()}`;
             document.getElementById('unit-label').innerText = `unit: ${gameSettings.units.toUpperCase()}`;
 
-            // Analog Needle & Arc Logic
+            // Analog Needle & Arc Logic (Multi-Gauge)
             const maxSpeed = 200;
             const needleAngle = -120 + ((rawSpeed / maxSpeed) * 240);
-            const needle = document.getElementById('speed-needle');
-            if (needle) needle.setAttribute('transform', `rotate(${needleAngle}, 50, 50)`);
+            const speedNeedle = document.getElementById('speed-needle');
+            if (speedNeedle) speedNeedle.setAttribute('transform', `rotate(${needleAngle}, 50, 50)`);
 
             const arc = document.getElementById('speed-arc');
             if (arc) {
                 const offset = 188 - (Math.min(1, rawSpeed / maxSpeed) * 188);
                 arc.style.strokeDashoffset = offset;
             }
+
+            // RPM Logic (Simulated)
+            let targetRpm = 800 + (rawSpeed * 40);
+            if (inputs.fwd) targetRpm += 3000 * (1 - (rawSpeed / maxSpeed));
+            rpm = THREE.MathUtils.lerp(rpm, targetRpm, 0.1);
+            const rpmAngle = -120 + ((rpm / 8000) * 240);
+            const rpmNeedle = document.getElementById('rpm-needle');
+            if (rpmNeedle) rpmNeedle.setAttribute('transform', `rotate(${rpmAngle}, 50, 50)`);
+
+            // Fuel Logic (Slow depletion)
+            if (rawSpeed > 1) fuelLevel -= 0.0005;
+            const fuelAngle = 45 - (fuelLevel / 100 * 90); // Partial arc
+            const fuelNeedle = document.getElementById('fuel-needle');
+            if (fuelNeedle) fuelNeedle.setAttribute('transform', `rotate(${fuelAngle}, 50, 50)`);
+
+            // Temp Logic (Warming up)
+            if (rawSpeed > 1 && engineTemp < 90) engineTemp += 0.002;
+            else if (engineTemp > 20) engineTemp -= 0.001;
+            const tempAngle = -90 + ((engineTemp / 120) * 180);
+            const tempNeedle = document.getElementById('temp-needle');
+            if (tempNeedle) tempNeedle.setAttribute('transform', `rotate(${tempAngle}, 50, 50)`);
 
             // Gear Logic
             let gear = "N";
