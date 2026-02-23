@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-control-v19'; // Advanced Supra Audio (Turbo + Launch)
+const CACHE_NAME = 'dr-control-v20'; // Supra Backfire Boom
 const ASSETS = [
   'index.html',
   'controller.html',

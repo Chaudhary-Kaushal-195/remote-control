@@ -1110,7 +1110,7 @@
 
         // --- AUDIO ENGINE ---
         let audioCtx, engineBuffer, engineSource, engineG;
-        let boostBuffer, flutterBuffer;
+        let boostBuffer, flutterBuffer, backfireBuffer;
         let musicG, isAudioInit = false;
         let lastThrottle = false;
 
@@ -1132,28 +1132,31 @@
 
             try {
                 // Load all Supra samples in parallel
-                const [engineRes, boostRes, flutterRes] = await Promise.all([
+                const [engineRes, boostRes, flutterRes, backfireRes] = await Promise.all([
                     fetch('toyota-supra-buornut.mp3'),
                     fetch('boost-supra-launch.mp3'),
-                    fetch('toyota_supra_sutututu.mp3')
+                    fetch('toyota_supra_sutututu.mp3'),
+                    fetch('modern car vs  old supra backfire 🔥 - IMGHOST.mp3')
                 ]);
 
-                const [engineAb, boostAb, flutterAb] = await Promise.all([
+                const [engineAb, boostAb, flutterAb, backfireAb] = await Promise.all([
                     engineRes.arrayBuffer(),
                     boostRes.arrayBuffer(),
-                    flutterRes.arrayBuffer()
+                    flutterRes.arrayBuffer(),
+                    backfireRes.arrayBuffer()
                 ]);
 
-                [engineBuffer, boostBuffer, flutterBuffer] = await Promise.all([
+                [engineBuffer, boostBuffer, flutterBuffer, backfireBuffer] = await Promise.all([
                     audioCtx.decodeAudioData(engineAb),
                     audioCtx.decodeAudioData(boostAb),
-                    audioCtx.decodeAudioData(flutterAb)
+                    audioCtx.decodeAudioData(flutterAb),
+                    audioCtx.decodeAudioData(backfireAb)
                 ]);
 
                 startEngine();
                 startProceduralMusic();
                 isAudioInit = true;
-                console.log("Supra Advanced Audio System Ready");
+                console.log("Supra Ultimate Audio System Ready (Backfire Loaded)");
             } catch (e) {
                 console.error("Audio Load Error:", e);
                 startProceduralMusic();
@@ -1214,21 +1217,17 @@
 
         let backfireTick = 0;
         function triggerBackfire() {
-            if (!isAudioInit) return;
+            if (!isAudioInit || !backfireBuffer) return;
             backfireTick = 10; // 10 frames of flame
 
-            // Pop sound (short modulation)
-            const pop = audioCtx.createOscillator();
-            const popG = audioCtx.createGain();
-            pop.type = 'triangle';
-            pop.frequency.setValueAtTime(100, audioCtx.currentTime);
-            pop.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.1);
-            popG.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            popG.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
-            pop.connect(popG);
-            popG.connect(audioCtx.destination);
-            pop.start();
-            pop.stop(audioCtx.currentTime + 0.1);
+            // Play the "Boom" sample
+            const source = audioCtx.createBufferSource();
+            const g = audioCtx.createGain();
+            source.buffer = backfireBuffer;
+            g.gain.value = (gameSettings.engineVol / 100) * 0.8;
+            source.connect(g);
+            g.connect(audioCtx.destination);
+            source.start(0);
         }
 
         function animate() {
