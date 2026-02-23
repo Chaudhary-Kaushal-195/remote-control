@@ -1386,9 +1386,16 @@
 
                 lastThrottle = inputs.fwd;
 
-                const pitch = 0.45 + (Math.abs(speed) * 10);
-                const baseVol = (gameSettings.engineVol / 100) * 0.35; // Balanced for neutrality
-                const activeVol = inputs.fwd ? baseVol : (baseVol * 0.4);
+                // NEW: RPM-Based Pitch (Balanced for 2JZ Neutrality)
+                // 800 RPM = ~0.35 pitch (Deep idle rumble)
+                // 8000 RPM = ~1.7 pitch (High scream)
+                const pitch = 0.35 + (rpm / 8000) * 1.5;
+
+                // Volume Tuning: Lower volume at idle, louder under load
+                const isStationary = rawSpeed < 1 && !inputs.fwd;
+                const baseVolFactor = isStationary ? 0.15 : 0.35; // Quiter at idle
+                const baseVol = (gameSettings.engineVol / 100) * baseVolFactor;
+                const activeVol = inputs.fwd ? (baseVol * 1.3) : baseVol;
 
                 engineSource.playbackRate.value = THREE.MathUtils.lerp(engineSource.playbackRate.value, pitch, 0.12);
                 engineG.gain.value = THREE.MathUtils.lerp(engineG.gain.value, activeVol, 0.1);
