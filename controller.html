@@ -244,8 +244,10 @@
 
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script>
-        // Proactive Redirect: If no session ID, go back to Hub
-        if (!window.location.search.includes('hostId=') && !window.location.href.includes('localhost')) {
+        // Proactive Redirect: If no session ID AND not manual mode, go back to Hub
+        if (!window.location.search.includes('hostId=') &&
+            !window.location.search.includes('mode=manual') &&
+            !window.location.href.includes('localhost')) {
             window.location.href = 'index.html';
         }
 
