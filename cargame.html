@@ -1108,126 +1108,21 @@
             if (e.key === ' ') inputs.brake = false;
         });
 
-        // --- AUDIO ENGINE ---
-        let audioCtx, engineBuffer, engineSource, engineG;
-        let boostBuffer, flutterBuffer, backfireBuffer;
-        let musicG, isAudioInit = false;
+        // --- AUDIO ENGINE (DISABLED) ---
+        let isAudioInit = true;
         let lastThrottle = false;
 
-        window.initAudio = async () => {
-            if (isAudioInit) return;
+        window.initAudio = () => {
             const overlay = document.getElementById('sound-overlay');
-            overlay.style.display = 'none';
-
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-            // Engine Gain
-            engineG = audioCtx.createGain();
-            engineG.connect(audioCtx.destination);
-
-            // Music Gain
-            musicG = audioCtx.createGain();
-            musicG.connect(audioCtx.destination);
-            musicG.gain.value = (gameSettings.musicVol / 100) * 0.4;
-
-            try {
-                // Load all Supra samples in parallel
-                const [engineRes, boostRes, flutterRes, backfireRes] = await Promise.all([
-                    fetch('toyota-supra-buornut.mp3'),
-                    fetch('boost-supra-launch.mp3'),
-                    fetch('toyota_supra_sutututu.mp3'),
-                    fetch('modern car vs  old supra backfire 🔥 - IMGHOST.mp3')
-                ]);
-
-                const [engineAb, boostAb, flutterAb, backfireAb] = await Promise.all([
-                    engineRes.arrayBuffer(),
-                    boostRes.arrayBuffer(),
-                    flutterRes.arrayBuffer(),
-                    backfireRes.arrayBuffer()
-                ]);
-
-                [engineBuffer, boostBuffer, flutterBuffer, backfireBuffer] = await Promise.all([
-                    audioCtx.decodeAudioData(engineAb),
-                    audioCtx.decodeAudioData(boostAb),
-                    audioCtx.decodeAudioData(flutterAb),
-                    audioCtx.decodeAudioData(backfireAb)
-                ]);
-
-                startEngine();
-                startProceduralMusic();
-                isAudioInit = true;
-                console.log("Supra Ultimate Audio System Ready (Backfire Loaded)");
-            } catch (e) {
-                console.error("Audio Load Error:", e);
-                startProceduralMusic();
-                isAudioInit = true;
-            }
+            if (overlay) overlay.style.display = 'none';
         };
 
-        function triggerTurboFlutter() {
-            if (!isAudioInit || !flutterBuffer) return;
-            const source = audioCtx.createBufferSource();
-            const g = audioCtx.createGain();
-            source.buffer = flutterBuffer;
-            g.gain.value = (gameSettings.engineVol / 100) * 0.6;
-            source.connect(g);
-            g.connect(audioCtx.destination);
-            source.start(0);
-        }
-
-        function triggerBoostLaunch() {
-            if (!isAudioInit || !boostBuffer) return;
-            const source = audioCtx.createBufferSource();
-            const g = audioCtx.createGain();
-            source.buffer = boostBuffer;
-            g.gain.value = (gameSettings.engineVol / 100) * 0.5;
-            source.connect(g);
-            g.connect(audioCtx.destination);
-            source.start(0);
-        }
-
-        function startProceduralMusic() {
-            // Simple Synthwave Loop (Procedural)
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(55, audioCtx.currentTime); // A1 Bass
-
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            osc.connect(gain);
-            gain.connect(musicG);
-            osc.start();
-
-            // Simple Pattern
-            setInterval(() => {
-                const now = audioCtx.currentTime;
-                const freq = [55, 65, 73, 82][Math.floor(Math.random() * 4)];
-                osc.frequency.exponentialRampToValueAtTime(freq, now + 0.1);
-            }, 500);
-        }
-
-        function startEngine() {
-            engineSource = audioCtx.createBufferSource();
-            engineSource.buffer = engineBuffer;
-            engineSource.loop = true;
-            engineSource.connect(engineG);
-            engineSource.start(0);
-            engineG.gain.value = 0.1; // Idle
-        }
+        function triggerTurboFlutter() { }
+        function triggerBoostLaunch() { }
 
         let backfireTick = 0;
         function triggerBackfire() {
-            if (!isAudioInit || !backfireBuffer) return;
-            backfireTick = 10; // 10 frames of flame
-
-            // Play the "Boom" sample
-            const source = audioCtx.createBufferSource();
-            const g = audioCtx.createGain();
-            source.buffer = backfireBuffer;
-            g.gain.value = (gameSettings.engineVol / 100) * 0.8;
-            source.connect(g);
-            g.connect(audioCtx.destination);
-            source.start(0);
+            backfireTick = 10; // visual flame only
         }
 
         function animate() {
@@ -1372,34 +1267,7 @@
                 if (strip.position.z > 1.8) strip.position.z = -2;
             });
 
-            // Engine Audio Modulation (Supra 2JZ Neutral Tuning)
-            if (isAudioInit) {
-                // Detection for "Sutututu" (Flutter on Release)
-                if (lastThrottle && !inputs.fwd && rpm > 4000) {
-                    triggerTurboFlutter();
-                }
-
-                // Detection for "Launch"
-                if (!lastThrottle && inputs.fwd && rawSpeed < 10) {
-                    triggerBoostLaunch();
-                }
-
-                lastThrottle = inputs.fwd;
-
-                // NEW: RPM-Based Pitch (Balanced for 2JZ Neutrality)
-                // 800 RPM = ~0.35 pitch (Deep idle rumble)
-                // 8000 RPM = ~1.7 pitch (High scream)
-                const pitch = 0.35 + (rpm / 8000) * 1.5;
-
-                // Volume Tuning: Lower volume at idle, louder under load
-                const isStationary = rawSpeed < 1 && !inputs.fwd;
-                const baseVolFactor = isStationary ? 0.15 : 0.35; // Quiter at idle
-                const baseVol = (gameSettings.engineVol / 100) * baseVolFactor;
-                const activeVol = inputs.fwd ? (baseVol * 1.3) : baseVol;
-
-                engineSource.playbackRate.value = THREE.MathUtils.lerp(engineSource.playbackRate.value, pitch, 0.12);
-                engineG.gain.value = THREE.MathUtils.lerp(engineG.gain.value, activeVol, 0.1);
-            }
+            // Audio disabled
         }
         animate();
     </script>

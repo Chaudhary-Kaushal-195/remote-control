@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-control-v21'; // Neutral Idle Audio Fix
+const CACHE_NAME = 'dr-control-v22'; // All sound removed
 const ASSETS = [
   'index.html',
   'controller.html',
