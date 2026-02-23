@@ -1,11 +1,11 @@
 {
-  "name": "Dr. Control - Universal Remote",
-  "short_name": "DrControl",
-  "start_url": "controller.html",
+  "name": "Dr. Vice - Game Hub",
+  "short_name": "DrVice",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#0a0015",
   "theme_color": "#f092ff",
-  "orientation": "landscape",
+  "orientation": "any",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",

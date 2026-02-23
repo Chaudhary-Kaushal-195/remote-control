@@ -1,5 +1,6 @@
-const CACHE_NAME = 'dr-control-v3'; // Bumped for Vercel deployment
+const CACHE_NAME = 'dr-control-v4'; // Bumped for index.html entry fix
 const ASSETS = [
+  'index.html',
   'controller.html',
   'manifest.json',
   'https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js',
