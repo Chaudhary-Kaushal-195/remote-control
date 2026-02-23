@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-control-v4'; // Bumped for index.html entry fix
+const CACHE_NAME = 'dr-control-v5'; // Final forced update for Android
 const ASSETS = [
   'index.html',
   'controller.html',

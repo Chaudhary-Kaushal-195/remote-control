@@ -244,8 +244,11 @@
 
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script>
-        let peer = null, conn = null;
-        let gyroActive = false;
+        // Proactive Redirect: If no session ID, go back to Hub
+        if (!window.location.search.includes('hostId=') && !window.location.href.includes('localhost')) {
+            window.location.href = 'index.html';
+        }
+
         const status = document.getElementById('status');
         const wheelInner = document.getElementById('wheel-inner');
         const tiltDisplay = document.getElementById('debug-tilt');
