@@ -135,6 +135,9 @@
             align-items: flex-end;
             gap: 30px;
             position: relative;
+            /* Explicit width to bound absolute children like handbrake */
+            width: 100px;
+            height: 150px;
         }
 
         .pedal {
@@ -169,10 +172,11 @@
             background: linear-gradient(to right, rgba(0, 0, 0, 0.9), rgba(255, 68, 0, 0.3));
             z-index: 55;
             position: absolute;
+            /* Adjust bottom offset according to the new locked ui-container bounds */
             bottom: 165px;
-            /* Sits right above the gas pedal */
-            right: -25px;
-            /* Center horizontally over the 70px gas pedal */
+            right: 0px;
+            transform: translateX(30px);
+            /* Center cleanly */
             flex-direction: row;
         }
 
@@ -199,6 +203,9 @@
             border: 2px solid;
             border-image: linear-gradient(to top, #0ffffa, #f092ff) 1;
             box-shadow: 0 0 15px rgba(15, 255, 250, 0.3);
+            position: absolute;
+            bottom: 0px;
+            right: 0px;
         }
 
         #gas .stripe {
