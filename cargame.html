@@ -212,7 +212,40 @@
             font-size: 14px;
             font-weight: 900;
         }
+
+        /* QR Overlay */
+        #qr-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10, 0, 21, 0.95);
+            padding: 30px;
+            border: 2px solid #f092ff;
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(240, 146, 255, 0.5);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        #qr-code {
+            background: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .qr-close {
+            margin-top: 15px;
+            color: #f092ff;
+            cursor: pointer;
+            text-decoration: underline;
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
 <body>
@@ -228,6 +261,13 @@
                 { totveID [ ammd. > ayt, (hrees bwgt 0.3
                 impurts > gaicinsct hot, {posvelat 100./0105W20/400/0060/tod 2310.01, widpuls},
                 },</div>
+    </div>
+
+    <div id="qr-overlay">
+        <h2 style="color:#0ffffa; margin-top:0;">SCAN TO CONNECT</h2>
+        <div id="qr-code"></div>
+        <p style="font-size:12px; opacity:0.8;">SCAN WITH PHONE CAMERA TO USE AS CONTROLLER</p>
+        <div class="qr-close" onclick="document.getElementById('qr-overlay').style.display='none'">CLOSE</div>
     </div>
 
     <div id="steering-zone">
@@ -377,13 +417,31 @@
             peer = new Peer();
             peer.on('open', (id) => {
                 console.log('Laptop Peer ID:', id);
-                const url = `${window.location.origin}${window.location.pathname}?role=controller&hostId=${id}`;
-                remoteBox.innerText = `ID: ${id} (CLICK TO COPY LINK)`;
+
+                // Use GitHub Pages URL if available, fallback to local origin
+                const baseUrl = window.location.href.includes('github.io')
+                    ? "https://Chaudhary-Kaushal-195.github.io/remote-control/controller.html"
+                    : `${window.location.origin}/controller.html`;
+
+                const url = `${baseUrl}?hostId=${id}`;
+                remoteBox.innerText = `ID: ${id} (CLICK FOR QR)`;
                 remoteBox.style.background = "rgba(0, 255, 255, 0.1)";
                 remoteBox.style.color = "#0ffffa";
+
+                // Generate QR Code
+                const qrContainer = document.getElementById('qr-code');
+                qrContainer.innerHTML = "";
+                new QRCode(qrContainer, {
+                    text: url,
+                    width: 200,
+                    height: 200,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
                 remoteBox.onclick = () => {
-                    navigator.clipboard.writeText(url);
-                    alert("Controller Link Copied! \n\n 1. Open Chrome/Safari on your phone.\n 2. Paste this link into the ADDRESS BAR.");
+                    document.getElementById('qr-overlay').style.display = 'flex';
                 };
             });
             peer.on('error', (err) => {
