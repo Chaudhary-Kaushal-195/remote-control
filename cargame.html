@@ -220,6 +220,37 @@
             font-weight: 900;
         }
 
+        #rev-btn {
+            width: 70px;
+            height: 45px;
+            border-color: #0ffffa;
+            color: #0ffffa;
+            box-shadow: 0 0 15px rgba(15, 255, 250, 0.3);
+            border-radius: 10px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(15, 255, 250, 0.2));
+            z-index: 55;
+            position: relative;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+
+        #rev-btn:active {
+            background: rgba(15, 255, 250, 0.4);
+        }
+
+        #orbit-zone {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 50vh;
+            /* Only top half of screen */
+            z-index: 5000;
+            pointer-events: auto;
+            /* Catch touches */
+            touch-action: none;
+        }
+
         /* Modern HUD */
         #hud {
             position: absolute;
@@ -651,14 +682,17 @@
         </div>
     </div>
 
-    <div id="steering-zone">
+    <div id="steering-zone" style="z-index: 6000;">
         <div id="wheel-visual">
             <div class="spoke-center"></div>
             <div class="spoke-hand"></div>
         </div>
     </div>
 
-    <div class="ui-container">
+    <!-- Orbit zone only on top half -->
+    <div id="orbit-zone"></div>
+
+    <div class="ui-container" style="z-index: 6000;">
         <div id="handbrake" class="pedal">
             <div class="pedal-label" style="color:#ff4400; top: -20px; font-size: 13px;">E-BRAKE</div>
             <div class="stripe"></div>
@@ -673,6 +707,7 @@
             <div class="stripe"></div>
             <div class="stripe"></div>
         </div>
+        <div id="rev-btn" class="pedal">REV</div>
     </div>
 
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
@@ -1037,8 +1072,11 @@
         }
 
         // --- MOUSE/TOUCH ORBIT ---
-        let orbitX = 0, orbitY = 0.5, isOrbiting = false;
-        window.addEventListener('mousedown', () => isOrbiting = true);
+        let orbitX = 0, orbitY = 0.5, isOrbiting = false, orbitTouchId = null;
+        let lastOrbitTouch = { x: 0, y: 0 };
+
+        const orbitZone = document.getElementById('orbit-zone');
+        orbitZone.addEventListener('mousedown', () => isOrbiting = true);
         window.addEventListener('mouseup', () => isOrbiting = false);
         window.addEventListener('mousemove', (e) => {
             if (isOrbiting) {
@@ -1053,44 +1091,55 @@
         };
 
         window.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 2) {
-                isOrbiting = true;
-            } else {
-                for (let t of e.changedTouches) {
-                    if (t.target.closest('#gas')) inputs.fwd = true;
-                    if (t.target.closest('#handbrake')) inputs.handbrake = true;
-                    const r = wheelZone.getBoundingClientRect();
-                    if (t.clientX >= r.left && t.clientX <= r.right && t.clientY >= r.top && t.clientY <= r.bottom) {
-                        activeId = t.identifier; lastAngle = getAngle(t.clientX, t.clientY);
-                    }
+            for (let t of e.changedTouches) {
+                // Check if touch is in orbit zone
+                if (t.target === orbitZone) {
+                    isOrbiting = true;
+                    orbitTouchId = t.identifier;
+                    lastOrbitTouch = { x: t.clientX, y: t.clientY };
+                    continue; // Skip pedal logic for this touch
+                }
+
+                if (t.target.closest('#gas')) inputs.fwd = true;
+                if (t.target.closest('#rev-btn')) inputs.bwd = true;
+                if (t.target.closest('#handbrake')) inputs.handbrake = true;
+
+                const r = wheelZone.getBoundingClientRect();
+                if (t.clientX >= r.left && t.clientX <= r.right && t.clientY >= r.top && t.clientY <= r.bottom) {
+                    activeId = t.identifier; lastAngle = getAngle(t.clientX, t.clientY);
                 }
             }
         }, { passive: false });
 
         window.addEventListener('touchmove', (e) => {
-            if (isOrbiting && e.touches.length === 2) {
-                // Orbit logic for 2-finger touch
-                const dx = e.touches[0].clientX - e.touches[1].clientX;
-                orbitX += dx * 0.0001;
-            } else {
-                for (let t of e.changedTouches) {
-                    if (t.identifier === activeId) {
-                        const cur = getAngle(t.clientX, t.clientY);
-                        let d = cur - lastAngle;
-                        if (d > Math.PI) d -= Math.PI * 2; if (d < -Math.PI) d += Math.PI * 2;
-                        wheelAngle = Math.max(-180, Math.min(180, wheelAngle + (d * 180 / Math.PI) * 1.3));
-                        visual.style.transform = `rotate(${wheelAngle}deg)`;
-                        lastAngle = cur;
-                    }
+            for (let t of e.changedTouches) {
+                if (isOrbiting && t.identifier === orbitTouchId) {
+                    // Orbit logic for 1-finger drag in top half
+                    const dx = t.clientX - lastOrbitTouch.x;
+                    const dy = t.clientY - lastOrbitTouch.y;
+                    orbitX -= dx * 0.005;
+                    orbitY = Math.max(0.1, Math.min(1.5, orbitY + dy * 0.005));
+                    lastOrbitTouch = { x: t.clientX, y: t.clientY };
+                } else if (t.identifier === activeId) {
+                    const cur = getAngle(t.clientX, t.clientY);
+                    let d = cur - lastAngle;
+                    if (d > Math.PI) d -= Math.PI * 2; if (d < -Math.PI) d += Math.PI * 2;
+                    wheelAngle = Math.max(-180, Math.min(180, wheelAngle + (d * 180 / Math.PI) * 1.3));
+                    visual.style.transform = `rotate(${wheelAngle}deg)`;
+                    lastAngle = cur;
                 }
             }
-            e.preventDefault();
+            if (e.cancelable && !e.target.closest('button')) e.preventDefault(); // Don't prevent default on UI buttons
         }, { passive: false });
 
         window.addEventListener('touchend', (e) => {
-            if (e.touches.length < 2) isOrbiting = false;
             for (let t of e.changedTouches) {
+                if (t.identifier === orbitTouchId) {
+                    isOrbiting = false;
+                    orbitTouchId = null;
+                }
                 if (t.target.closest('#gas')) inputs.fwd = false;
+                if (t.target.closest('#rev-btn')) inputs.bwd = false;
                 if (t.target.closest('#handbrake')) inputs.handbrake = false;
                 if (t.identifier === activeId) activeId = null;
             }
