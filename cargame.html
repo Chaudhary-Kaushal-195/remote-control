@@ -509,15 +509,8 @@
 
 <body>
 
-    <div id="hud">
-        <b style="color:#0ffffa; letter-spacing:1px; font-size:12px;"># DR. VICE PRO RACING</b><br>
-        <div id="speed-box" style="font-size: 28px; margin-top:5px; font-weight:900; color:#fff;">0 KPH</div>
-        <div id="unit-label" style="font-size: 10px; opacity:0.6; margin-bottom:10px;">unit: KPH</div>
-
-        <div style="display:flex; gap:10px;">
-            <button class="hud-btn" id="cam-btn" onclick="initAudio(); cycleCamera();">🎥 VIEW: NORMAL</button>
-            <button id="remote-box" class="hud-btn" onclick="initAudio(); setupRemote();">🤳 SYNC PHONE</button>
-        </div>
+    <div id="hud" style="display:none;">
+        <div id="unit-label"></div>
     </div>
 
     <div class="dash-cluster">
@@ -559,9 +552,11 @@
                 </g>
                 <circle cx="50" cy="50" r="6" fill="var(--neon-pink)" />
                 <text x="50" y="80" text-anchor="middle" fill="#fff" font-size="10" font-weight="900"
-                    opacity="0.4">MPH</text>
+                    opacity="0.4">SPEED</text>
             </svg>
-            <div id="gear-box" class="gear-display">N</div>
+            <div id="speed-box"
+                style="position: absolute; bottom: 45px; font-size: 26px; font-weight:900; color:#fff; text-shadow: 0 0 10px rgba(15, 255, 250, 0.5);">
+                0 KPH</div>
         </div>
 
         <!-- TACHOMETER (RPM) -->
@@ -575,7 +570,8 @@
                     <path d="M 50 50 L 47 50 L 50 15 L 53 50 Z" fill="#0ffffa" />
                 </g>
             </svg>
-            <div class="dash-label">RPM</div>
+            <div id="gear-box" class="gear-display" style="bottom: 35px; font-size: 24px;">N</div>
+            <div class="dash-label" style="bottom:15px;">RPM</div>
         </div>
     </div>
 
@@ -614,6 +610,13 @@
     <div id="settings-modal" onclick="event.target === this && toggleSettings()">
         <div class="modal-content">
             <h2 style="margin-top:0; color:var(--neon-blue); letter-spacing:2px;">LIVE SETTINGS</h2>
+
+            <div style="display:flex; gap:10px; margin-bottom: 20px;">
+                <button class="hud-btn" id="cam-btn" onclick="initAudio(); cycleCamera();"
+                    style="flex:1; padding:10px; font-size:12px;">🎥 CAMERA</button>
+                <button id="remote-box" class="hud-btn" onclick="initAudio(); setupRemote();"
+                    style="flex:1; padding:10px; font-size:12px;">🤳 SYNC PHONE</button>
+            </div>
 
             <div class="setting-row">
                 <div class="setting-label">Steering Mode</div>
