@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-control-v16'; // Live In-Game Settings
+const CACHE_NAME = 'dr-control-v17'; // Responsive Scaling & Click Fix
 const ASSETS = [
   'index.html',
   'controller.html',
