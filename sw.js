@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-control-v6'; // Forced update for connection fix
+const CACHE_NAME = 'dr-control-v7'; // Enforce Landscape lock
 const ASSETS = [
   'index.html',
   'controller.html',
