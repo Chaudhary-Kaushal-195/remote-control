@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-control-v14'; // Advanced Transparent Dashboard
+const CACHE_NAME = 'dr-control-v15'; // Pixel-perfect needles & centered cluster
 const ASSETS = [
   'index.html',
   'controller.html',

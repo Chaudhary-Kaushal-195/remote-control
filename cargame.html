@@ -280,9 +280,7 @@
         }
 
         .gauge-needle {
-            transition: transform 0.05s ease-out;
-            transform-origin: 50px 50px;
-            /* Pivot around SVG center */
+            transition: transform 0.05s linear;
         }
 
         .dash-label {
@@ -293,6 +291,7 @@
             color: #fff;
             text-transform: uppercase;
             opacity: 0.8;
+            letter-spacing: 1px;
         }
 
         .gear-display {
@@ -414,10 +413,11 @@
         <!-- TEMP GAUGE -->
         <div class="gauge-pod gauge-mini">
             <svg width="70" height="70" viewBox="0 0 100 100">
-                <path d="M 30 70 A 30 30 0 1 1 70 70" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6"
+                <path d="M 25 75 A 35 35 0 1 1 75 75" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="6"
                     stroke-linecap="round" />
-                <line x1="50" y1="50" x2="50" y2="20" stroke="#ff4400" stroke-width="3" class="gauge-needle"
-                    id="temp-needle" transform="rotate(-90, 50, 50)" />
+                <g id="temp-needle-grp" transform="rotate(-90, 50, 50)">
+                    <path d="M 50 50 L 48 50 L 50 20 L 52 50 Z" fill="#ff4400" />
+                </g>
             </svg>
             <div class="dash-label" style="bottom:12px; font-size:8px;">TEMP</div>
         </div>
@@ -427,8 +427,9 @@
             <svg width="100" height="100" viewBox="0 0 100 100">
                 <path d="M 25 75 A 35 35 0 1 1 75 75" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"
                     stroke-linecap="round" />
-                <line x1="50" y1="50" x2="50" y2="20" stroke="#ffaa00" stroke-width="4" class="gauge-needle"
-                    id="fuel-needle" transform="rotate(45, 50, 50)" />
+                <g id="fuel-needle-grp" transform="rotate(45, 50, 50)">
+                    <path d="M 50 50 L 47 50 L 50 15 L 53 50 Z" fill="#ffaa00" />
+                </g>
             </svg>
             <div class="dash-label">FUEL</div>
         </div>
@@ -436,15 +437,18 @@
         <!-- MAIN SPEEDO -->
         <div class="gauge-pod gauge-main">
             <svg width="160" height="160" viewBox="0 0 100 100">
-                <path d="M 20 80 A 40 40 0 1 1 80 80" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"
-                    stroke-linecap="round" />
-                <path id="speed-arc" d="M 20 80 A 40 40 0 1 1 80 80" fill="none" stroke="var(--neon-blue)"
+                <!-- Re-calculated Arc for perfect (50,50) center -->
+                <path d="M 21.7 78.3 A 40 40 0 1 1 78.3 78.3" fill="none" stroke="rgba(255,255,255,0.1)"
+                    stroke-width="8" stroke-linecap="round" />
+                <path id="speed-arc" d="M 21.7 78.3 A 40 40 0 1 1 78.3 78.3" fill="none" stroke="var(--neon-blue)"
                     stroke-width="8" stroke-linecap="round" stroke-dasharray="188" stroke-dashoffset="188" />
-                <line x1="50" y1="50" x2="50" y2="15" stroke="var(--neon-pink)" stroke-width="4" class="gauge-needle"
-                    id="speed-needle" transform="rotate(-120, 50, 50)" />
+
+                <g id="speed-needle-grp" transform="rotate(-120, 50, 50)">
+                    <path d="M 50 50 L 46 50 L 50 12 L 54 50 Z" fill="var(--neon-pink)" />
+                </g>
                 <circle cx="50" cy="50" r="6" fill="var(--neon-pink)" />
                 <text x="50" y="80" text-anchor="middle" fill="#fff" font-size="10" font-weight="900"
-                    opacity="0.6">MPH</text>
+                    opacity="0.4">MPH</text>
             </svg>
             <div id="gear-box" class="gear-display">N</div>
         </div>
@@ -454,10 +458,11 @@
             <svg width="100" height="100" viewBox="0 0 100 100">
                 <path d="M 25 75 A 35 35 0 1 1 75 75" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"
                     stroke-linecap="round" />
-                <path d="M 65 31 A 35 35 0 0 1 75 75" fill="none" stroke="#ff0000" stroke-width="8"
-                    stroke-linecap="round" opacity="0.5" />
-                <line x1="50" y1="50" x2="50" y2="20" stroke="#0ffffa" stroke-width="4" class="gauge-needle"
-                    id="rpm-needle" transform="rotate(-110, 50, 50)" />
+                <path d="M 70 30 A 35 35 0 0 1 75 75" fill="none" stroke="#ff0000" stroke-width="8"
+                    stroke-linecap="round" opacity="0.4" />
+                <g id="rpm-needle-grp" transform="rotate(-110, 50, 50)">
+                    <path d="M 50 50 L 47 50 L 50 15 L 53 50 Z" fill="#0ffffa" />
+                </g>
             </svg>
             <div class="dash-label">RPM</div>
         </div>
@@ -1076,11 +1081,11 @@
             speedBox.innerText = `${displaySpeed} ${gameSettings.units.toUpperCase()}`;
             document.getElementById('unit-label').innerText = `unit: ${gameSettings.units.toUpperCase()}`;
 
-            // Analog Needle & Arc Logic (Multi-Gauge)
+            // Analog Needle & Arc Logic (Multi-Gauge Clusters)
             const maxSpeed = 200;
             const needleAngle = -120 + ((rawSpeed / maxSpeed) * 240);
-            const speedNeedle = document.getElementById('speed-needle');
-            if (speedNeedle) speedNeedle.setAttribute('transform', `rotate(${needleAngle}, 50, 50)`);
+            const speedNeedleGrp = document.getElementById('speed-needle-grp');
+            if (speedNeedleGrp) speedNeedleGrp.setAttribute('transform', `rotate(${needleAngle}, 50, 50)`);
 
             const arc = document.getElementById('speed-arc');
             if (arc) {
@@ -1093,21 +1098,21 @@
             if (inputs.fwd) targetRpm += 3000 * (1 - (rawSpeed / maxSpeed));
             rpm = THREE.MathUtils.lerp(rpm, targetRpm, 0.1);
             const rpmAngle = -120 + ((rpm / 8000) * 240);
-            const rpmNeedle = document.getElementById('rpm-needle');
-            if (rpmNeedle) rpmNeedle.setAttribute('transform', `rotate(${rpmAngle}, 50, 50)`);
+            const rpmNeedleGrp = document.getElementById('rpm-needle-grp');
+            if (rpmNeedleGrp) rpmNeedleGrp.setAttribute('transform', `rotate(${rpmAngle}, 50, 50)`);
 
             // Fuel Logic (Slow depletion)
             if (rawSpeed > 1) fuelLevel -= 0.0005;
-            const fuelAngle = 45 - (fuelLevel / 100 * 90); // Partial arc
-            const fuelNeedle = document.getElementById('fuel-needle');
-            if (fuelNeedle) fuelNeedle.setAttribute('transform', `rotate(${fuelAngle}, 50, 50)`);
+            const fuelAngle = 45 - (fuelLevel / 100 * 90);
+            const fuelNeedleGrp = document.getElementById('fuel-needle-grp');
+            if (fuelNeedleGrp) fuelNeedleGrp.setAttribute('transform', `rotate(${fuelAngle}, 50, 50)`);
 
             // Temp Logic (Warming up)
             if (rawSpeed > 1 && engineTemp < 90) engineTemp += 0.002;
             else if (engineTemp > 20) engineTemp -= 0.001;
             const tempAngle = -90 + ((engineTemp / 120) * 180);
-            const tempNeedle = document.getElementById('temp-needle');
-            if (tempNeedle) tempNeedle.setAttribute('transform', `rotate(${tempAngle}, 50, 50)`);
+            const tempNeedleGrp = document.getElementById('temp-needle-grp');
+            if (tempNeedleGrp) tempNeedleGrp.setAttribute('transform', `rotate(${tempAngle}, 50, 50)`);
 
             // Gear Logic
             let gear = "N";
