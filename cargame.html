@@ -392,6 +392,70 @@
             text-align: center;
             box-shadow: 0 0 50px rgba(15, 255, 250, 0.2);
         }
+
+        /* Settings Modal */
+        #settings-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 7000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: rgba(10, 0, 20, 0.9);
+            border: 1px solid rgba(15, 255, 250, 0.3);
+            width: 90%;
+            max-width: 400px;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 50px rgba(15, 255, 250, 0.1);
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .setting-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        select,
+        input[type="range"] {
+            background: #1a1a1a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-family: inherit;
+        }
+
+        .close-modal-btn {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            background: var(--neon-blue);
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #000;
+            transition: 0.3s;
+        }
+
+        .close-modal-btn:hover {
+            box-shadow: 0 0 15px var(--neon-blue);
+            transform: scale(1.02);
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -472,10 +536,16 @@
         <div class="pause-content">
             <h1 style="color:var(--neon-blue); margin-bottom:10px;">GAME PAUSED</h1>
             <p style="color:#fff; opacity:0.7; margin-bottom:30px;">TAKE A BREATH, CHAMP.</p>
-            <button class="hud-btn" style="padding:15px 40px; font-size:16px;" onclick="togglePause()">RESUME
-                RACE</button>
-            <button class="hud-btn" style="display:block; margin:20px auto 0; opacity:0.6;"
-                onclick="window.location.href='index.html'">EXIT TO HUB</button>
+
+            <div style="display:flex; flex-direction:column; gap:15px; width:200px; margin:0 auto;">
+                <button class="hud-btn" style="padding:15px; font-size:16px;" onclick="togglePause()">RESUME
+                    RACE</button>
+                <button class="hud-btn"
+                    style="padding:15px; font-size:16px; border-color:var(--neon-pink); color:var(--neon-pink);"
+                    onclick="toggleSettings()">⚙️ SETTINGS</button>
+                <button class="hud-btn" style="padding:10px; opacity:0.6; font-size:12px;"
+                    onclick="window.location.href='index.html'">EXIT TO HUB</button>
+            </div>
         </div>
     </div>
 
@@ -491,6 +561,42 @@
         <div id="qr-code"></div>
         <p style="font-size:12px; opacity:0.8;">SCAN WITH PHONE CAMERA TO USE AS CONTROLLER</p>
         <div class="qr-close" onclick="document.getElementById('qr-overlay').style.display='none'">CLOSE</div>
+    </div>
+
+    <!-- IN-GAME SETTINGS MODAL -->
+    <div id="settings-modal" onclick="event.target === this && toggleSettings()">
+        <div class="modal-content">
+            <h2 style="margin-top:0; color:var(--neon-blue); letter-spacing:2px;">LIVE SETTINGS</h2>
+
+            <div class="setting-row">
+                <div class="setting-label">Steering Mode</div>
+                <select id="setting-steering" onchange="saveSettings()">
+                    <option value="wheel">Analog Wheel</option>
+                    <option value="buttons">Left/Right Buttons</option>
+                    <option value="gyro">Gyro Only (Pro)</option>
+                </select>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-label">Speed Format</div>
+                <select id="setting-units" onchange="saveSettings()">
+                    <option value="kph">KPH (Kilometers)</option>
+                    <option value="mph">MPH (Miles)</option>
+                </select>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-label">Engine Volume</div>
+                <input type="range" id="setting-engine-vol" min="0" max="100" value="80" oninput="saveSettings()">
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-label">Music Volume</div>
+                <input type="range" id="setting-music-vol" min="0" max="100" value="50" oninput="saveSettings()">
+            </div>
+
+            <button class="close-modal-btn" onclick="toggleSettings()">RESUME WITH UPDATES</button>
+        </div>
     </div>
 
     <div id="steering-zone">
@@ -559,11 +665,43 @@
             musicVol: 50
         };
 
-        function loadGlobalSettings() {
-            const saved = localStorage.getItem('drViceSettings');
-            if (saved) gameSettings = JSON.parse(saved);
+        function toggleSettings() {
+            const modal = document.getElementById('settings-modal');
+            const isVisible = modal.style.display === 'flex';
+            if (isVisible) {
+                modal.style.display = 'none';
+            } else {
+                modal.style.display = 'flex';
+                loadSettingsToModal();
+            }
         }
-        loadGlobalSettings();
+
+        function saveSettings() {
+            gameSettings.steering = document.getElementById('setting-steering').value;
+            gameSettings.units = document.getElementById('setting-units').value;
+            gameSettings.engineVol = document.getElementById('setting-engine-vol').value;
+            gameSettings.musicVol = document.getElementById('setting-music-vol').value;
+
+            localStorage.setItem('drViceSettings', JSON.stringify(gameSettings));
+            // Apply live engine volume
+            if (isAudioInit) {
+                const baseVol = (gameSettings.engineVol / 100) * 0.3;
+                engineG.gain.value = baseVol;
+            }
+        }
+
+        function loadSettingsToModal() {
+            const saved = localStorage.getItem('drViceSettings');
+            if (saved) {
+                const s = JSON.parse(saved);
+                document.getElementById('setting-steering').value = s.steering || 'wheel';
+                document.getElementById('setting-units').value = s.units || 'kph';
+                document.getElementById('setting-engine-vol').value = s.engineVol || 80;
+                document.getElementById('setting-music-vol').value = s.musicVol || 50;
+                gameSettings = s;
+            }
+        }
+        loadSettingsToModal();
 
         // --- CAMERA MODES ---
         let cameraMode = 0; // 0: Normal, 1: Inside, 2: Near

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-control-v15'; // Pixel-perfect needles & centered cluster
+const CACHE_NAME = 'dr-control-v16'; // Live In-Game Settings
 const ASSETS = [
   'index.html',
   'controller.html',
