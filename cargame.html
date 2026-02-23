@@ -1110,7 +1110,9 @@
 
         // --- AUDIO ENGINE ---
         let audioCtx, engineBuffer, engineSource, engineG;
+        let boostBuffer, flutterBuffer;
         let musicG, isAudioInit = false;
+        let lastThrottle = false;
 
         window.initAudio = async () => {
             if (isAudioInit) return;
@@ -1129,20 +1131,57 @@
             musicG.gain.value = (gameSettings.musicVol / 100) * 0.4;
 
             try {
-                const response = await fetch('toyota-supra-buornut.mp3'); // Supra 2JZ Sound
-                const arrayBuffer = await response.arrayBuffer();
-                engineBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+                // Load all Supra samples in parallel
+                const [engineRes, boostRes, flutterRes] = await Promise.all([
+                    fetch('toyota-supra-buornut.mp3'),
+                    fetch('boost-supra-launch.mp3'),
+                    fetch('toyota_supra_sutututu.mp3')
+                ]);
+
+                const [engineAb, boostAb, flutterAb] = await Promise.all([
+                    engineRes.arrayBuffer(),
+                    boostRes.arrayBuffer(),
+                    flutterRes.arrayBuffer()
+                ]);
+
+                [engineBuffer, boostBuffer, flutterBuffer] = await Promise.all([
+                    audioCtx.decodeAudioData(engineAb),
+                    audioCtx.decodeAudioData(boostAb),
+                    audioCtx.decodeAudioData(flutterAb)
+                ]);
 
                 startEngine();
                 startProceduralMusic();
                 isAudioInit = true;
+                console.log("Supra Advanced Audio System Ready");
             } catch (e) {
                 console.error("Audio Load Error:", e);
-                // Start music anyway if engine fails
                 startProceduralMusic();
                 isAudioInit = true;
             }
         };
+
+        function triggerTurboFlutter() {
+            if (!isAudioInit || !flutterBuffer) return;
+            const source = audioCtx.createBufferSource();
+            const g = audioCtx.createGain();
+            source.buffer = flutterBuffer;
+            g.gain.value = (gameSettings.engineVol / 100) * 0.6;
+            source.connect(g);
+            g.connect(audioCtx.destination);
+            source.start(0);
+        }
+
+        function triggerBoostLaunch() {
+            if (!isAudioInit || !boostBuffer) return;
+            const source = audioCtx.createBufferSource();
+            const g = audioCtx.createGain();
+            source.buffer = boostBuffer;
+            g.gain.value = (gameSettings.engineVol / 100) * 0.5;
+            source.connect(g);
+            g.connect(audioCtx.destination);
+            source.start(0);
+        }
 
         function startProceduralMusic() {
             // Simple Synthwave Loop (Procedural)
@@ -1334,15 +1373,25 @@
                 if (strip.position.z > 1.8) strip.position.z = -2;
             });
 
-            // Engine Audio Modulation (Supra 2JZ Tuning)
+            // Engine Audio Modulation (Supra 2JZ Neutral Tuning)
             if (isAudioInit) {
-                // Supra sound samples are often higher pitch by default, adjust multipliers for 2JZ scream
-                const pitch = 0.4 + (Math.abs(speed) * 12);
-                const baseVol = (gameSettings.engineVol / 100) * 0.4;
+                // Detection for "Sutututu" (Flutter on Release)
+                if (lastThrottle && !inputs.fwd && rpm > 4000) {
+                    triggerTurboFlutter();
+                }
+
+                // Detection for "Launch"
+                if (!lastThrottle && inputs.fwd && rawSpeed < 10) {
+                    triggerBoostLaunch();
+                }
+
+                lastThrottle = inputs.fwd;
+
+                const pitch = 0.45 + (Math.abs(speed) * 10);
+                const baseVol = (gameSettings.engineVol / 100) * 0.35; // Balanced for neutrality
                 const activeVol = inputs.fwd ? baseVol : (baseVol * 0.4);
 
-                // Smoother transitions for the higher-revving sound
-                engineSource.playbackRate.value = THREE.MathUtils.lerp(engineSource.playbackRate.value, pitch, 0.15);
+                engineSource.playbackRate.value = THREE.MathUtils.lerp(engineSource.playbackRate.value, pitch, 0.12);
                 engineG.gain.value = THREE.MathUtils.lerp(engineG.gain.value, activeVol, 0.1);
             }
         }

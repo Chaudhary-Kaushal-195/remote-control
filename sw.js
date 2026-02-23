@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dr-control-v18'; // Toyota Supra 2JZ Sound
+const CACHE_NAME = 'dr-control-v19'; // Advanced Supra Audio (Turbo + Launch)
 const ASSETS = [
   'index.html',
   'controller.html',
