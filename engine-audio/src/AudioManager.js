@@ -21,9 +21,16 @@ export class AudioManager {
     }
 
     async init(sources) {
+        const promises = [];
         for (const key in sources) {
-            this.samples[key] = await this.add(sources[key]);
+            promises.push(
+                this.add(sources[key]).then(node => {
+                    this.samples[key] = node;
+                })
+            );
         }
+        await Promise.all(promises);
+        this.isLoaded = true;
 
         if (this.ctx.state === 'suspended')
             this.ctx.resume();
@@ -43,12 +50,9 @@ export class AudioManager {
             loader.load(source.source, (buffer) => {
                 audioBufferSource.setBuffer(buffer);
                 audioBufferSource.setLoop(true);
-                audioBufferSource.setVolume(0); // In engine-audio this is handled by a gain node, here THREE.PositionalAudio has its own gain
-
-                // We use standard play logic but start muted
+                audioBufferSource.setVolume(0);
                 audioBufferSource.play();
 
-                // To mock the "gain" property from engine-audio-master that expects a "gain.value"
                 const mockedGainNode = {
                     gain: {
                         set value(v) { audioBufferSource.setVolume(v); },
@@ -56,7 +60,6 @@ export class AudioManager {
                     }
                 };
 
-                // To mock the detune logic
                 const mockedAudioNode = {
                     detune: {
                         set value(cents) { audioBufferSource.setPlaybackRate(Math.pow(2, cents / 1200)); },
@@ -70,6 +73,14 @@ export class AudioManager {
                     source.rpm,
                     source.volume !== undefined ? source.volume : 1.0
                 ));
+            }, undefined, (err) => {
+                console.warn("Missing Audio File: " + source.source);
+                // Return a silent mocked node so it doesn't break Promise.all
+                const silentMock = {
+                    gain: { set value(v) { }, get value() { return 0; } },
+                    detune: { set value(v) { }, get value() { return 0; } }
+                };
+                resolve(new DynamicAudioNode({ gain: silentMock.gain }, silentMock, source.rpm, 0));
             });
         });
     }

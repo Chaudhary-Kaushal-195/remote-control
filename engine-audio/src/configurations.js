@@ -20,7 +20,7 @@ export const bac_mono = {
     },
     drivetrain: {
         shiftTime: 50,
-        damping: 16,
+        damping: 80,
     },
     sounds: {
         ..._transmission,

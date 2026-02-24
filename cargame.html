@@ -1446,9 +1446,9 @@
                 }
 
                 if (inputs.handbrake || inputs.brake) {
-                    // Realistic braking logic without reversing
-                    if (vehicle.drivetrain.omega > 0.5) vehicle.drivetrain.omega = Math.max(0, vehicle.drivetrain.omega - 5.0);
-                    else if (vehicle.drivetrain.omega < -0.5) vehicle.drivetrain.omega = Math.min(0, vehicle.drivetrain.omega + 5.0);
+                    // Realistic braking logic: apply counter-omega to the drivetrain
+                    if (vehicle.drivetrain.omega > 0.5) vehicle.drivetrain.omega *= 0.95;
+                    else if (vehicle.drivetrain.omega < -0.5) vehicle.drivetrain.omega *= 0.95;
                     else vehicle.drivetrain.omega = 0;
                 }
 
