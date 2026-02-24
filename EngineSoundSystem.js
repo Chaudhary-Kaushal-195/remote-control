@@ -12,7 +12,7 @@ class Engine {
         this.limiter_delay = 100;
         this._last_limiter = 0;
 
-        this.torque = 400;
+        this.torque = 800; // Increased for faster spool up
         this.engine_braking = 200;
         this.throttle = 0;
 
