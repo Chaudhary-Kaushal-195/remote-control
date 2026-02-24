@@ -4,142 +4,117 @@ export class EngineSoundSystem {
     constructor(camera, carMesh) {
         this.camera = camera;
         this.carMesh = carMesh;
+
+        // Physics / Audio State
         this.throttle = 0;
         this.currentGear = 1;
         this.gearRatios = [3.8, 2.2, 1.5, 1.2, 1.0, 0.8];
-        this.idleRPM = 900;
-        this.redlineRPM = 7000;
+
+        this.idleRPM = 1000;
+        this.redlineRPM = 9000;
+        this.softLimiterRPM = 8950;
         this.currentRPM = this.idleRPM;
 
+        // Setup listener
         this.audioListener = new THREE.AudioListener();
         this.camera.add(this.audioListener);
-
         this.audioContext = this.audioListener.context;
-        // Doppler effect settings
-        if (this.audioContext.listener && 'dopplerFactor' in this.audioContext.listener) {
-            this.audioContext.listener.dopplerFactor = 1.5;
-        } else if (this.audioListener.setDopplerFactor) {
-            // Depending on Three.js version
-            this.audioListener.setDopplerFactor(1.5);
-        }
 
-        this.baseEngine = new THREE.PositionalAudio(this.audioListener);
-        this.boostLayer = new THREE.PositionalAudio(this.audioListener);
-        this.turboFlutter = new THREE.PositionalAudio(this.audioListener);
+        // Nodes
+        this.onHigh = new THREE.PositionalAudio(this.audioListener);
+        this.onLow = new THREE.PositionalAudio(this.audioListener);
+        this.offHigh = new THREE.PositionalAudio(this.audioListener);
+        this.offLow = new THREE.PositionalAudio(this.audioListener);
+        this.limiter = new THREE.PositionalAudio(this.audioListener);
 
-        // Multi-backfire setup
-        this.backfire1 = new THREE.PositionalAudio(this.audioListener);
-        this.backfire2 = new THREE.PositionalAudio(this.audioListener);
-        this.backfireBig = new THREE.PositionalAudio(this.audioListener);
+        // Add nodes to mesh
+        this.carMesh.add(this.onHigh);
+        this.carMesh.add(this.onLow);
+        this.carMesh.add(this.offHigh);
+        this.carMesh.add(this.offLow);
+        this.carMesh.add(this.limiter);
 
-        this.carMesh.add(this.baseEngine);
-        this.carMesh.add(this.boostLayer);
-        this.carMesh.add(this.turboFlutter);
-        this.carMesh.add(this.backfire1);
-        this.carMesh.add(this.backfire2);
-        this.carMesh.add(this.backfireBig);
-
-        this.setupAudioSettings(this.baseEngine);
-        this.setupAudioSettings(this.boostLayer);
-        this.setupAudioSettings(this.turboFlutter);
-        this.setupAudioSettings(this.backfire1);
-        this.setupAudioSettings(this.backfire2);
-        this.setupAudioSettings(this.backfireBig);
-
-        this.lowpassFilter = this.audioContext.createBiquadFilter();
-        this.lowpassFilter.type = 'lowpass';
-        this.lowpassFilter.frequency.value = 22050;
-
-        this.baseEngine.setFilter(this.lowpassFilter);
-        this.boostLayer.setFilter(this.lowpassFilter);
-        this.turboFlutter.setFilter(this.lowpassFilter);
-        this.backfire1.setFilter(this.lowpassFilter);
-        this.backfire2.setFilter(this.lowpassFilter);
-        this.backfireBig.setFilter(this.lowpassFilter);
-
-        this.loadAudioFiles();
+        // Settings
+        [this.onHigh, this.onLow, this.offHigh, this.offLow, this.limiter].forEach(audio => {
+            audio.setRefDistance(5);
+            audio.setMaxDistance(100);
+            audio.setRolloffFactor(2);
+            audio.setDistanceModel('exponential');
+        });
 
         this.isLoaded = false;
-        this.lastThrottle = 0;
+        this.loadAudioFiles();
     }
 
-    setupAudioSettings(audio) {
-        audio.setRefDistance(5);
-        audio.setMaxDistance(100);
-        audio.setRolloffFactor(2);
-        audio.setDistanceModel('exponential');
+    checkLoaded() {
+        this.loadedCount++;
+        if (this.loadedCount >= this.totalFiles) {
+            this.isLoaded = true;
+            if (this.shouldStartPlay) this.startEngine();
+        }
     }
 
     loadAudioFiles() {
         const loader = new THREE.AudioLoader();
+        this.loadedCount = 0;
+        this.totalFiles = 5;
+        this.shouldStartPlay = false;
 
-        loader.load('toyota-supra-buornut.mp3', (buffer) => {
-            this.baseEngine.setBuffer(buffer);
-            this.baseEngine.setLoop(true);
-            this.baseEngine.setVolume(0);
-            this.baseEngine.play();
+        loader.load('audio/bac_mono/BAC_Mono_onhigh.wav', (buffer) => {
+            this.onHigh.setBuffer(buffer);
+            this.onHigh.setLoop(true);
+            this.onHigh.setVolume(0);
             this.checkLoaded();
         });
 
-        loader.load('boost-supra-launch.mp3', (buffer) => {
-            this.boostLayer.setBuffer(buffer);
-            this.boostLayer.setLoop(true);
-            this.boostLayer.setVolume(0);
-            this.boostLayer.play();
+        loader.load('audio/bac_mono/BAC_Mono_onlow.wav', (buffer) => {
+            this.onLow.setBuffer(buffer);
+            this.onLow.setLoop(true);
+            this.onLow.setVolume(0);
             this.checkLoaded();
         });
 
-        loader.load('toyota_supra_sutututu.mp3', (buffer) => {
-            this.turboFlutter.setBuffer(buffer);
-            this.turboFlutter.setLoop(false);
-            this.turboFlutter.setVolume(0.8);
+        loader.load('audio/bac_mono/BAC_Mono_offveryhigh.wav', (buffer) => {
+            this.offHigh.setBuffer(buffer);
+            this.offHigh.setLoop(true);
+            this.offHigh.setVolume(0);
             this.checkLoaded();
         });
 
-        loader.load('boom1.mp3', (buffer) => {
-            this.backfire1.setBuffer(buffer);
-            this.backfire1.setLoop(false);
-            this.backfire1.setVolume(1.0);
+        loader.load('audio/bac_mono/BAC_Mono_offlow.wav', (buffer) => {
+            this.offLow.setBuffer(buffer);
+            this.offLow.setLoop(true);
+            this.offLow.setVolume(0);
             this.checkLoaded();
         });
 
-        loader.load('boom2.mp3', (buffer) => {
-            this.backfire2.setBuffer(buffer);
-            this.backfire2.setLoop(false);
-            this.backfire2.setVolume(1.0);
-            this.checkLoaded();
-        });
-
-        loader.load('boom4.mp3', (buffer) => {
-            this.backfireBig.setBuffer(buffer);
-            this.backfireBig.setLoop(false);
-            this.backfireBig.setVolume(1.5); // Big blast
+        loader.load('audio/bac_mono/limiter.wav', (buffer) => {
+            this.limiter.setBuffer(buffer);
+            this.limiter.setLoop(true);
+            this.limiter.setVolume(0);
             this.checkLoaded();
         });
     }
 
-    checkLoaded() {
-        if (this.baseEngine.buffer && this.boostLayer.buffer && this.turboFlutter.buffer &&
-            this.backfire1.buffer && this.backfire2.buffer && this.backfireBig.buffer) {
-            this.isLoaded = true;
+    startEngine() {
+        this.shouldStartPlay = true;
+        if (!this.isLoaded) return;
+
+        // Only play if not already playing to avoid overlapping restarts
+        if (!this.onHigh.isPlaying) {
+            this.onHigh.play();
+            this.onLow.play();
+            this.offHigh.play();
+            this.offLow.play();
+            this.limiter.play();
         }
     }
 
     setThrottle(value) {
-        this.lastThrottle = this.throttle;
         this.throttle = value;
-
-        if (this.lastThrottle > 0 && this.throttle === 0 && this.currentRPM > 3500) {
-            if (this.isLoaded) {
-                if (this.turboFlutter.isPlaying) this.turboFlutter.stop();
-                this.turboFlutter.play();
-            }
-            this.triggerBackfireRoll(true); // From throttle release
-        }
     }
 
     shiftGear(direction, gearIndex) {
-        let oldGear = this.currentGear;
         if (gearIndex !== undefined) {
             this.currentGear = gearIndex;
         } else {
@@ -149,53 +124,26 @@ export class EngineSoundSystem {
                 this.currentGear--;
             }
         }
-
-        if (oldGear !== this.currentGear) {
-            this.triggerBackfireRoll(false);
-        }
     }
 
-    triggerBackfireRoll(isThrottleRelease) {
-        if (!this.isLoaded || this.currentRPM < 3500) return;
-
-        // Increase backfire frequency, especially on throttle release
-        let chance = isThrottleRelease ? 0.8 : 0.3;
-
-        if (Math.random() < chance) {
-            // Big blast more likely at very high RPMs on throttle release
-            let bigChance = (isThrottleRelease && this.currentRPM > 5500) ? 0.4 : 0.05;
-
-            if (Math.random() < bigChance) {
-                if (this.backfireBig.isPlaying) this.backfireBig.stop();
-                this.backfireBig.play();
-                if (window.triggerBackfireVisual) window.triggerBackfireVisual(true);
-            } else {
-                // Multiple rapid pops
-                this.playMultiBackfire(Math.floor(Math.random() * 4) + 2); // 2 to 5 pops
-            }
-        }
+    // Crossfade helper: Returns 0-1 mapped to cos curve
+    crossFade(value, start, end) {
+        const x = Math.max(0, Math.min(1, (value - start) / (end - start)));
+        const gain1 = Math.cos((1.0 - x) * 0.5 * Math.PI); // Secondary (High / On)
+        const gain2 = Math.cos(x * 0.5 * Math.PI);         // Primary (Low / Off)
+        return { high: gain1, low: gain2 };
     }
 
-    playMultiBackfire(count) {
-        let pops = 0;
-        const popSequence = () => {
-            if (pops >= count) return;
+    ratio(val, min, max) {
+        if (min === max) return val >= max ? 1 : 0;
+        return Math.max(0, Math.min(1, (val - min) / (max - min)));
+    }
 
-            let isBoom1 = Math.random() > 0.5;
-            let sound = isBoom1 ? this.backfire1 : this.backfire2;
-
-            if (sound.isPlaying) sound.stop();
-            // Vary pitch slightly for realism
-            sound.setPlaybackRate(0.9 + Math.random() * 0.2);
-            sound.play();
-
-            if (window.triggerBackfireVisual) window.triggerBackfireVisual(false);
-
-            pops++;
-            // Rapid pop interval between 80ms and 200ms
-            setTimeout(popSequence, 80 + Math.random() * 120);
-        };
-        popSequence();
+    getPlaybackRate(currentRPM, sampleRPM, pitchFactor = 0.2) {
+        // detune value = (currentRPM - sampleRPM) * pitchFactor (in cents)
+        // 1200 cents = 1 octave = 2x speed
+        const cents = (currentRPM - sampleRPM) * pitchFactor;
+        return Math.pow(2, cents / 1200);
     }
 
     update(deltaTime, wheelSpeed) {
@@ -213,43 +161,40 @@ export class EngineSoundSystem {
 
         if (targetRPM > this.redlineRPM) {
             targetRPM = this.redlineRPM;
-            // Rev limiter bouncing can also trigger backfires
-            if (this.throttle > 0.8 && Math.random() < 0.15) {
-                this.triggerBackfireRoll(false);
-            }
         }
 
+        // Simulating some inertia for RPM changes
         this.currentRPM += (targetRPM - this.currentRPM) * deltaTime * 10;
-        if (this.currentRPM > 9999) this.currentRPM = 9999;
 
-        // 1. Base Engine
-        let pitch = (this.currentRPM / this.redlineRPM) * 2;
-        pitch = Math.max(0.2, pitch);
-        this.baseEngine.setPlaybackRate(pitch);
+        // Implement crossfading logic
+        const { high, low } = this.crossFade(this.currentRPM, 3000, 6500);
+        const { high: on, low: off } = this.crossFade(this.throttle, 0, 1);
+        const limiterGain = this.ratio(this.currentRPM, this.softLimiterRPM * 0.93, this.redlineRPM);
 
-        let engineVol = 0.3 + (this.throttle * 0.7);
-        // Master volume control integration
-        const masterVol = window.gameSettings ? (window.gameSettings.engineVol / 100) : 1.0;
-        this.baseEngine.setVolume(engineVol * masterVol);
+        const masterVol = window.gameSettings ? (Number(window.gameSettings.engineVol) / 100) : 1.0;
 
-        // 2. Boost Layer
-        if (this.currentRPM > 3000) {
-            let boostVol = Math.min(1.0, (this.currentRPM - 3000) / (this.redlineRPM - 3000));
-            this.boostLayer.setVolume(boostVol * 0.8 * this.throttle * masterVol);
-        } else if (this.currentRPM < 2500) {
-            this.boostLayer.setVolume(0);
-        } else {
-            let boostVol = (this.currentRPM - 2500) / 500;
-            this.boostLayer.setVolume(boostVol * 0.2 * this.throttle * masterVol);
-        }
+        // Pitch shift (sample RPM for all bac mono base sounds is 1000)
+        const basePitch = this.getPlaybackRate(this.currentRPM, 1000);
 
-        // Camera distance (reduce vol / lowpass filter)
-        let dist = this.camera.position.distanceTo(this.carMesh.position);
-        if (dist > 30) {
-            let val = 22050 - (dist - 30) * 150;
-            this.lowpassFilter.frequency.value = Math.max(300, val);
-        } else {
-            this.lowpassFilter.frequency.value = 22050; // open
-        }
+        // Apply volumes and pitches
+        // "on_high" : on * high
+        // "off_high": off * high
+        // "on_low"  : on * low
+        // "off_low" : off * low
+
+        this.onHigh.setPlaybackRate(basePitch);
+        this.onHigh.setVolume(on * high * 0.5 * masterVol);
+
+        this.onLow.setPlaybackRate(basePitch);
+        this.onLow.setVolume(on * low * 0.5 * masterVol);
+
+        this.offHigh.setPlaybackRate(basePitch);
+        this.offHigh.setVolume(off * high * 0.5 * masterVol);
+
+        this.offLow.setPlaybackRate(basePitch);
+        this.offLow.setVolume(off * low * 0.5 * masterVol);
+
+        this.limiter.setPlaybackRate(1.0);
+        this.limiter.setVolume(limiterGain * 0.4 * masterVol);
     }
 }

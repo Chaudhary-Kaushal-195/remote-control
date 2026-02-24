@@ -804,6 +804,7 @@
             musicVol: 50,
             controlHud: 'on'
         };
+        window.gameSettings = gameSettings;
 
         window.applyHUDVisibility = () => {
             const isHudOn = gameSettings.controlHud !== 'off';
@@ -1304,6 +1305,9 @@
             } else if (engineSoundSystem.audioContext.state === 'suspended') {
                 engineSoundSystem.audioContext.resume();
             }
+
+            // Actually start playing the engine loops now that user clicked
+            engineSoundSystem.startEngine();
         };
 
         let backfireTick = 0;
