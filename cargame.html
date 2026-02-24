@@ -1361,6 +1361,8 @@
             backfireTick = isBigBackfire ? 20 : 8; // big blast lasts longer visually
         };
 
+        let lastTime = performance.now();
+
         function animate() {
             requestAnimationFrame(animate);
             if (isPaused) {
@@ -1380,25 +1382,46 @@
                 visual.style.transform = `rotate(${wheelAngle}deg)`;
             }
 
-            // Physics
-            if (inputs.fwd) {
-                if (manualGearIndex >= 1) speed += 0.025; // Accelerate forward
-                else if (manualGearIndex === -1) speed -= 0.015; // Reverse
-            }
-            if (inputs.bwd) {
-                if (manualGearIndex >= 1) speed -= 0.015;
-                else if (manualGearIndex === -1) speed += 0.015;
+            // Physics Integration via EngineSoundSystem if available
+            const now = performance.now();
+            const dt = Math.min((now - lastTime) / 1000, 0.1); // Max 100ms delta to prevent huge jumps
+            lastTime = now;
+
+            if (engineSoundSystem) {
+                // Determine physical gear mapping
+                engineSoundSystem.shiftGear('set', manualGearIndex);
+
+                // Throttle / Brake controls
+                engineSoundSystem.setThrottle(inputs.fwd ? 1.0 : 0.0);
+                if (inputs.handbrake || inputs.brake) {
+                    engineSoundSystem.applyBrakes(0.3); // Brake force
+                }
+
+                // Run XPBD physics step
+                engineSoundSystem.update(dt);
+
+                // Read back physics
+                speed = engineSoundSystem.velocity;
+                rpm = engineSoundSystem.engine.rpm;
+            } else {
+                // Fallback basic physics if audio engine isn't initialized yet
+                if (inputs.fwd) {
+                    if (manualGearIndex >= 1) speed += 0.025;
+                    else if (manualGearIndex === -1) speed -= 0.015;
+                }
+                if (inputs.bwd) {
+                    if (manualGearIndex >= 1) speed -= 0.015;
+                    else if (manualGearIndex === -1) speed += 0.015;
+                }
+                if (inputs.handbrake || inputs.brake) {
+                    let brakeForce = 0.08;
+                    if (speed > 0) speed = Math.max(0, speed - brakeForce);
+                    if (speed < 0) speed = Math.min(0, speed + brakeForce);
+                }
+                speed *= inputs.handbrake ? 0.95 : 0.99;
             }
 
-            // Brake Logic (Now exclusively E-Brake)
-            if (inputs.handbrake || inputs.brake) {
-                let brakeForce = 0.08; // Handbrake needs to be stronger for high speeds
-                if (speed > 0) speed = Math.max(0, speed - brakeForce);
-                if (speed < 0) speed = Math.min(0, speed + brakeForce);
-            }
-
-            speed *= inputs.handbrake ? 0.95 : 0.99; // Less natural friction (0.99) allows top speed of ~450-500 KPH
-
+            // Move car via calculated speed
             car.translateZ(speed);
             car.rotation.y -= (wheelAngle / 180) * 0.05 * (speed * 4);
 
@@ -1433,14 +1456,25 @@
             camera.lookAt(worldTarget);
 
             // Update DAT.GUI State
-            engineState.throttle = inputs.fwd ? 1.0 : 0.0;
-            engineState.rpm = Math.floor(rpm);
-            engineState.theta = Math.floor(wheelAngle); // Placeholder for theta
-            engineState.omega = Math.floor(speed * 100); // Placeholder for engine omega
+            if (engineSoundSystem && engineSoundSystem.isLoaded) {
+                engineState.throttle = engineSoundSystem.engine.throttle;
+                engineState.rpm = engineSoundSystem.engine.rpm;
+                engineState.theta = engineSoundSystem.engine.theta;
+                engineState.omega = engineSoundSystem.engine.omega;
 
-            drivetrainState.gear = manualGearIndex === -1 ? "R" : (manualGearIndex === 0 ? "N" : manualGearIndex.toString());
-            drivetrainState.theta = Math.floor(wheelAngle); // Placeholder for drivetrain theta
-            drivetrainState.omega = Math.floor(speed * 100); // Placeholder for drivetrain omega
+                drivetrainState.gear = engineSoundSystem.drivetrain.gear;
+                drivetrainState.theta = engineSoundSystem.drivetrain.theta;
+                drivetrainState.omega = engineSoundSystem.drivetrain.omega;
+            } else {
+                engineState.throttle = inputs.fwd ? 1.0 : 0.0;
+                engineState.rpm = Math.floor(rpm);
+                engineState.theta = 0;
+                engineState.omega = 0;
+
+                drivetrainState.gear = manualGearIndex === -1 ? "R" : (manualGearIndex === 0 ? "N" : manualGearIndex.toString());
+                drivetrainState.theta = 0;
+                drivetrainState.omega = 0;
+            }
 
             renderer.render(scene, camera);
 
@@ -1519,20 +1553,6 @@
                 if (strip.position.z < -2) strip.position.z = 1.8;
                 if (strip.position.z > 1.8) strip.position.z = -2;
             });
-
-            if (engineSoundSystem) {
-                engineSoundSystem.setThrottle(inputs.fwd ? 1.0 : 0.0);
-
-                let gearIndex = 1;
-                if (gear === "2") gearIndex = 2;
-                else if (gear === "3") gearIndex = 3;
-                else if (gear === "4") gearIndex = 4;
-                else if (gear === "5") gearIndex = 5;
-                else if (gear === "6") gearIndex = 6;
-                engineSoundSystem.shiftGear('set', gearIndex);
-
-                engineSoundSystem.update(0.016, speed * 200);
-            }
         }
         animate();
 
