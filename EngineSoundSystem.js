@@ -199,27 +199,36 @@ export class EngineSoundSystem {
 
         this.isLoaded = false;
         this.shouldStartPlay = false;
-        this.loadAudioFiles();
     }
 
     // Keep Audio Loading Logic 
-    checkLoaded() {
-        this.loadedCount++;
-        if (this.loadedCount >= 5) {
-            this.isLoaded = true;
-            if (this.shouldStartPlay) this.startEngine();
-        }
-    }
+    init() {
+        return new Promise((resolve) => {
+            const loader = new THREE.AudioLoader();
+            this.loadedCount = 0;
 
-    loadAudioFiles() {
-        const loader = new THREE.AudioLoader();
-        this.loadedCount = 0;
+            const checkLoaded = () => {
+                this.loadedCount++;
+                if (this.loadedCount >= 5) {
+                    this.isLoaded = true;
+                    resolve();
+                }
+            };
 
-        loader.load('audio/bac_mono/BAC_Mono_onhigh.wav', b => { this.onHigh.setBuffer(b); this.onHigh.setLoop(true); this.onHigh.setVolume(0); this.checkLoaded(); });
-        loader.load('audio/bac_mono/BAC_Mono_onlow.wav', b => { this.onLow.setBuffer(b); this.onLow.setLoop(true); this.onLow.setVolume(0); this.checkLoaded(); });
-        loader.load('audio/bac_mono/BAC_Mono_offveryhigh.wav', b => { this.offHigh.setBuffer(b); this.offHigh.setLoop(true); this.offHigh.setVolume(0); this.checkLoaded(); });
-        loader.load('audio/bac_mono/BAC_Mono_offlow.wav', b => { this.offLow.setBuffer(b); this.offLow.setLoop(true); this.offLow.setVolume(0); this.checkLoaded(); });
-        loader.load('audio/bac_mono/limiter.wav', b => { this.limiter.setBuffer(b); this.limiter.setLoop(true); this.limiter.setVolume(0); this.checkLoaded(); });
+            const loadSilent = (src, node) => {
+                loader.load(src,
+                    b => { node.setBuffer(b); node.setLoop(true); node.setVolume(0); checkLoaded(); },
+                    undefined,
+                    err => { console.warn("Audio missing:", src); checkLoaded(); }
+                );
+            };
+
+            loadSilent('audio/bac_mono/BAC_Mono_onhigh.wav', this.onHigh);
+            loadSilent('audio/bac_mono/BAC_Mono_onlow.wav', this.onLow);
+            loadSilent('audio/bac_mono/BAC_Mono_offveryhigh.wav', this.offHigh);
+            loadSilent('audio/bac_mono/BAC_Mono_offlow.wav', this.offLow);
+            loadSilent('audio/bac_mono/limiter.wav', this.limiter);
+        });
     }
 
     startEngine() {
