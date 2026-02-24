@@ -776,6 +776,32 @@
     <script type="module">
         import * as THREE from 'three';
 
+        // --- AUDIO ENGINE VIA IFRAME ---
+        let isAudioInit = false;
+
+        window.initAudio = async () => {
+            const overlay = document.getElementById('sound-overlay');
+            if (overlay) overlay.style.display = 'none';
+            const orbit = document.getElementById('orbit-zone');
+            if (orbit) orbit.style.pointerEvents = 'auto'; // Enable camera orbiting after start
+            const aframe = document.getElementById('audio-iframe');
+            if (aframe) aframe.style.pointerEvents = 'auto'; // Allow clicking the iframe dat.gui
+
+            if (!isAudioInit) {
+                isAudioInit = true;
+                sendIframeKey('start', '', '');
+
+                // Sync 1st gear logic initially so car matches iframe
+                setTimeout(() => {
+                    if (typeof manualGearIndex !== 'undefined') {
+                        manualGearIndex = 1;
+                    }
+                    sendIframeKey('keydown', 'ArrowUp', 'ArrowUp');
+                    setTimeout(() => sendIframeKey('keyup', 'ArrowUp', 'ArrowUp'), 50);
+                }, 100);
+            }
+        };
+
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x05000a);
@@ -1294,11 +1320,16 @@
 
         function sendIframeKey(type, code, key) {
             if (iframe && iframe.contentWindow) {
-                iframe.contentWindow.postMessage({ type, code, key }, "http://localhost:5173");
+                // Use "*" for local development to avoid strict origin trailing slash mismatches blocking the message
+                iframe.contentWindow.postMessage({ type, code, key }, "*");
             }
         }
 
         window.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                if (!isAudioInit) initAudio();
+                e.preventDefault();
+            }
             if (['w', 'W'].includes(e.key)) { inputs.fwd = true; sendIframeKey('keydown', 'Space', ' '); }
             if (['s', 'S'].includes(e.key)) inputs.bwd = true;
             if (['ArrowLeft', 'a', 'A'].includes(e.key)) inputs.left = true;
@@ -1331,29 +1362,6 @@
             if (e.key === 'ArrowUp') sendIframeKey('keyup', 'ArrowUp', 'ArrowUp');
             if (e.key === 'ArrowDown') sendIframeKey('keyup', 'ArrowDown', 'ArrowDown');
         });
-
-        // --- AUDIO ENGINE VIA IFRAME ---
-        let isAudioInit = false;
-
-        window.initAudio = async () => {
-            const overlay = document.getElementById('sound-overlay');
-            if (overlay) overlay.style.display = 'none';
-            document.getElementById('orbit-zone').style.pointerEvents = 'auto'; // Enable camera orbiting after start
-            document.getElementById('audio-iframe').style.pointerEvents = 'auto'; // Allow clicking the iframe dat.gui
-
-            if (!isAudioInit) {
-                // Send START trigger to external Iframe
-                sendIframeKey('start', '', '');
-                isAudioInit = true;
-
-                // Sync 1st gear logic initially so car matches iframe
-                setTimeout(() => {
-                    manualGearIndex = 1;
-                    sendIframeKey('keydown', 'ArrowUp', 'ArrowUp');
-                    setTimeout(() => sendIframeKey('keyup', 'ArrowUp', 'ArrowUp'), 50);
-                }, 100);
-            }
-        };
 
         let backfireTick = 0;
         let isBigBackfire = false;
