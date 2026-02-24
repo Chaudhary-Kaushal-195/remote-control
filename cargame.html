@@ -63,6 +63,14 @@
             font-weight: normal;
         }
 
+        /* OVERRIDE NATIVE DAT.GUI POSITIONING */
+        /* Forces the dat.gui panel injected by engine-audio to sit on the left * /
+        .dg.ac {
+            left: 0px !important;
+            right: auto !important;
+            z-index: 50 !important;
+        }
+
         /* STEERING WHEEL - Realistic pink icon style from image */
         #steering-zone {
             position: absolute;
@@ -769,18 +777,16 @@
         <div id="rev-btn" class="pedal">REV</div>
     </div>
 
-    <!-- VITE TYPESCRIPT BACKEND IFRAME -->
-    <iframe id="audio-iframe" src="http://localhost:5173"
-        style="position: absolute; top:0; left:0; width: 350px; height: 350px; z-index: 50; border: none; pointer-events: none;"></iframe>
-
+    <!-- VITE TYPESCRIPT NATIVE ESM INTEGRATION -->
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
     </script>
+    <script type="module" src="http://localhost:5173/src/main.ts"></script>
 
     <script type="module">
         import * as THREE from 'three';
 
-        // --- AUDIO ENGINE VIA IFRAME ---
+        // --- AUDIO ENGINE VIA NATIVE ESM ---
         let isAudioInit = false;
 
         window.initAudio = async () => {
@@ -788,20 +794,26 @@
             if (overlay) overlay.style.display = 'none';
             const orbit = document.getElementById('orbit-zone');
             if (orbit) orbit.style.pointerEvents = 'auto'; // Enable camera orbiting after start
-            const aframe = document.getElementById('audio-iframe');
-            if (aframe) aframe.style.pointerEvents = 'auto'; // Allow clicking the iframe dat.gui
 
             if (!isAudioInit) {
                 isAudioInit = true;
-                sendIframeKey('start', '', '');
 
-                // Sync 1st gear logic initially so car matches iframe
+                // Trigger the natively imported TypeScript Vite App directly!
+                if (window.startTypeScriptEngineAudio) {
+                    window.startTypeScriptEngineAudio();
+                } else {
+                    console.error("Vite TypeScript app not loaded yet or start function not exposed on window.");
+                }
+
+                // Sync 1st gear logic initially visually
                 setTimeout(() => {
                     if (typeof manualGearIndex !== 'undefined') {
                         manualGearIndex = 1;
                     }
-                    sendIframeKey('keydown', 'ArrowUp', 'ArrowUp');
-                    setTimeout(() => sendIframeKey('keyup', 'ArrowUp', 'ArrowUp'), 50);
+                    // Since the typescript script natively listens to document keydowns,
+                    // we dispatch a real KeyboardEvent to force it into 1st gear.
+                    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', code: 'ArrowUp' }));
+                    setTimeout(() => document.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowUp', code: 'ArrowUp' })), 50);
                 }, 100);
             }
         };
@@ -1319,52 +1331,42 @@
         window.addEventListener('mouseup', resetMouseInputs);
         window.addEventListener('mouseout', resetMouseInputs);
 
-        // Forward keyboard commands directly to the embedded Vite server
-        const iframe = document.getElementById('audio-iframe');
-
-        function sendIframeKey(type, code, key) {
-            if (iframe && iframe.contentWindow) {
-                // Use "*" for local development to avoid strict origin trailing slash mismatches blocking the message
-                iframe.contentWindow.postMessage({ type, code, key }, "*");
-            }
-        }
+        // Native event listeners for the visual game
+        // (The TypeScript engine-audio natively listens to document so we don't need to forward anything anymore!)
 
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 if (!isAudioInit) initAudio();
                 e.preventDefault();
             }
-            if (['w', 'W'].includes(e.key)) { inputs.fwd = true; sendIframeKey('keydown', 'Space', ' '); }
+            if (['w', 'W', ' '].includes(e.key)) {
+                inputs.fwd = true;
+                if (e.key === ' ') e.preventDefault();
+            }
             if (['s', 'S'].includes(e.key)) inputs.bwd = true;
             if (['ArrowLeft', 'a', 'A'].includes(e.key)) inputs.left = true;
             if (['ArrowRight', 'd', 'D'].includes(e.key)) inputs.right = true;
-            if (e.key === ' ') { inputs.fwd = true; sendIframeKey('keydown', 'Space', ' '); e.preventDefault(); }
-            if (['b', 'B'].includes(e.key)) { inputs.brake = true; sendIframeKey('keydown', 'KeyB', 'b'); }
+            if (['b', 'B'].includes(e.key)) inputs.brake = true;
 
             // Arcade Drivetrain mappings
             if (e.key === 'ArrowUp') {
                 if (manualGearIndex < 6) manualGearIndex++;
-                sendIframeKey('keydown', 'ArrowUp', 'ArrowUp');
-                e.preventDefault();
             }
             if (e.key === 'ArrowDown') {
                 if (manualGearIndex > -1) manualGearIndex--;
-                sendIframeKey('keydown', 'ArrowDown', 'ArrowDown');
-                e.preventDefault();
             }
             if (e.key.toLowerCase() === 'c') cycleCamera();
         });
 
         window.addEventListener('keyup', (e) => {
-            if (['w', 'W'].includes(e.key)) { inputs.fwd = false; sendIframeKey('keyup', 'Space', ' '); }
+            if (['w', 'W', ' '].includes(e.key)) {
+                inputs.fwd = false;
+                if (e.key === ' ') e.preventDefault();
+            }
             if (['s', 'S'].includes(e.key)) inputs.bwd = false;
             if (['ArrowLeft', 'a', 'A'].includes(e.key)) inputs.left = false;
             if (['ArrowRight', 'd', 'D'].includes(e.key)) inputs.right = false;
-            if (e.key === ' ') { inputs.fwd = false; sendIframeKey('keyup', 'Space', ' '); e.preventDefault(); }
-            if (['b', 'B'].includes(e.key)) { inputs.brake = false; sendIframeKey('keyup', 'KeyB', 'b'); }
-
-            if (e.key === 'ArrowUp') sendIframeKey('keyup', 'ArrowUp', 'ArrowUp');
-            if (e.key === 'ArrowDown') sendIframeKey('keyup', 'ArrowDown', 'ArrowDown');
+            if (['b', 'B'].includes(e.key)) inputs.brake = false;
         });
 
         let backfireTick = 0;
@@ -1400,22 +1402,31 @@
             const dt = Math.min((now - lastTime) / 1000, 0.1); // Max 100ms delta
             lastTime = now;
 
-            // Arcade Physics (Visual Car Movement decoupled from sound gears)
-            if (inputs.fwd) {
-                speed += 0.025;
-            } else if (inputs.bwd) { // reverse/brake
-                speed -= 0.015;
+            // Link Visual Car Movement to the imported TypeScript Engine Audio Math
+            let engineData = null;
+            if (window.getEngineData) {
+                engineData = window.getEngineData();
             }
-            if (inputs.handbrake || inputs.brake) {
-                let brakeForce = 0.08;
-                if (speed > 0) speed = Math.max(0, speed - brakeForce);
-                if (speed < 0) speed = Math.min(0, speed + brakeForce);
-            }
-            speed *= inputs.handbrake ? 0.95 : 0.99; // Drag/coasting
 
-            // Sound Physics (Runs purely for sound generation and HUD, doesn't move car)
-            // WE NOW IGNORE LOCAL AUDIO MATH, IT'S IN THE IFRAME.
-            rpm = Math.abs(speed) * 8000;
+            if (engineData) {
+                // Omega is wheel rotation speed from physics. Convert to m/s.
+                // Normally omega is rads/sec. Dividing by a factor visually scales it to our scene.
+                speed = engineData.omega * 0.05;
+                rpm = engineData.rpm;
+                manualGearIndex = engineData.gear;
+            } else {
+                // Fallback Arcade Physics before engine loads
+                if (inputs.fwd) speed += 0.025;
+                else if (inputs.bwd) speed -= 0.015;
+
+                if (inputs.handbrake || inputs.brake) {
+                    let brakeForce = 0.08;
+                    if (speed > 0) speed = Math.max(0, speed - brakeForce);
+                    if (speed < 0) speed = Math.min(0, speed + brakeForce);
+                }
+                speed *= inputs.handbrake ? 0.95 : 0.99; // Drag/coasting
+                rpm = Math.abs(speed) * 8000;
+            }
 
             // Move car via calculated speed (m/s * dt visually scaled)
             // scale up visual translation lightly so it feels fast
