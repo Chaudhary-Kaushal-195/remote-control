@@ -811,21 +811,31 @@
         const gui = new window.dat.GUI({ autoPlace: true });
         gui.domElement.style.position = 'absolute';
         gui.domElement.style.top = '10px';
-        gui.domElement.style.right = '10px';
+        gui.domElement.style.left = '10px'; // Re-positioned to Top Left
         gui.domElement.style.zIndex = '9999';
 
+        const guiMain = gui.addFolder('Settings');
         const guiEngine = gui.addFolder('Engine');
         const guiDrivetrain = gui.addFolder('Drivetrain');
 
-        const engineState = { throttle: 0, rpm: 0 };
-        const drivetrainState = { gear: "N", speedKph: 0 };
+        const mainState = { activeConfig: 'bac_mono' };
+        // Match Engine state exactly 
+        const engineState = { throttle: 0, rpm: 0, theta: 0, omega: 0 };
+        // Match Drivetrain state exactly
+        const drivetrainState = { gear: "1", theta: 0, omega: 0 };
 
-        guiEngine.add(engineState, 'throttle').name('Throttle').listen();
-        guiEngine.add(engineState, 'rpm').name('RPM').listen();
+        guiMain.add(mainState, 'activeConfig', ['bac_mono']).name('Select config');
+
+        guiEngine.add(engineState, 'throttle', 0, 1).name('Throttle').listen();
+        guiEngine.add(engineState, 'rpm', 0, 9000).name('RPM').listen();
+        guiEngine.add(engineState, 'theta', 0, 1000).name('Theta').listen();
+        guiEngine.add(engineState, 'omega', -100, 100).name('Omega').listen();
 
         guiDrivetrain.add(drivetrainState, 'gear').name('Gear').listen();
-        guiDrivetrain.add(drivetrainState, 'speedKph').name('Speed KPH').listen();
+        guiDrivetrain.add(drivetrainState, 'theta', 0, 1000).name('Theta').listen();
+        guiDrivetrain.add(drivetrainState, 'omega', -100, 100).name('Omega').listen();
 
+        guiMain.open();
         guiEngine.open();
         guiDrivetrain.open();
 
@@ -1425,8 +1435,12 @@
             // Update DAT.GUI State
             engineState.throttle = inputs.fwd ? 1.0 : 0.0;
             engineState.rpm = Math.floor(rpm);
+            engineState.theta = Math.floor(wheelAngle); // Placeholder for theta
+            engineState.omega = Math.floor(speed * 100); // Placeholder for engine omega
+
             drivetrainState.gear = manualGearIndex === -1 ? "R" : (manualGearIndex === 0 ? "N" : manualGearIndex.toString());
-            drivetrainState.speedKph = Math.floor(Math.abs(speed * 200));
+            drivetrainState.theta = Math.floor(wheelAngle); // Placeholder for drivetrain theta
+            drivetrainState.omega = Math.floor(speed * 100); // Placeholder for drivetrain omega
 
             renderer.render(scene, camera);
 
