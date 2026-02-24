@@ -665,6 +665,21 @@
         <div class="qr-close" onclick="document.getElementById('qr-overlay').style.display='none'">CLOSE</div>
     </div>
 
+    <div id="gyro-prompt-overlay"
+        style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9000; align-items:center; justify-content:center; flex-direction:column; backdrop-filter: blur(8px);">
+        <div class="modal-content" style="text-align:center;">
+            <h2 style="color:var(--neon-blue); margin-top:0;">CONNECT REMOTE</h2>
+            <p style="color:#fff; opacity:0.8; margin-bottom:20px;">Connect remote controller to use Gyro steering.</p>
+            <div style="display:flex; gap:10px; justify-content:center;">
+                <button class="hud-btn" style="padding:10px 20px; font-size:14px; flex:1;"
+                    onclick="handleGyroPrompt('connect')">CONNECT</button>
+                <button class="hud-btn"
+                    style="padding:10px 20px; font-size:14px; flex:1; border-color:var(--neon-pink); color:var(--neon-pink);"
+                    onclick="handleGyroPrompt('not_now')">NOT NOW</button>
+            </div>
+        </div>
+    </div>
+
     <!-- IN-GAME SETTINGS MODAL -->
     <div id="settings-modal" onclick="event.target === this && toggleSettings()">
         <div class="modal-content">
@@ -679,7 +694,7 @@
 
             <div class="setting-row">
                 <div class="setting-label">Steering Mode</div>
-                <select id="setting-steering" onchange="saveSettings()">
+                <select id="setting-steering" onchange="checkSteeringChange()">
                     <option value="wheel">Analog Wheel</option>
                     <option value="buttons">Left/Right Buttons</option>
                     <option value="gyro">Gyro Only (Pro)</option>
@@ -827,6 +842,29 @@
             } else {
                 modal.style.display = 'flex';
                 loadSettingsToModal();
+            }
+        };
+
+        window.checkSteeringChange = () => {
+            const sel = document.getElementById('setting-steering');
+            // Show prompt if gyro selected and no remote connected
+            if (sel.value === 'gyro' && !peer) {
+                document.getElementById('gyro-prompt-overlay').style.display = 'flex';
+            } else {
+                saveSettings();
+            }
+        };
+
+        window.handleGyroPrompt = (action) => {
+            document.getElementById('gyro-prompt-overlay').style.display = 'none';
+            if (action === 'connect') {
+                saveSettings();
+                document.getElementById('settings-modal').style.display = 'none';
+                setupRemote();
+            } else {
+                // Revert to previous setting
+                const sel = document.getElementById('setting-steering');
+                sel.value = gameSettings.steering;
             }
         };
 
