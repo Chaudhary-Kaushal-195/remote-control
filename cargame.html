@@ -1446,7 +1446,7 @@
                 }
 
                 // Run XPBD physics step
-                vehicle.update(now / 1000, dt); // time, dt
+                vehicle.update(now, dt); // time in ms, dt in seconds
 
                 // Read back physics for visuals
                 speed = vehicle.velocity;
