@@ -772,7 +772,11 @@
 
     <script type="module">
         import * as THREE from 'three';
-        import { EngineSoundSystem } from './EngineSoundSystem.js';
+        import { Vehicle } from './engine-audio/src/Vehicle.js';
+        import { bac_mono } from './engine-audio/src/configurations.js';
+
+        // Set global Three so AudioManager doesn't crash
+        window.THREE = THREE;
 
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
@@ -1315,12 +1319,27 @@
             if (['ArrowRight', 'd', 'D'].includes(e.key)) inputs.right = true;
             if (e.key === ' ') { inputs.fwd = true; e.preventDefault(); }
             if (['b', 'B'].includes(e.key)) { inputs.brake = true; }
+
+            // Replaced with physical Drivetrain mappings
             if (e.key === 'ArrowUp') {
-                if (manualGearIndex < 6) manualGearIndex++;
+                if (vehicle) {
+                    vehicle.drivetrain.changeGear(vehicle.drivetrain.gear + 1);
+                    // Slight auto-rev match when shifting up/down to prevent sudden stalling in 1st
+                    vehicle.engine.throttle = 0.5;
+                    setTimeout(() => vehicle.engine.throttle = (inputs.fwd ? 1.0 : 0.0), 100);
+                } else {
+                    if (manualGearIndex < 6) manualGearIndex++;
+                }
                 e.preventDefault();
             }
             if (e.key === 'ArrowDown') {
-                if (manualGearIndex > -1) manualGearIndex--;
+                if (vehicle) {
+                    vehicle.drivetrain.changeGear(vehicle.drivetrain.gear - 1);
+                    vehicle.engine.throttle = 0.5;
+                    setTimeout(() => vehicle.engine.throttle = (inputs.fwd ? 1.0 : 0.0), 100);
+                } else {
+                    if (manualGearIndex > -1) manualGearIndex--;
+                }
                 e.preventDefault();
             }
             if (e.key.toLowerCase() === 'c') cycleCamera();
@@ -1337,21 +1356,19 @@
 
         // --- AUDIO ENGINE ---
         let isAudioInit = false;
-        let engineSoundSystem = null;
+        let vehicle = null;
 
-        window.initAudio = () => {
+        window.initAudio = async () => {
             const overlay = document.getElementById('sound-overlay');
             if (overlay) overlay.style.display = 'none';
-            if (!engineSoundSystem) {
-                engineSoundSystem = new EngineSoundSystem(camera, car);
+            if (!vehicle) {
+                vehicle = new Vehicle(camera, car);
+                window.vehicle = vehicle;
+                await vehicle.init(bac_mono);
                 isAudioInit = true;
-                window.engineSoundSystem = engineSoundSystem;
-            } else if (engineSoundSystem.audioContext.state === 'suspended') {
-                engineSoundSystem.audioContext.resume();
+            } else if (vehicle.audio.ctx.state === 'suspended') {
+                vehicle.audio.ctx.resume();
             }
-
-            // Actually start playing the engine loops now that user clicked
-            engineSoundSystem.startEngine();
         };
 
         let backfireTick = 0;
@@ -1387,22 +1404,29 @@
             const dt = Math.min((now - lastTime) / 1000, 0.1); // Max 100ms delta to prevent huge jumps
             lastTime = now;
 
-            if (engineSoundSystem) {
-                // Determine physical gear mapping
-                engineSoundSystem.shiftGear('set', manualGearIndex);
-
+            if (vehicle) {
                 // Throttle / Brake controls
-                engineSoundSystem.setThrottle(inputs.fwd ? 1.0 : 0.0);
+                if (vehicle.drivetrain.downShift) {
+                    vehicle.engine.throttle = 0.8; // rev matching
+                } else if (inputs.fwd) {
+                    vehicle.engine.throttle = Math.min(1.0, vehicle.engine.throttle + 0.2);
+                } else {
+                    vehicle.engine.throttle = Math.max(0.0, vehicle.engine.throttle - 0.2);
+                }
+
                 if (inputs.handbrake || inputs.brake) {
-                    engineSoundSystem.applyBrakes(0.3); // Brake force
+                    // Realistic braking logic without reversing
+                    if (vehicle.drivetrain.omega > 0.5) vehicle.drivetrain.omega = Math.max(0, vehicle.drivetrain.omega - 5.0);
+                    else if (vehicle.drivetrain.omega < -0.5) vehicle.drivetrain.omega = Math.min(0, vehicle.drivetrain.omega + 5.0);
+                    else vehicle.drivetrain.omega = 0;
                 }
 
                 // Run XPBD physics step
-                engineSoundSystem.update(dt);
+                vehicle.update(now / 1000, dt); // time, dt
 
-                // Read back physics
-                speed = engineSoundSystem.velocity;
-                rpm = engineSoundSystem.engine.rpm;
+                // Read back physics for visuals
+                speed = vehicle.velocity;
+                rpm = vehicle.engine.rpm;
             } else {
                 // Fallback basic physics if audio engine isn't initialized yet
                 if (inputs.fwd) {
@@ -1421,12 +1445,13 @@
                 speed *= inputs.handbrake ? 0.95 : 0.99;
             }
 
-            // Move car via calculated speed
-            car.translateZ(speed);
-            car.rotation.y -= (wheelAngle / 180) * 0.05 * (speed * 4);
+            // Move car via calculated speed (m/s * dt visually scaled)
+            // scale up visual translation lightly so it feels fast
+            car.translateZ(speed * dt * 3.5);
+            car.rotation.y -= (wheelAngle / 180) * 0.05 * (speed * 0.2);
 
             wheels.forEach((w, i) => {
-                w.roller.rotation.x += speed * 3.5;
+                w.roller.rotation.x += speed * dt * 5.0;
                 if (i < 2) w.anchor.rotation.y = -(wheelAngle / 180) * 0.7;
             });
 
@@ -1456,15 +1481,24 @@
             camera.lookAt(worldTarget);
 
             // Update DAT.GUI State
-            if (engineSoundSystem && engineSoundSystem.isLoaded) {
-                engineState.throttle = engineSoundSystem.engine.throttle;
-                engineState.rpm = engineSoundSystem.engine.rpm;
-                engineState.theta = engineSoundSystem.engine.theta;
-                engineState.omega = engineSoundSystem.engine.omega;
+            if (vehicle && vehicle.audio && vehicle.audio.isLoaded) {
+                engineState.throttle = vehicle.engine.throttle;
+                engineState.rpm = vehicle.engine.rpm;
+                engineState.theta = vehicle.engine.theta;
+                engineState.omega = vehicle.engine.omega;
 
-                drivetrainState.gear = engineSoundSystem.drivetrain.gear;
-                drivetrainState.theta = engineSoundSystem.drivetrain.theta;
-                drivetrainState.omega = engineSoundSystem.drivetrain.omega;
+                drivetrainState.gear = vehicle.drivetrain.gear;
+                drivetrainState.theta = vehicle.drivetrain.theta;
+                drivetrainState.omega = vehicle.drivetrain.omega;
+            } else if (vehicle) {
+                engineState.throttle = vehicle.engine.throttle;
+                engineState.rpm = vehicle.engine.rpm;
+                engineState.theta = vehicle.engine.theta;
+                engineState.omega = vehicle.engine.omega;
+
+                drivetrainState.gear = vehicle.drivetrain.gear;
+                drivetrainState.theta = vehicle.drivetrain.theta;
+                drivetrainState.omega = vehicle.drivetrain.omega;
             } else {
                 engineState.throttle = inputs.fwd ? 1.0 : 0.0;
                 engineState.rpm = Math.floor(rpm);
@@ -1479,13 +1513,15 @@
             renderer.render(scene, camera);
 
             // HUD Units Logic
-            const rawSpeed = Math.abs(speed * 200);
+            // Mathematically the engine-audio script's math uses KPH / 3.6 = m/s. 
+            // So we multiply by 3.6 to visually simulate KPH correctly.
+            const rawSpeed = Math.abs(speed * 3.6);
             const displaySpeed = gameSettings.units === 'mph' ? Math.round(rawSpeed * 0.62) : Math.round(rawSpeed);
             speedBox.innerText = `${displaySpeed} ${gameSettings.units.toUpperCase()}`;
             document.getElementById('unit-label').innerText = `unit: ${gameSettings.units.toUpperCase()}`;
 
             // Analog Needle & Arc Logic (Multi-Gauge Clusters)
-            const maxSpeed = 550; // New limit for the dial to show up to 500+ KPH
+            const maxSpeed = 350; // New limit for the dial for real car physics 350 KPH
             const needleAngle = -120 + ((rawSpeed / maxSpeed) * 240);
             const speedNeedleGrp = document.getElementById('speed-needle-grp');
             if (speedNeedleGrp) speedNeedleGrp.setAttribute('transform', `rotate(${needleAngle}, 50, 50)`);
@@ -1496,13 +1532,12 @@
                 arc.style.strokeDashoffset = offset;
             }
 
-            // RPM Logic (Simulated)
-            let targetRpm = 800 + (rawSpeed * 15); // Adjust RPM scaling for the new 550 KPH limit
-            if (inputs.fwd) targetRpm += 3000 * (1 - (rawSpeed / maxSpeed));
-            rpm = THREE.MathUtils.lerp(rpm, targetRpm, 0.1);
-            const rpmAngle = -120 + ((rpm / 8000) * 240);
+            // RPM Logic (Simulated matching)
+            const rpmAngle = -120 + ((rpm / 10000) * 240);
             const rpmNeedleGrp = document.getElementById('rpm-needle-grp');
             if (rpmNeedleGrp) rpmNeedleGrp.setAttribute('transform', `rotate(${rpmAngle}, 50, 50)`);
+            const rpmBox = document.getElementById('rpm-box');
+            if (rpmBox) rpmBox.innerText = Math.round(rpm);
 
             // Fuel Logic (Slow depletion)
             if (rawSpeed > 1) fuelLevel -= 0.001;
@@ -1517,16 +1552,18 @@
             const tempNeedleGrp = document.getElementById('temp-needle-grp');
             if (tempNeedleGrp) tempNeedleGrp.setAttribute('transform', `rotate(${tempAngle}, 50, 50)`);
 
-            // Gear Logic (Manual)
-            let gear = "N";
-            if (manualGearIndex === -1) {
-                gear = "R";
-            } else if (manualGearIndex === 0) {
-                gear = "N";
+            // Gear Logic
+            let gearVal = "N";
+            if (vehicle) {
+                if (vehicle.drivetrain.gear === -1) gearVal = "R";
+                else if (vehicle.drivetrain.gear === 0) gearVal = "N";
+                else gearVal = vehicle.drivetrain.gear.toString();
             } else {
-                gear = manualGearIndex.toString();
+                if (manualGearIndex === -1) gearVal = "R";
+                else if (manualGearIndex === 0) gearVal = "N";
+                else gearVal = manualGearIndex.toString();
             }
-            document.getElementById('gear-box').innerText = gear;
+            document.getElementById('gear-box').innerText = gearVal;
 
             // Backfire Logic is now handled via Sound Engine (triggerBackfireVisual)
 
