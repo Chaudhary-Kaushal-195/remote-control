@@ -1152,7 +1152,8 @@
         // --- CONTROLS ---
         let speed = 0, wheelAngle = 0, activeId = null, lastAngle = 0;
         let gyroActive = false, gyroTilt = 0;
-        const inputs = { fwd: false, bwd: false, left: false, right: false, handbrake: false };
+        let manualGearIndex = 1; // -1=R, 0=N, 1..6=Gears
+        const inputs = { fwd: false, bwd: false, left: false, right: false, handbrake: false, brake: false };
         const wheelZone = document.getElementById('steering-zone'), visual = document.getElementById('wheel-visual');
         const speedBox = document.getElementById('speed-box');
 
@@ -1275,20 +1276,30 @@
         });
 
         window.addEventListener('keydown', (e) => {
-            if (['ArrowUp', 'w', 'W'].includes(e.key)) inputs.fwd = true;
-            if (['ArrowDown', 's', 'S'].includes(e.key)) inputs.bwd = true;
+            if (['w', 'W'].includes(e.key)) inputs.fwd = true;
+            if (['s', 'S'].includes(e.key)) inputs.bwd = true;
             if (['ArrowLeft', 'a', 'A'].includes(e.key)) inputs.left = true;
             if (['ArrowRight', 'd', 'D'].includes(e.key)) inputs.right = true;
-            if (e.key === ' ') { inputs.brake = true; e.preventDefault(); }
+            if (e.key === ' ') { inputs.fwd = true; e.preventDefault(); }
+            if (['b', 'B'].includes(e.key)) { inputs.brake = true; }
+            if (e.key === 'ArrowUp') {
+                if (manualGearIndex < 6) manualGearIndex++;
+                e.preventDefault();
+            }
+            if (e.key === 'ArrowDown') {
+                if (manualGearIndex > -1) manualGearIndex--;
+                e.preventDefault();
+            }
             if (e.key.toLowerCase() === 'c') cycleCamera();
         });
 
         window.addEventListener('keyup', (e) => {
-            if (['ArrowUp', 'w', 'W'].includes(e.key)) inputs.fwd = false;
-            if (['ArrowDown', 's', 'S'].includes(e.key)) inputs.bwd = false;
+            if (['w', 'W'].includes(e.key)) inputs.fwd = false;
+            if (['s', 'S'].includes(e.key)) inputs.bwd = false;
             if (['ArrowLeft', 'a', 'A'].includes(e.key)) inputs.left = false;
             if (['ArrowRight', 'd', 'D'].includes(e.key)) inputs.right = false;
-            if (e.key === ' ') inputs.brake = false;
+            if (e.key === ' ') inputs.fwd = false;
+            if (['b', 'B'].includes(e.key)) inputs.brake = false;
         });
 
         // --- AUDIO ENGINE ---
@@ -1337,11 +1348,17 @@
             }
 
             // Physics
-            if (inputs.fwd) speed += 0.025; // Accelerate faster for higher top speed
-            if (inputs.bwd) speed -= 0.015; // Reverse
+            if (inputs.fwd) {
+                if (manualGearIndex >= 1) speed += 0.025; // Accelerate forward
+                else if (manualGearIndex === -1) speed -= 0.015; // Reverse
+            }
+            if (inputs.bwd) {
+                if (manualGearIndex >= 1) speed -= 0.015;
+                else if (manualGearIndex === -1) speed += 0.015;
+            }
 
             // Brake Logic (Now exclusively E-Brake)
-            if (inputs.handbrake) {
+            if (inputs.handbrake || inputs.brake) {
                 let brakeForce = 0.08; // Handbrake needs to be stronger for high speeds
                 if (speed > 0) speed = Math.max(0, speed - brakeForce);
                 if (speed < 0) speed = Math.min(0, speed + brakeForce);
@@ -1423,17 +1440,14 @@
             const tempNeedleGrp = document.getElementById('temp-needle-grp');
             if (tempNeedleGrp) tempNeedleGrp.setAttribute('transform', `rotate(${tempAngle}, 50, 50)`);
 
-            // Gear Logic
+            // Gear Logic (Manual)
             let gear = "N";
-            if (speed < -0.01) {
+            if (manualGearIndex === -1) {
                 gear = "R";
-            } else if (rawSpeed > 0.1) {
-                if (rawSpeed < 80) gear = "1";
-                else if (rawSpeed < 170) gear = "2";
-                else if (rawSpeed < 270) gear = "3";
-                else if (rawSpeed < 370) gear = "4";
-                else if (rawSpeed < 470) gear = "5";
-                else gear = "6";
+            } else if (manualGearIndex === 0) {
+                gear = "N";
+            } else {
+                gear = manualGearIndex.toString();
             }
             document.getElementById('gear-box').innerText = gear;
 
