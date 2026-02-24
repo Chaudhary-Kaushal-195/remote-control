@@ -87,7 +87,7 @@ export class Engine {
         this.theta += this.omega * dt;
         this.dTheta = this.omega * dt;
 
-        this.rpm = (60 * this.omega) / 2 * Math.PI; // Correct engine-audio-master formula
+        this.rpm = (60 * this.omega) / (2 * Math.PI); // Correct calculation
 
     }
 
