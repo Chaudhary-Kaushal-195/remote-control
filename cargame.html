@@ -491,6 +491,31 @@
             transform: scale(1.02);
         }
 
+        #steering-buttons {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            gap: 20px;
+            z-index: 6000;
+            display: none;
+        }
+
+        .steer-btn {
+            width: 70px;
+            height: 70px;
+            flex-direction: row;
+            font-size: 28px;
+            color: #0ffffa;
+            border-color: #0ffffa;
+            box-shadow: 0 0 15px rgba(15, 255, 250, 0.3);
+            text-shadow: 0 0 5px rgba(15, 255, 250, 0.5);
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .steer-btn:active {
+            background: rgba(15, 255, 250, 0.4);
+        }
+
         /* Responsive Scaling for Small Screens & Mobile Landscape */
         @media (max-width: 900px),
         (max-height: 500px) {
@@ -518,7 +543,8 @@
                 gap: 15px;
             }
 
-            #steering-zone {
+            #steering-zone,
+            #steering-buttons {
                 transform: scale(1.15);
                 transform-origin: bottom left;
                 bottom: 25px;
@@ -669,6 +695,14 @@
             </div>
 
             <div class="setting-row">
+                <div class="setting-label">Control HUD</div>
+                <select id="setting-hud-toggle" onchange="saveSettings()">
+                    <option value="on">On (Visible)</option>
+                    <option value="off">Off (Hidden)</option>
+                </select>
+            </div>
+
+            <div class="setting-row">
                 <div class="setting-label">Engine Volume</div>
                 <input type="range" id="setting-engine-vol" min="0" max="100" value="80" oninput="saveSettings()">
             </div>
@@ -687,6 +721,11 @@
             <div class="spoke-center"></div>
             <div class="spoke-hand"></div>
         </div>
+    </div>
+
+    <div id="steering-buttons">
+        <div id="steer-left" class="pedal steer-btn">&#9664;</div>
+        <div id="steer-right" class="pedal steer-btn">&#9654;</div>
     </div>
 
     <!-- Orbit zone only on top half -->
@@ -747,7 +786,37 @@
             steering: 'wheel',
             units: 'kph',
             engineVol: 80,
-            musicVol: 50
+            musicVol: 50,
+            controlHud: 'on'
+        };
+
+        window.applyHUDVisibility = () => {
+            const isHudOn = gameSettings.controlHud !== 'off';
+            const steeringZone = document.getElementById('steering-zone');
+            const steeringButtons = document.getElementById('steering-buttons');
+            const uiContainer = document.querySelector('.ui-container');
+
+            if (!isHudOn) {
+                if (steeringZone) steeringZone.style.display = 'none';
+                if (steeringButtons) steeringButtons.style.display = 'none';
+                if (uiContainer) uiContainer.style.display = 'none';
+            } else {
+                if (uiContainer) uiContainer.style.display = 'flex';
+
+                if (gameSettings.steering === 'wheel') {
+                    if (steeringZone) steeringZone.style.display = 'block';
+                    if (steeringButtons) steeringButtons.style.display = 'none';
+                    if (window.setGyroState) window.setGyroState(false);
+                } else if (gameSettings.steering === 'buttons') {
+                    if (steeringZone) steeringZone.style.display = 'none';
+                    if (steeringButtons) steeringButtons.style.display = 'flex';
+                    if (window.setGyroState) window.setGyroState(false);
+                } else if (gameSettings.steering === 'gyro') {
+                    if (steeringZone) steeringZone.style.display = 'none';
+                    if (steeringButtons) steeringButtons.style.display = 'none';
+                    if (window.setGyroState) window.setGyroState(true);
+                }
+            }
         };
 
         window.toggleSettings = () => {
@@ -766,8 +835,13 @@
             gameSettings.units = document.getElementById('setting-units').value;
             gameSettings.engineVol = document.getElementById('setting-engine-vol').value;
             gameSettings.musicVol = document.getElementById('setting-music-vol').value;
+            const hudToggle = document.getElementById('setting-hud-toggle');
+            if (hudToggle) gameSettings.controlHud = hudToggle.value;
 
             localStorage.setItem('drViceSettings', JSON.stringify(gameSettings));
+
+            if (window.applyHUDVisibility) window.applyHUDVisibility();
+
             // Apply live engine volume is handled dynamically in EngineSoundSystem update
             if (window.engineSoundSystem) {
                 // Instantly update volume if system is active
@@ -783,7 +857,10 @@
                 document.getElementById('setting-units').value = s.units || 'kph';
                 document.getElementById('setting-engine-vol').value = s.engineVol || 80;
                 document.getElementById('setting-music-vol').value = s.musicVol || 50;
-                gameSettings = s;
+                if (document.getElementById('setting-hud-toggle')) {
+                    document.getElementById('setting-hud-toggle').value = s.controlHud || 'on';
+                }
+                gameSettings = Object.assign(gameSettings, s);
             }
         }
         loadSettingsToModal();
@@ -1041,18 +1118,27 @@
         const speedBox = document.getElementById('speed-box');
 
         window.toggleGyro = async () => {
-            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                try {
-                    const response = await DeviceOrientationEvent.requestPermission();
-                    if (response === 'granted') startGyro();
-                } catch (e) { console.error(e); }
+            window.setGyroState(!gyroActive);
+        };
+
+        window.setGyroState = async (forceState) => {
+            if (forceState === gyroActive) return;
+            if (forceState) {
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    try {
+                        const response = await DeviceOrientationEvent.requestPermission();
+                        if (response === 'granted') _setGyro(true);
+                    } catch (e) { console.error(e); _setGyro(true); }
+                } else {
+                    _setGyro(true);
+                }
             } else {
-                startGyro();
+                _setGyro(false);
             }
         };
 
-        function startGyro() {
-            gyroActive = !gyroActive;
+        function _setGyro(state) {
+            gyroActive = state;
             if (gyroActive) {
                 window.addEventListener('deviceorientation', handleGyro, true);
                 speedBox.style.borderColor = "#0ffffa";
@@ -1103,6 +1189,8 @@
                 if (t.target.closest('#gas')) inputs.fwd = true;
                 if (t.target.closest('#rev-btn')) inputs.bwd = true;
                 if (t.target.closest('#handbrake')) inputs.handbrake = true;
+                if (t.target.closest('#steer-left')) inputs.left = true;
+                if (t.target.closest('#steer-right')) inputs.right = true;
 
                 const r = wheelZone.getBoundingClientRect();
                 if (t.clientX >= r.left && t.clientX <= r.right && t.clientY >= r.top && t.clientY <= r.bottom) {
@@ -1141,6 +1229,8 @@
                 if (t.target.closest('#gas')) inputs.fwd = false;
                 if (t.target.closest('#rev-btn')) inputs.bwd = false;
                 if (t.target.closest('#handbrake')) inputs.handbrake = false;
+                if (t.target.closest('#steer-left')) inputs.left = false;
+                if (t.target.closest('#steer-right')) inputs.right = false;
                 if (t.identifier === activeId) activeId = null;
             }
         });
@@ -1339,6 +1429,10 @@
             }
         }
         animate();
+
+        setTimeout(() => {
+            if (window.applyHUDVisibility) window.applyHUDVisibility();
+        }, 100);
     </script>
 </body>
 
