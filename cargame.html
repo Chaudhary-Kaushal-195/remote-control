@@ -126,7 +126,6 @@
             top: 40%;
         }
 
-        /* PEDALS - Matching exact icon shapes and glows */
         .ui-container {
             position: absolute;
             bottom: 40px;
@@ -138,9 +137,13 @@
             gap: 10px;
             /* Reduced gap since they stack */
             z-index: 55;
+            pointer-events: none;
+            /* Let clicks pass through empty space */
         }
 
         .pedal {
+            pointer-events: auto;
+            /* Catch clicks directly on pedals */
             border-radius: 10px;
             display: flex;
             flex-direction: column;
@@ -246,7 +249,8 @@
             height: 50vh;
             /* Only top half of screen */
             z-index: 5000;
-            pointer-events: auto;
+            pointer-events: none;
+            /* Disabled until game starts to let initial click pass through */
             /* Catch touches */
             touch-action: none;
         }
@@ -382,7 +386,8 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.8);
-            z-index: 5000;
+            z-index: 10000;
+            /* Must be higher than dat.gui 9999 to catch first click */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -1380,6 +1385,8 @@
         window.initAudio = async () => {
             const overlay = document.getElementById('sound-overlay');
             if (overlay) overlay.style.display = 'none';
+            document.getElementById('orbit-zone').style.pointerEvents = 'auto'; // Enable camera orbiting after start
+
             if (!vehicle) {
                 vehicle = new Vehicle(camera, car);
                 window.vehicle = vehicle;
