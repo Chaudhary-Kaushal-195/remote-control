@@ -59,7 +59,7 @@ class Engine {
         this.omega += dAlpha * dt;
         this.theta += this.omega * dt;
 
-        this.rpm = (60 * this.omega) / (2 * Math.PI);
+        this.rpm = (60 * this.omega) / 2 * Math.PI;
     }
 
     update(h) {
