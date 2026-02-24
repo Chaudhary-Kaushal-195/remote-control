@@ -765,6 +765,7 @@
     </div>
 
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.9/dat.gui.min.js"></script>
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
     </script>
@@ -805,6 +806,28 @@
             controlHud: 'on'
         };
         window.gameSettings = gameSettings;
+
+        // --- DAT.GUI SETUP ---
+        const gui = new window.dat.GUI({ autoPlace: true });
+        gui.domElement.style.position = 'absolute';
+        gui.domElement.style.top = '10px';
+        gui.domElement.style.right = '10px';
+        gui.domElement.style.zIndex = '9999';
+
+        const guiEngine = gui.addFolder('Engine');
+        const guiDrivetrain = gui.addFolder('Drivetrain');
+
+        const engineState = { throttle: 0, rpm: 0 };
+        const drivetrainState = { gear: "N", speedKph: 0 };
+
+        guiEngine.add(engineState, 'throttle').name('Throttle').listen();
+        guiEngine.add(engineState, 'rpm').name('RPM').listen();
+
+        guiDrivetrain.add(drivetrainState, 'gear').name('Gear').listen();
+        guiDrivetrain.add(drivetrainState, 'speedKph').name('Speed KPH').listen();
+
+        guiEngine.open();
+        guiDrivetrain.open();
 
         window.applyHUDVisibility = () => {
             const isHudOn = gameSettings.controlHud !== 'off';
@@ -1398,6 +1421,12 @@
 
             camera.position.lerp(worldPos, 0.12);
             camera.lookAt(worldTarget);
+
+            // Update DAT.GUI State
+            engineState.throttle = inputs.fwd ? 1.0 : 0.0;
+            engineState.rpm = Math.floor(rpm);
+            drivetrainState.gear = manualGearIndex === -1 ? "R" : (manualGearIndex === 0 ? "N" : manualGearIndex.toString());
+            drivetrainState.speedKph = Math.floor(Math.abs(speed * 200));
 
             renderer.render(scene, camera);
 
