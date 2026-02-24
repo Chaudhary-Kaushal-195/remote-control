@@ -386,8 +386,8 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.8);
-            z-index: 10000;
-            /* Must be higher than dat.gui 9999 to catch first click */
+            z-index: 99999;
+            /* Must be MUCH higher than anything else to catch first click */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -771,7 +771,7 @@
 
     <!-- VITE TYPESCRIPT BACKEND IFRAME -->
     <iframe id="audio-iframe" src="http://localhost:5173"
-        style="position: absolute; top:0; left:0; width: 350px; height: 350px; z-index: 9999; border: none; pointer-events: none;"></iframe>
+        style="position: absolute; top:0; left:0; width: 350px; height: 350px; z-index: 50; border: none; pointer-events: none;"></iframe>
 
     <script type="module">
         import * as THREE from 'three';
@@ -1339,6 +1339,7 @@
             const overlay = document.getElementById('sound-overlay');
             if (overlay) overlay.style.display = 'none';
             document.getElementById('orbit-zone').style.pointerEvents = 'auto'; // Enable camera orbiting after start
+            document.getElementById('audio-iframe').style.pointerEvents = 'auto'; // Allow clicking the iframe dat.gui
 
             if (!isAudioInit) {
                 // Send START trigger to external Iframe
