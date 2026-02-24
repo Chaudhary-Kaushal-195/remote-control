@@ -1379,6 +1379,7 @@
             if (!vehicle) {
                 vehicle = new EngineSoundSystem(camera, car);
                 window.vehicle = vehicle;
+                await vehicle.init(); // Wait for sounds to load
                 vehicle.startEngine();
                 isAudioInit = true;
 
@@ -1424,11 +1425,11 @@
 
             // Arcade Physics (Visual Car Movement completely decoupled from sound)
             if (inputs.fwd) {
-                if (manualGearIndex >= 1) speed += 0.08;
-                else if (manualGearIndex === -1) speed -= 0.05;
+                if (manualGearIndex >= 1) speed += 0.025;
+                else if (manualGearIndex === -1) speed -= 0.015;
             } else if (inputs.bwd) { // reverse/brake
-                if (manualGearIndex >= 1) speed -= 0.05;
-                else if (manualGearIndex === -1) speed += 0.05;
+                if (manualGearIndex >= 1) speed -= 0.015;
+                else if (manualGearIndex === -1) speed += 0.015;
             }
             if (inputs.handbrake || inputs.brake) {
                 let brakeForce = 0.08;
@@ -1499,7 +1500,7 @@
             camera.lookAt(worldTarget);
 
             // Update DAT.GUI State
-            if (vehicle && vehicle.isLoaded) {
+            if (vehicle && vehicle.audio && vehicle.audio.isLoaded) {
                 engineState.throttle = vehicle.engine.throttle;
                 engineState.rpm = vehicle.engine.rpm;
                 engineState.theta = vehicle.engine.theta;
