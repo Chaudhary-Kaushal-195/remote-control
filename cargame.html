@@ -769,18 +769,12 @@
         <div id="rev-btn" class="pedal">REV</div>
     </div>
 
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.9/dat.gui.min.js"></script>
-    <script type="importmap">
-        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
-    </script>
+    <!-- VITE TYPESCRIPT BACKEND IFRAME -->
+    <iframe id="audio-iframe" src="http://localhost:5173"
+        style="position: absolute; top:0; left:0; width: 350px; height: 350px; z-index: 9999; border: none; pointer-events: none;"></iframe>
 
     <script type="module">
         import * as THREE from 'three';
-        import { EngineSoundSystem } from './EngineSoundSystem.js';
-
-        // Set global Three so AudioManager doesn't crash
-        window.THREE = THREE;
 
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
@@ -805,47 +799,7 @@
             if (overlay) overlay.style.display = isPaused ? 'flex' : 'none';
         };
 
-        // --- GLOBAL SETTINGS & SYNC ---
-        let gameSettings = {
-            steering: 'wheel',
-            units: 'kph',
-            engineVol: 80,
-            musicVol: 50,
-            controlHud: 'on'
-        };
         window.gameSettings = gameSettings;
-
-        // --- DAT.GUI SETUP ---
-        const gui = new window.dat.GUI({ autoPlace: true });
-        gui.domElement.style.position = 'absolute';
-        gui.domElement.style.top = '10px';
-        gui.domElement.style.left = '10px'; // Re-positioned to Top Left
-        gui.domElement.style.zIndex = '9999';
-
-        const guiMain = gui.addFolder('Settings');
-        const guiEngine = gui.addFolder('Engine');
-        const guiDrivetrain = gui.addFolder('Drivetrain');
-
-        const mainState = { activeConfig: 'bac_mono' };
-        // Match Engine state exactly 
-        const engineState = { throttle: 0, rpm: 0, theta: 0, omega: 0 };
-        // Match Drivetrain state exactly
-        const drivetrainState = { gear: "1", theta: 0, omega: 0 };
-
-        guiMain.add(mainState, 'activeConfig', ['bac_mono']).name('Select config');
-
-        guiEngine.add(engineState, 'throttle', 0, 1).name('Throttle').listen();
-        guiEngine.add(engineState, 'rpm', 0, 9000).name('RPM').listen();
-        guiEngine.add(engineState, 'theta', 0, 1000).name('Theta').listen();
-        guiEngine.add(engineState, 'omega', -100, 100).name('Omega').listen();
-
-        guiDrivetrain.add(drivetrainState, 'gear').name('Gear').listen();
-        guiDrivetrain.add(drivetrainState, 'theta', 0, 1000).name('Theta').listen();
-        guiDrivetrain.add(drivetrainState, 'omega', -100, 100).name('Omega').listen();
-
-        guiMain.open();
-        guiEngine.open();
-        guiDrivetrain.open();
 
         window.applyHUDVisibility = () => {
             const isHudOn = gameSettings.controlHud !== 'off';
@@ -1335,58 +1289,68 @@
         window.addEventListener('mouseup', resetMouseInputs);
         window.addEventListener('mouseout', resetMouseInputs);
 
+        // Forward keyboard commands directly to the embedded Vite server
+        const iframe = document.getElementById('audio-iframe');
+
+        function sendIframeKey(type, code, key) {
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({ type, code, key }, "http://localhost:5173");
+            }
+        }
+
         window.addEventListener('keydown', (e) => {
-            if (['w', 'W'].includes(e.key)) inputs.fwd = true;
+            if (['w', 'W'].includes(e.key)) { inputs.fwd = true; sendIframeKey('keydown', 'Space', ' '); }
             if (['s', 'S'].includes(e.key)) inputs.bwd = true;
             if (['ArrowLeft', 'a', 'A'].includes(e.key)) inputs.left = true;
             if (['ArrowRight', 'd', 'D'].includes(e.key)) inputs.right = true;
-            if (e.key === ' ') { inputs.fwd = true; e.preventDefault(); }
-            if (['b', 'B'].includes(e.key)) { inputs.brake = true; }
+            if (e.key === ' ') { inputs.fwd = true; sendIframeKey('keydown', 'Space', ' '); e.preventDefault(); }
+            if (['b', 'B'].includes(e.key)) { inputs.brake = true; sendIframeKey('keydown', 'KeyB', 'b'); }
 
-            // Replaced with physical Drivetrain mappings
-            // Arcade + Sound Engine Drivetrain mappings
+            // Arcade Drivetrain mappings
             if (e.key === 'ArrowUp') {
                 if (manualGearIndex < 6) manualGearIndex++;
-                if (vehicle) vehicle.shiftGear('up', manualGearIndex);
+                sendIframeKey('keydown', 'ArrowUp', 'ArrowUp');
                 e.preventDefault();
             }
             if (e.key === 'ArrowDown') {
                 if (manualGearIndex > -1) manualGearIndex--;
-                if (vehicle) vehicle.shiftGear('down', manualGearIndex);
+                sendIframeKey('keydown', 'ArrowDown', 'ArrowDown');
                 e.preventDefault();
             }
             if (e.key.toLowerCase() === 'c') cycleCamera();
         });
 
         window.addEventListener('keyup', (e) => {
-            if (['w', 'W'].includes(e.key)) inputs.fwd = false;
+            if (['w', 'W'].includes(e.key)) { inputs.fwd = false; sendIframeKey('keyup', 'Space', ' '); }
             if (['s', 'S'].includes(e.key)) inputs.bwd = false;
             if (['ArrowLeft', 'a', 'A'].includes(e.key)) inputs.left = false;
             if (['ArrowRight', 'd', 'D'].includes(e.key)) inputs.right = false;
-            if (e.key === ' ') { inputs.fwd = false; e.preventDefault(); }
-            if (['b', 'B'].includes(e.key)) { inputs.brake = false; }
+            if (e.key === ' ') { inputs.fwd = false; sendIframeKey('keyup', 'Space', ' '); e.preventDefault(); }
+            if (['b', 'B'].includes(e.key)) { inputs.brake = false; sendIframeKey('keyup', 'KeyB', 'b'); }
+
+            if (e.key === 'ArrowUp') sendIframeKey('keyup', 'ArrowUp', 'ArrowUp');
+            if (e.key === 'ArrowDown') sendIframeKey('keyup', 'ArrowDown', 'ArrowDown');
         });
 
-        // --- AUDIO ENGINE ---
+        // --- AUDIO ENGINE VIA IFRAME ---
         let isAudioInit = false;
-        let vehicle = null; // We'll keep the name 'vehicle' for the EngineSoundSystem instance so dat.gui doesn't break
 
         window.initAudio = async () => {
             const overlay = document.getElementById('sound-overlay');
             if (overlay) overlay.style.display = 'none';
             document.getElementById('orbit-zone').style.pointerEvents = 'auto'; // Enable camera orbiting after start
 
-            if (!vehicle) {
-                vehicle = new EngineSoundSystem(camera, car);
-                window.vehicle = vehicle;
-                await vehicle.init(); // Wait for sounds to load
-                vehicle.startEngine();
+            if (!isAudioInit) {
+                // Send START trigger to external Iframe
+                sendIframeKey('start', '', '');
                 isAudioInit = true;
 
-                // Auto-shift to 1st
-                setTimeout(() => { vehicle.shiftGear('up', 1); }, 100);
-            } else if (vehicle.audioContext.state === 'suspended') {
-                vehicle.audioContext.resume();
+                // Sync 1st gear logic initially so car matches iframe
+                setTimeout(() => {
+                    manualGearIndex = 1;
+                    sendIframeKey('keydown', 'ArrowUp', 'ArrowUp');
+                    setTimeout(() => sendIframeKey('keyup', 'ArrowUp', 'ArrowUp'), 50);
+                }, 100);
             }
         };
 
@@ -1439,30 +1403,8 @@
             speed *= inputs.handbrake ? 0.95 : 0.99; // Drag/coasting
 
             // Sound Physics (Runs purely for sound generation and HUD, doesn't move car)
-            if (vehicle) {
-                // Throttle
-                if (vehicle.drivetrain.downShift) {
-                    vehicle.setThrottle(0.8);
-                } else if (inputs.fwd) {
-                    vehicle.setThrottle(Math.min(1.0, vehicle.engine.throttle + 0.1));
-                } else {
-                    vehicle.setThrottle(Math.max(0.0, vehicle.engine.throttle - 0.2));
-                }
-
-                // Brakes
-                if (inputs.handbrake || inputs.brake) {
-                    vehicle.applyBrakes(5.0);
-                }
-
-                // integrate sound physics
-                vehicle.update(dt);
-
-                // RPM HUD is now driven by Sound engine RPM for realism
-                rpm = vehicle.engine.rpm;
-            } else {
-                // If audio isn't initialized yet, simulate fake RPM for HUD
-                rpm = Math.abs(speed) * 8000;
-            }
+            // WE NOW IGNORE LOCAL AUDIO MATH, IT'S IN THE IFRAME.
+            rpm = Math.abs(speed) * 8000;
 
             // Move car via calculated speed (m/s * dt visually scaled)
             // scale up visual translation lightly so it feels fast
@@ -1499,35 +1441,7 @@
             camera.position.lerp(worldPos, 0.12);
             camera.lookAt(worldTarget);
 
-            // Update DAT.GUI State
-            if (vehicle && vehicle.audio && vehicle.audio.isLoaded) {
-                engineState.throttle = vehicle.engine.throttle;
-                engineState.rpm = vehicle.engine.rpm;
-                engineState.theta = vehicle.engine.theta;
-                engineState.omega = vehicle.engine.omega;
-
-                drivetrainState.gear = vehicle.drivetrain.gear;
-                drivetrainState.theta = vehicle.drivetrain.theta;
-                drivetrainState.omega = vehicle.drivetrain.omega;
-            } else if (vehicle) {
-                engineState.throttle = vehicle.engine.throttle;
-                engineState.rpm = vehicle.engine.rpm;
-                engineState.theta = vehicle.engine.theta;
-                engineState.omega = vehicle.engine.omega;
-
-                drivetrainState.gear = vehicle.drivetrain.gear;
-                drivetrainState.theta = vehicle.drivetrain.theta;
-                drivetrainState.omega = vehicle.drivetrain.omega;
-            } else {
-                engineState.throttle = inputs.fwd ? 1.0 : 0.0;
-                engineState.rpm = Math.floor(rpm);
-                engineState.theta = 0;
-                engineState.omega = 0;
-
-                drivetrainState.gear = manualGearIndex === -1 ? "R" : (manualGearIndex === 0 ? "N" : manualGearIndex.toString());
-                drivetrainState.theta = 0;
-                drivetrainState.omega = 0;
-            }
+            // Dat.gui state is dropped here because the iframe is rendering its own original dat.gui.
 
             renderer.render(scene, camera);
 
