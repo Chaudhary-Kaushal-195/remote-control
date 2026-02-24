@@ -777,8 +777,7 @@
 
     <script type="module">
         import * as THREE from 'three';
-        import { Vehicle } from './engine-audio/src/Vehicle.js';
-        import { bac_mono } from './engine-audio/src/configurations.js';
+        import { EngineSoundSystem } from './EngineSoundSystem.js';
 
         // Set global Three so AudioManager doesn't crash
         window.THREE = THREE;
@@ -1345,25 +1344,15 @@
             if (['b', 'B'].includes(e.key)) { inputs.brake = true; }
 
             // Replaced with physical Drivetrain mappings
+            // Arcade + Sound Engine Drivetrain mappings
             if (e.key === 'ArrowUp') {
-                if (vehicle) {
-                    vehicle.drivetrain.changeGear(vehicle.drivetrain.gear + 1);
-                    // Slight auto-rev match when shifting up/down to prevent sudden stalling in 1st
-                    vehicle.engine.throttle = 0.5;
-                    setTimeout(() => vehicle.engine.throttle = (inputs.fwd ? 1.0 : 0.0), 100);
-                } else {
-                    if (manualGearIndex < 6) manualGearIndex++;
-                }
+                if (manualGearIndex < 6) manualGearIndex++;
+                if (vehicle) vehicle.shiftGear('up', manualGearIndex);
                 e.preventDefault();
             }
             if (e.key === 'ArrowDown') {
-                if (vehicle) {
-                    vehicle.drivetrain.changeGear(vehicle.drivetrain.gear - 1);
-                    vehicle.engine.throttle = 0.5;
-                    setTimeout(() => vehicle.engine.throttle = (inputs.fwd ? 1.0 : 0.0), 100);
-                } else {
-                    if (manualGearIndex > -1) manualGearIndex--;
-                }
+                if (manualGearIndex > -1) manualGearIndex--;
+                if (vehicle) vehicle.shiftGear('down', manualGearIndex);
                 e.preventDefault();
             }
             if (e.key.toLowerCase() === 'c') cycleCamera();
@@ -1380,7 +1369,7 @@
 
         // --- AUDIO ENGINE ---
         let isAudioInit = false;
-        let vehicle = null;
+        let vehicle = null; // We'll keep the name 'vehicle' for the EngineSoundSystem instance so dat.gui doesn't break
 
         window.initAudio = async () => {
             const overlay = document.getElementById('sound-overlay');
@@ -1388,15 +1377,15 @@
             document.getElementById('orbit-zone').style.pointerEvents = 'auto'; // Enable camera orbiting after start
 
             if (!vehicle) {
-                vehicle = new Vehicle(camera, car);
+                vehicle = new EngineSoundSystem(camera, car);
                 window.vehicle = vehicle;
-                await vehicle.init(bac_mono);
+                vehicle.startEngine();
                 isAudioInit = true;
 
-                // Auto-shift to 1st gear so that the user doesn't wonder why pressing gas in Neutral does nothing
-                setTimeout(() => { vehicle.drivetrain.changeGear(1); }, 100);
-            } else if (vehicle.audio.ctx.state === 'suspended') {
-                vehicle.audio.ctx.resume();
+                // Auto-shift to 1st
+                setTimeout(() => { vehicle.shiftGear('up', 1); }, 100);
+            } else if (vehicle.audioContext.state === 'suspended') {
+                vehicle.audioContext.resume();
             }
         };
 
@@ -1428,52 +1417,50 @@
                 visual.style.transform = `rotate(${wheelAngle}deg)`;
             }
 
-            // Physics Integration via EngineSoundSystem if available
+            // Update Time
             const now = performance.now();
-            const dt = Math.min((now - lastTime) / 1000, 0.1); // Max 100ms delta to prevent huge jumps
+            const dt = Math.min((now - lastTime) / 1000, 0.1); // Max 100ms delta
             lastTime = now;
 
+            // Arcade Physics (Visual Car Movement completely decoupled from sound)
+            if (inputs.fwd) {
+                if (manualGearIndex >= 1) speed += 0.025;
+                else if (manualGearIndex === -1) speed -= 0.015;
+            } else if (inputs.bwd) { // reverse/brake
+                if (manualGearIndex >= 1) speed -= 0.015;
+                else if (manualGearIndex === -1) speed += 0.015;
+            }
+            if (inputs.handbrake || inputs.brake) {
+                let brakeForce = 0.08;
+                if (speed > 0) speed = Math.max(0, speed - brakeForce);
+                if (speed < 0) speed = Math.min(0, speed + brakeForce);
+            }
+            speed *= inputs.handbrake ? 0.95 : 0.99; // Drag/coasting
+
+            // Sound Physics (Runs purely for sound generation and HUD, doesn't move car)
             if (vehicle) {
-                // Throttle / Brake controls
+                // Throttle
                 if (vehicle.drivetrain.downShift) {
-                    vehicle.engine.throttle = 0.8; // rev matching
+                    vehicle.setThrottle(0.8);
                 } else if (inputs.fwd) {
-                    // Allow full 1.0 throttle quickly
-                    vehicle.engine.throttle = Math.min(1.0, vehicle.engine.throttle + 0.1);
+                    vehicle.setThrottle(Math.min(1.0, vehicle.engine.throttle + 0.1));
                 } else {
-                    // Drop throttle quickly on release
-                    vehicle.engine.throttle = Math.max(0.0, vehicle.engine.throttle - 0.2);
+                    vehicle.setThrottle(Math.max(0.0, vehicle.engine.throttle - 0.2));
                 }
 
+                // Brakes
                 if (inputs.handbrake || inputs.brake) {
-                    // Realistic braking logic: apply counter-omega to the drivetrain
-                    if (vehicle.drivetrain.omega > 0.5) vehicle.drivetrain.omega *= 0.95;
-                    else if (vehicle.drivetrain.omega < -0.5) vehicle.drivetrain.omega *= 0.95;
-                    else vehicle.drivetrain.omega = 0;
+                    vehicle.applyBrakes(5.0);
                 }
 
-                // Run XPBD physics step
-                vehicle.update(now, dt); // time in ms, dt in seconds
+                // integrate sound physics
+                vehicle.update(dt);
 
-                // Read back physics for visuals
-                speed = vehicle.velocity;
+                // RPM HUD is now driven by Sound engine RPM for realism
                 rpm = vehicle.engine.rpm;
             } else {
-                // Fallback basic physics if audio engine isn't initialized yet
-                if (inputs.fwd) {
-                    if (manualGearIndex >= 1) speed += 0.025;
-                    else if (manualGearIndex === -1) speed -= 0.015;
-                }
-                if (inputs.bwd) {
-                    if (manualGearIndex >= 1) speed -= 0.015;
-                    else if (manualGearIndex === -1) speed += 0.015;
-                }
-                if (inputs.handbrake || inputs.brake) {
-                    let brakeForce = 0.08;
-                    if (speed > 0) speed = Math.max(0, speed - brakeForce);
-                    if (speed < 0) speed = Math.min(0, speed + brakeForce);
-                }
-                speed *= inputs.handbrake ? 0.95 : 0.99;
+                // If audio isn't initialized yet, simulate fake RPM for HUD
+                rpm = Math.abs(speed) * 8000;
             }
 
             // Move car via calculated speed (m/s * dt visually scaled)
@@ -1512,7 +1499,7 @@
             camera.lookAt(worldTarget);
 
             // Update DAT.GUI State
-            if (vehicle && vehicle.audio && vehicle.audio.isLoaded) {
+            if (vehicle && vehicle.isLoaded) {
                 engineState.throttle = vehicle.engine.throttle;
                 engineState.rpm = vehicle.engine.rpm;
                 engineState.theta = vehicle.engine.theta;
