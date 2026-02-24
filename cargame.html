@@ -1400,13 +1400,11 @@
             const dt = Math.min((now - lastTime) / 1000, 0.1); // Max 100ms delta
             lastTime = now;
 
-            // Arcade Physics (Visual Car Movement completely decoupled from sound)
+            // Arcade Physics (Visual Car Movement decoupled from sound gears)
             if (inputs.fwd) {
-                if (manualGearIndex >= 1) speed += 0.025;
-                else if (manualGearIndex === -1) speed -= 0.015;
+                speed += 0.025;
             } else if (inputs.bwd) { // reverse/brake
-                if (manualGearIndex >= 1) speed -= 0.015;
-                else if (manualGearIndex === -1) speed += 0.015;
+                speed -= 0.015;
             }
             if (inputs.handbrake || inputs.brake) {
                 let brakeForce = 0.08;
