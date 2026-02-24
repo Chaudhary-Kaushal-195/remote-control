@@ -1307,8 +1307,10 @@
         };
 
         let backfireTick = 0;
-        window.triggerBackfireVisual = function () {
-            backfireTick = 10; // visual flame only
+        let isBigBackfire = false;
+        window.triggerBackfireVisual = function (isBig) {
+            isBigBackfire = !!isBig;
+            backfireTick = isBigBackfire ? 20 : 8; // big blast lasts longer visually
         };
 
         function animate() {
@@ -1435,9 +1437,14 @@
 
             if (backfireTick > 0) {
                 backfireTick--;
-                backfireLight.intensity = 5 * (backfireTick / 10);
-                flame.scale.setScalar(1 + Math.random() * 2);
-                flame.material.opacity = (backfireTick / 10);
+                let maxIntensity = isBigBackfire ? 15 : 5;
+                let scaleBase = isBigBackfire ? 2.5 : 1;
+                let scaleRand = isBigBackfire ? 4.0 : 1.5;
+                let maxTicks = isBigBackfire ? 20 : 8;
+
+                backfireLight.intensity = maxIntensity * (backfireTick / maxTicks);
+                flame.scale.setScalar(scaleBase + Math.random() * scaleRand);
+                flame.material.opacity = Math.min(1, (backfireTick / maxTicks) * (isBigBackfire ? 1.5 : 1.0));
             } else {
                 backfireLight.intensity = 0;
                 flame.material.opacity = 0;

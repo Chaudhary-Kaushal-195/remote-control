@@ -26,17 +26,25 @@ export class EngineSoundSystem {
         this.baseEngine = new THREE.PositionalAudio(this.audioListener);
         this.boostLayer = new THREE.PositionalAudio(this.audioListener);
         this.turboFlutter = new THREE.PositionalAudio(this.audioListener);
-        this.backfire = new THREE.PositionalAudio(this.audioListener);
+
+        // Multi-backfire setup
+        this.backfire1 = new THREE.PositionalAudio(this.audioListener);
+        this.backfire2 = new THREE.PositionalAudio(this.audioListener);
+        this.backfireBig = new THREE.PositionalAudio(this.audioListener);
 
         this.carMesh.add(this.baseEngine);
         this.carMesh.add(this.boostLayer);
         this.carMesh.add(this.turboFlutter);
-        this.carMesh.add(this.backfire);
+        this.carMesh.add(this.backfire1);
+        this.carMesh.add(this.backfire2);
+        this.carMesh.add(this.backfireBig);
 
         this.setupAudioSettings(this.baseEngine);
         this.setupAudioSettings(this.boostLayer);
         this.setupAudioSettings(this.turboFlutter);
-        this.setupAudioSettings(this.backfire);
+        this.setupAudioSettings(this.backfire1);
+        this.setupAudioSettings(this.backfire2);
+        this.setupAudioSettings(this.backfireBig);
 
         this.lowpassFilter = this.audioContext.createBiquadFilter();
         this.lowpassFilter.type = 'lowpass';
@@ -45,7 +53,9 @@ export class EngineSoundSystem {
         this.baseEngine.setFilter(this.lowpassFilter);
         this.boostLayer.setFilter(this.lowpassFilter);
         this.turboFlutter.setFilter(this.lowpassFilter);
-        this.backfire.setFilter(this.lowpassFilter);
+        this.backfire1.setFilter(this.lowpassFilter);
+        this.backfire2.setFilter(this.lowpassFilter);
+        this.backfireBig.setFilter(this.lowpassFilter);
 
         this.loadAudioFiles();
 
@@ -86,16 +96,31 @@ export class EngineSoundSystem {
             this.checkLoaded();
         });
 
-        loader.load('modern car vs  old supra backfire \uD83D\uDD25 - IMGHOST.mp3', (buffer) => {
-            this.backfire.setBuffer(buffer);
-            this.backfire.setLoop(false);
-            this.backfire.setVolume(1.0);
+        loader.load('boom1.mp3', (buffer) => {
+            this.backfire1.setBuffer(buffer);
+            this.backfire1.setLoop(false);
+            this.backfire1.setVolume(1.0);
+            this.checkLoaded();
+        });
+
+        loader.load('boom2.mp3', (buffer) => {
+            this.backfire2.setBuffer(buffer);
+            this.backfire2.setLoop(false);
+            this.backfire2.setVolume(1.0);
+            this.checkLoaded();
+        });
+
+        loader.load('boom4.mp3', (buffer) => {
+            this.backfireBig.setBuffer(buffer);
+            this.backfireBig.setLoop(false);
+            this.backfireBig.setVolume(1.5); // Big blast
             this.checkLoaded();
         });
     }
 
     checkLoaded() {
-        if (this.baseEngine.buffer && this.boostLayer.buffer && this.turboFlutter.buffer && this.backfire.buffer) {
+        if (this.baseEngine.buffer && this.boostLayer.buffer && this.turboFlutter.buffer &&
+            this.backfire1.buffer && this.backfire2.buffer && this.backfireBig.buffer) {
             this.isLoaded = true;
         }
     }
@@ -131,15 +156,46 @@ export class EngineSoundSystem {
     }
 
     triggerBackfireRoll(isThrottleRelease) {
-        if (this.isLoaded && this.currentRPM > 5000 && Math.random() < 0.20) {
-            if (this.backfire.isPlaying) this.backfire.stop();
-            this.backfire.play();
+        if (!this.isLoaded || this.currentRPM < 3500) return;
 
-            // Optionally trigger visuals via window if available
-            if (window.triggerBackfireVisual) {
-                window.triggerBackfireVisual();
+        // Increase backfire frequency, especially on throttle release
+        let chance = isThrottleRelease ? 0.8 : 0.3;
+
+        if (Math.random() < chance) {
+            // Big blast more likely at very high RPMs on throttle release
+            let bigChance = (isThrottleRelease && this.currentRPM > 5500) ? 0.4 : 0.05;
+
+            if (Math.random() < bigChance) {
+                if (this.backfireBig.isPlaying) this.backfireBig.stop();
+                this.backfireBig.play();
+                if (window.triggerBackfireVisual) window.triggerBackfireVisual(true);
+            } else {
+                // Multiple rapid pops
+                this.playMultiBackfire(Math.floor(Math.random() * 4) + 2); // 2 to 5 pops
             }
         }
+    }
+
+    playMultiBackfire(count) {
+        let pops = 0;
+        const popSequence = () => {
+            if (pops >= count) return;
+
+            let isBoom1 = Math.random() > 0.5;
+            let sound = isBoom1 ? this.backfire1 : this.backfire2;
+
+            if (sound.isPlaying) sound.stop();
+            // Vary pitch slightly for realism
+            sound.setPlaybackRate(0.9 + Math.random() * 0.2);
+            sound.play();
+
+            if (window.triggerBackfireVisual) window.triggerBackfireVisual(false);
+
+            pops++;
+            // Rapid pop interval between 80ms and 200ms
+            setTimeout(popSequence, 80 + Math.random() * 120);
+        };
+        popSequence();
     }
 
     update(deltaTime, wheelSpeed) {
@@ -155,7 +211,13 @@ export class EngineSoundSystem {
             targetRPM += this.throttle * (this.redlineRPM * 0.3); // Reving in neutral or clutch
         }
 
-        if (targetRPM > this.redlineRPM) targetRPM = this.redlineRPM;
+        if (targetRPM > this.redlineRPM) {
+            targetRPM = this.redlineRPM;
+            // Rev limiter bouncing can also trigger backfires
+            if (this.throttle > 0.8 && Math.random() < 0.15) {
+                this.triggerBackfireRoll(false);
+            }
+        }
 
         this.currentRPM += (targetRPM - this.currentRPM) * deltaTime * 10;
         if (this.currentRPM > 9999) this.currentRPM = 9999;
