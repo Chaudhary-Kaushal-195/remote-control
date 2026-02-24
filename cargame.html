@@ -1312,6 +1312,25 @@
             }
         });
 
+        // Add mouse support for the on-screen UI buttons so desktop users can click them
+        window.addEventListener('mousedown', (e) => {
+            if (e.target.closest('#gas')) inputs.fwd = true;
+            if (e.target.closest('#rev-btn')) inputs.bwd = true;
+            if (e.target.closest('#handbrake')) inputs.handbrake = true;
+            if (e.target.closest('#steer-left')) inputs.left = true;
+            if (e.target.closest('#steer-right')) inputs.right = true;
+        });
+
+        const resetMouseInputs = (e) => {
+            if (e.target.closest('#gas')) inputs.fwd = false;
+            if (e.target.closest('#rev-btn')) inputs.bwd = false;
+            if (e.target.closest('#handbrake')) inputs.handbrake = false;
+            if (e.target.closest('#steer-left')) inputs.left = false;
+            if (e.target.closest('#steer-right')) inputs.right = false;
+        };
+        window.addEventListener('mouseup', resetMouseInputs);
+        window.addEventListener('mouseout', resetMouseInputs);
+
         window.addEventListener('keydown', (e) => {
             if (['w', 'W'].includes(e.key)) inputs.fwd = true;
             if (['s', 'S'].includes(e.key)) inputs.bwd = true;
@@ -1350,8 +1369,8 @@
             if (['s', 'S'].includes(e.key)) inputs.bwd = false;
             if (['ArrowLeft', 'a', 'A'].includes(e.key)) inputs.left = false;
             if (['ArrowRight', 'd', 'D'].includes(e.key)) inputs.right = false;
-            if (e.key === ' ') inputs.fwd = false;
-            if (['b', 'B'].includes(e.key)) inputs.brake = false;
+            if (e.key === ' ') { inputs.fwd = false; e.preventDefault(); }
+            if (['b', 'B'].includes(e.key)) { inputs.brake = false; }
         });
 
         // --- AUDIO ENGINE ---
@@ -1366,6 +1385,9 @@
                 window.vehicle = vehicle;
                 await vehicle.init(bac_mono);
                 isAudioInit = true;
+
+                // Auto-shift to 1st gear so that the user doesn't wonder why pressing gas in Neutral does nothing
+                setTimeout(() => { vehicle.drivetrain.changeGear(1); }, 100);
             } else if (vehicle.audio.ctx.state === 'suspended') {
                 vehicle.audio.ctx.resume();
             }
@@ -1409,8 +1431,10 @@
                 if (vehicle.drivetrain.downShift) {
                     vehicle.engine.throttle = 0.8; // rev matching
                 } else if (inputs.fwd) {
-                    vehicle.engine.throttle = Math.min(1.0, vehicle.engine.throttle + 0.2);
+                    // Allow full 1.0 throttle quickly
+                    vehicle.engine.throttle = Math.min(1.0, vehicle.engine.throttle + 0.1);
                 } else {
+                    // Drop throttle quickly on release
                     vehicle.engine.throttle = Math.max(0.0, vehicle.engine.throttle - 0.2);
                 }
 
