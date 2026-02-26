@@ -47,7 +47,7 @@ document.addEventListener('keyup', e => {
     if (!loaded) {
         return;
     }
-    
+
     keys[e.code] = false;
 
     if (e.code.startsWith('Digit')) {
@@ -65,31 +65,32 @@ document.addEventListener('keyup', e => {
 const startBtn = document.getElementById('start_btn');
 const controls = document.getElementById('controls');
 
-startBtn?.addEventListener('click', start, {once : true})
-document.querySelector('select')?.addEventListener('change', start)
-
-async function start() {
+// @ts-ignore
+window.startTypeScriptEngineAudio = async function () {
     // @ts-ignore
     await vehicle.init(configurations[settings.activeConfig]);
 
     loaded = true;
-    
-    startBtn!.style.display = 'none';
-    controls!.style.display = 'block';
+
+    if (startBtn) startBtn.style.display = 'none';
+    if (controls) controls.style.display = 'block';
 }
 
+startBtn?.addEventListener('click', (window as any).startTypeScriptEngineAudio, { once: true })
+document.querySelector('select')?.addEventListener('change', (window as any).startTypeScriptEngineAudio)
+
 /* Update loop */
-let 
+let
     lastTime = (new Date()).getTime(),
     currentTime = 0,
     dt = 0;
-    
+
 function update(time: DOMHighResTimeStamp): void {
 
     requestAnimationFrame(time => {
         update(time);
     });
-    
+
     currentTime = (new Date()).getTime();
     dt = (currentTime - lastTime) / 1000;
     lastTime = currentTime;
@@ -115,8 +116,17 @@ function update(time: DOMHighResTimeStamp): void {
     if (keys['KeyB']) {
         drivetrain.omega -= 0.3; // Brakes
     }
-    
+
     vehicle.update(time, dt);
 }
 
 update(10);
+
+// @ts-ignore
+window.getEngineData = function () {
+    return {
+        rpm: engine.rpm,
+        omega: vehicle.drivetrain.omega,
+        gear: vehicle.drivetrain.gear
+    };
+};
