@@ -4,6 +4,13 @@ export default defineConfig({
     base: './',
     build: {
         minify: true,
-        target: 'esnext'
+        target: 'esnext',
+        rollupOptions: {
+            output: {
+                entryFileNames: `assets/engine-audio.js`,
+                chunkFileNames: `assets/engine-audio.js`,
+                assetFileNames: `assets/[name].[ext]`
+            }
+        }
     },
 });
