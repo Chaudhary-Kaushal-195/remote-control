@@ -1519,10 +1519,10 @@
 
                 // Gear Logic
                 let gearVal = "N";
-                if (vehicle) {
-                    if (vehicle.drivetrain.gear === -1) gearVal = "R";
-                    else if (vehicle.drivetrain.gear === 0) gearVal = "N";
-                    else gearVal = vehicle.drivetrain.gear.toString();
+                if (engineData) {
+                    if (engineData.gear === -1) gearVal = "R";
+                    else if (engineData.gear === 0) gearVal = "N";
+                    else gearVal = engineData.gear.toString();
                 } else {
                     if (manualGearIndex === -1) gearVal = "R";
                     else if (manualGearIndex === 0) gearVal = "N";
