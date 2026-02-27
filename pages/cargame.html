@@ -195,9 +195,11 @@
 
             <div style="display:flex; gap:10px; margin-bottom: 20px;">
                 <button class="hud-btn" id="cam-btn" onclick="window.initAudio(); window.cycleCamera();"
-                    style="flex:1; padding:10px; font-size:12px;">🎥 CAMERA</button>
-                <button id="remote-box" class="hud-btn" onclick="window.initAudio(); window.setupRemote();"
-                    style="flex:1; padding:10px; font-size:12px;">🤳 SYNC PHONE</button>
+                    style="flex:1; padding:10px; font-size:12px; background: #eeeeee; color: #111;">🎥 CAMERA</button>
+                <button id="settings-remote-status" class="hud-btn" onclick="window.toggleControllerConnection();"
+                    style="flex:1; padding:10px; font-size:12px; border: 1px solid gray; color: gray; background: rgba(255,255,255,0.05);">
+                    CONTROLLER DISCONNECTED
+                </button>
             </div>
 
             <div class="setting-row">

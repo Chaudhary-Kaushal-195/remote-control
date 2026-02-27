@@ -129,7 +129,19 @@ window.setupRemote = () => {
     });
     peer.on('connection', (c) => {
         conn = c;
-        if (remoteBox) remoteBox.innerText = "CONTROLLER CONNECTED";
+        if (remoteBox) {
+            remoteBox.innerText = "CONTROLLER CONNECTED";
+            // Disable opening QR code again from HUD if connected
+            remoteBox.onclick = () => { window.toggleSettings && window.toggleSettings(); };
+        }
+
+        const statusBtn = document.getElementById('settings-remote-status');
+        if (statusBtn) {
+            statusBtn.innerText = "CONTROLLER CONNECTED";
+            statusBtn.style.color = "#00ffff";
+            statusBtn.style.borderColor = "#00ffff";
+            statusBtn.style.background = "rgba(0,255,255,0.05)";
+        }
         conn.on('open', () => conn.send({ type: 'config', config: window.gameSettings }));
         conn.on('data', (data) => {
             if (data.type === 'gyro') {
@@ -141,6 +153,38 @@ window.setupRemote = () => {
             }
         });
     });
+};
+
+window.toggleControllerConnection = () => {
+    if (window.initAudio) window.initAudio();
+    const statusBtn = document.getElementById('settings-remote-status');
+    const remoteBox = document.getElementById('remote-box');
+
+    if (peer && !peer.disconnected) {
+        if (confirm("Disconnect the current phone controller?")) {
+            peer.destroy();
+            peer = null;
+            conn = null;
+
+            // Reset Settings Menu Button
+            if (statusBtn) {
+                statusBtn.innerText = "CONTROLLER DISCONNECTED";
+                statusBtn.style.color = "gray";
+                statusBtn.style.borderColor = "gray";
+                statusBtn.style.background = "rgba(255,255,255,0.05)";
+            }
+
+            // Reset In-Game UI Button
+            if (remoteBox) {
+                remoteBox.innerText = "🤳 SYNC PHONE";
+                remoteBox.style.background = "rgba(0, 0, 0, 0.4)";
+                remoteBox.style.color = "white";
+                remoteBox.onclick = () => { window.initAudio(); window.setupRemote(); };
+            }
+        }
+    } else {
+        window.setupRemote();
+    }
 };
 
 window.setGyroState = async (forceState) => {
