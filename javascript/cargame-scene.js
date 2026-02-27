@@ -235,33 +235,11 @@ function animate() {
     const dt = Math.min((now - lastTime) / 1000, 0.1);
     lastTime = now;
 
+    let engineData = null;
     if (window.getEngineData) engineData = window.getEngineData();
 
-    // Max achievable KPH per gear at 10000 RPM
-    const maxGearSpeedsKPH = {
-        '-1': 60,   // Reverse
-        '0': 0,     // Neutral
-        '1': 100,
-        '2': 180,
-        '3': 260,
-        '4': 340,
-        '5': 420,
-        '6': 500
-    };
-
     if (engineData) {
-        let currentGear = engineData.gear.toString();
-        let maxGearKPH = maxGearSpeedsKPH[currentGear] || 0;
-
-        let calculatedKPH = (engineData.rpm / 10000) * maxGearKPH;
-
-        // Convert realistic KPH to ThreeJS scene speed (internal speed = KPH / 3.6)
-        if (engineData.gear === -1) {
-            speed = -calculatedKPH / 3.6;
-        } else {
-            speed = calculatedKPH / 3.6;
-        }
-
+        speed = engineData.omega * 0.05;
         rpm = engineData.rpm;
     } else {
         if (window.inputs && window.inputs.fwd) speed += 0.025;
