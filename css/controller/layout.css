@@ -68,7 +68,7 @@ input {
 }
 
 button {
-    background: #f092ff;
+    background: rgba(255, 255, 255, 0.9);
     color: #000;
     border: none;
     padding: 15px 40px;
@@ -78,8 +78,15 @@ button {
     cursor: pointer;
     margin: 10px 0;
     max-width: 90%;
-    transition: 0.2s;
-    box-shadow: 0 0 20px rgba(240, 146, 255, 0.4);
+    transition: all 0.2s ease;
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+    font-family: 'Inter', sans-serif;
+}
+
+button:active {
+    transform: scale(0.95);
+    background: #fff;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
 }
 
 #debug-tilt {
@@ -103,26 +110,24 @@ button {
     z-index: 101;
 }
 
-/* FORCE LANDSCAPE OVERLAY */
-/* FORCE LANDSCAPE OVERLAY */
+/* FORCE LANDSCAPE OVERLAY & ROTATE */
 @media screen and (orientation: portrait) {
-    body::before {
-        content: "🔄 PLEASE ROTATE YOUR DEVICE TO LANDSCAPE";
+
+    /* Instead of a blocker, physically rotate the controller sideways */
+    body {
+        transform: rotate(-90deg);
+        transform-origin: center center;
+        width: 100vh;
+        height: 100vw;
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: #000;
-        color: #0ffffa;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: 'Courier New', monospace;
-        font-weight: bold;
-        text-align: center;
-        z-index: 999999;
-        padding: 20px;
-        box-sizing: border-box;
+        top: 50%;
+        left: 50%;
+        margin-top: -50vw;
+        margin-left: -50vh;
+    }
+
+    #desktop-blocker {
+        transform: rotate(90deg);
+        /* Counter-rotate if it shows up */
     }
 }
