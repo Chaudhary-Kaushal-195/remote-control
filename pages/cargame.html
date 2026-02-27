@@ -71,6 +71,9 @@
 
         <!-- TACHOMETER (RPM) -->
         <div class="gauge-pod gauge-sub">
+            <!-- Gear Display Moved Outside/Top -->
+            <div id="gear-box" class="gear-display-external">N</div>
+
             <svg width="110" height="110" viewBox="0 0 100 100">
                 <!-- Background Arc -->
                 <path d="M 21.7 78.3 A 40 40 0 1 1 78.3 78.3" fill="none" stroke="rgba(255,255,255,0.05)"
@@ -115,7 +118,9 @@
                 </g>
                 <circle cx="50" cy="50" r="3" fill="#fff" opacity="0.2" />
             </svg>
-            <div id="gear-box" class="gear-display">N</div>
+
+            <!-- Digital RPM Readout (In center) -->
+            <div id="rpm-box" class="rpm-digit">0</div>
             <div class="dash-label">RPM ×1000</div>
         </div>
     </div>

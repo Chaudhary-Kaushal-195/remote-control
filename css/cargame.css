@@ -348,15 +348,39 @@
             letter-spacing: 2px;
         }
 
-        .gear-display {
+        .gear-display,
+        .gear-display-external {
             position: absolute;
-            bottom: 45px;
-            font-size: 42px;
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
             color: var(--neon-pink);
             text-shadow: 0 0 20px rgba(240, 146, 255, 0.6);
             filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
+        }
+
+        .gear-display {
+            bottom: 45px;
+            font-size: 42px;
+        }
+
+        .gear-display-external {
+            top: -25px;
+            font-size: 24px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .rpm-digit {
+            position: absolute;
+            bottom: 42px;
+            width: 100%;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+            color: #fff;
+            opacity: 0.8;
+            letter-spacing: 1px;
         }
 
         #pause-btn {
