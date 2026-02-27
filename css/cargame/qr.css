@@ -1,0 +1,31 @@
+/* QR Code Connection Overlay */
+#qr-overlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(10, 0, 21, 0.95);
+    padding: 30px;
+    border: 2px solid #f092ff;
+    border-radius: 20px;
+    box-shadow: 0 0 50px rgba(240, 146, 255, 0.5);
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+#qr-code {
+    background: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.qr-close {
+    margin-top: 15px;
+    color: #f092ff;
+    cursor: pointer;
+    text-decoration: underline;
+}

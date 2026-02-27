@@ -1,0 +1,95 @@
+#status {
+    position: absolute;
+    top: 10px;
+    font-size: 14px;
+    color: #f092ff;
+    text-shadow: 0 0 10px #f092ff;
+}
+
+/* Controller Layout */
+#ui-container {
+    display: flex;
+    width: 90%;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+/* Connection Overlay */
+#overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 0, 21, 0.95);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    text-align: center;
+}
+
+input {
+    background: none;
+    border: 2px solid #f092ff;
+    color: #f092ff;
+    padding: 15px;
+    font-size: 20px;
+    text-align: center;
+    border-radius: 10px;
+    width: 250px;
+    margin-bottom: 20px;
+    outline: none;
+}
+
+button {
+    background: #f092ff;
+    color: #000;
+    border: none;
+    padding: 15px 40px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+#debug-tilt {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+#fix-sensors {
+    position: absolute;
+    top: 50px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #f092ff;
+    color: #f092ff;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: none;
+    z-index: 101;
+}
+
+/* FORCE LANDSCAPE OVERLAY */
+@media screen and (orientation: portrait) {
+    body::before {
+        content: "🔄 PLEASE ROTATE YOUR DEVICE TO LANDSCAPE";
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #000;
+        color: #0ffffa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        text-align: center;
+        z-index: 999999;
+        padding: 20px;
+    }
+}

@@ -1,0 +1,29 @@
+#reader-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #0a0015;
+    z-index: 2000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#reader {
+    width: 300px;
+    height: 300px;
+    border: 2px solid #0ffffa;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(15, 255, 250, 0.4);
+}
+
+.scan-btn {
+    background: #f092ff !important;
+    color: #000 !important;
+    font-weight: bold;
+    margin-bottom: 10px;
+}

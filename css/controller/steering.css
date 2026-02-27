@@ -1,0 +1,55 @@
+/* Analog Stick / Wheel Visual */
+#wheel-zone {
+    width: 140px;
+    height: 140px;
+    border: 3px solid #f092ff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 20px rgba(240, 146, 255, 0.4);
+}
+
+#wheel-inner {
+    width: 40px;
+    height: 40px;
+    background: #f092ff;
+    border-radius: 50%;
+    box-shadow: 0 0 15px #f092ff;
+    transition: transform 0.1s;
+}
+
+/* Button Steering Mode */
+#button-steering {
+    display: none;
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 85%;
+    height: 140px;
+    z-index: 50;
+    gap: 20px;
+}
+
+.steer-btn {
+    flex: 1;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid #f092ff;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 50px;
+    color: #f092ff;
+    -webkit-user-select: none;
+    user-select: none;
+    transition: 0.1s;
+}
+
+.steer-btn:active {
+    background: #f092ff;
+    color: #000;
+    box-shadow: 0 0 30px #f092ff;
+}

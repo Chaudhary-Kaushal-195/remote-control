@@ -1,0 +1,412 @@
+/* HUD - Exactly like top-left of reference image */
+#hud {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: #0ffffa;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+    z-index: 100;
+    font-size: 18px;
+    line-height: 1.4;
+    background: rgba(10, 0, 21, 0.85);
+    border: 1px solid var(--neon-blue);
+    padding: 15px;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    min-width: 220px;
+    box-shadow: 0 0 15px rgba(15, 255, 250, 0.2);
+    pointer-events: auto;
+}
+
+#hud b {
+    color: #0ffffa;
+    font-weight: 900;
+}
+
+#speed-box {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 0px 4px;
+    color: #fff;
+    font-size: 14px;
+    margin-left: 5px;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+#speed-box:active {
+    background: rgba(0, 255, 255, 0.2);
+}
+
+.hud-meta {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: pre;
+    margin-top: 10px;
+    font-weight: normal;
+}
+
+/* OVERRIDE NATIVE DAT.GUI POSITIONING */
+.dg.ac {
+    left: 0px !important;
+    right: auto !important;
+    z-index: 50 !important;
+}
+
+/* STEERING WHEEL */
+#steering-zone {
+    position: absolute;
+    bottom: 40px;
+    left: 40px;
+    width: 140px;
+    height: 140px;
+    z-index: 50;
+}
+
+#wheel-visual {
+    width: 100%;
+    height: 100%;
+    border: 3px solid #f092ff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px rgba(240, 146, 255, 0.4);
+    position: relative;
+}
+
+#wheel-visual::after {
+    content: "";
+    position: absolute;
+    width: 88%;
+    height: 88%;
+    border: 1.5px solid #f092ff;
+    border-radius: 50%;
+    box-shadow: inset 0 0 5px rgba(240, 146, 255, 0.2);
+}
+
+.spoke-center {
+    width: 30px;
+    height: 22px;
+    border: 2px solid #f092ff;
+    border-radius: 50% 50% 40% 40%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+}
+
+.spoke-center::before {
+    content: "";
+    position: absolute;
+    width: 12px;
+    height: 3px;
+    background: #f092ff;
+    border-radius: 2px;
+}
+
+.spoke-hand {
+    position: absolute;
+    width: 68%;
+    height: 38%;
+    border: 2px solid #f092ff;
+    border-radius: 30% 30% 70% 70%;
+    top: 40%;
+}
+
+.ui-container {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    z-index: 55;
+    pointer-events: none;
+}
+
+.pedal {
+    pointer-events: auto;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    border: 2px solid;
+    background: rgba(0, 0, 0, 0.5);
+    font-size: 14px;
+    position: relative;
+}
+
+.pedal-label {
+    position: absolute;
+    top: -25px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: #fff;
+    opacity: 0.9;
+}
+
+#handbrake {
+    width: 120px;
+    height: 45px;
+    border-color: #ff4400;
+    color: #ff4400;
+    box-shadow: 0 0 15px rgba(255, 68, 0, 0.4);
+    border-radius: 20px;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.9), rgba(255, 68, 0, 0.3));
+    z-index: 55;
+    position: relative;
+    flex-direction: row;
+    margin-right: -10px;
+}
+
+#handbrake .stripe {
+    height: 70%;
+    width: 8px;
+    background: none;
+    border: 2px solid #ff4400;
+    border-radius: 4px;
+    margin: 0 6px;
+    box-shadow: inset 0 0 5px rgba(255, 68, 0, 0.5);
+}
+
+#handbrake .stripe.active {
+    background: #ff4400;
+}
+
+
+#gas {
+    width: 70px;
+    height: 150px;
+    color: #0ffffa;
+    border: 2px solid;
+    border-image: linear-gradient(to top, #0ffffa, #f092ff) 1;
+    box-shadow: 0 0 15px rgba(15, 255, 250, 0.3);
+    position: relative;
+}
+
+#gas .stripe {
+    width: 60%;
+    height: 10px;
+    border: 1.5px solid #0ffffa;
+    border-radius: 3px;
+    margin: 6px 0;
+}
+
+#gas .pedal-label {
+    color: #f092ff;
+    top: 12px;
+    font-size: 14px;
+    font-weight: 900;
+}
+
+#rev-btn {
+    width: 70px;
+    height: 45px;
+    border-color: #0ffffa;
+    color: #0ffffa;
+    box-shadow: 0 0 15px rgba(15, 255, 250, 0.3);
+    border-radius: 10px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(15, 255, 250, 0.2));
+    z-index: 55;
+    position: relative;
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+#rev-btn:active {
+    background: rgba(15, 255, 250, 0.4);
+}
+
+.dash-cluster {
+    position: absolute;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    z-index: 6000;
+    pointer-events: none;
+}
+
+.gauge-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gauge-pod {
+    background: rgba(10, 0, 20, 0.7);
+    border: 1px solid var(--glass-border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.05);
+    position: relative;
+}
+
+.gauge-pod::before {
+    content: "";
+    position: absolute;
+    top: 5%;
+    left: 10%;
+    width: 80%;
+    height: 40%;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+    border-radius: 100px 100px 0 0;
+    pointer-events: none;
+}
+
+.gauge-main {
+    width: 200px;
+    height: 200px;
+    border: 2px solid rgba(15, 255, 250, 0.4);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 15px rgba(15, 255, 250, 0.1);
+}
+
+.gauge-sub {
+    width: 120px;
+    height: 120px;
+    border-color: rgba(240, 146, 255, 0.4);
+}
+
+.gauge-mini {
+    width: 80px;
+    height: 80px;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.gauge-needle {
+    transition: transform 0.05s linear;
+}
+
+.dash-label {
+    position: absolute;
+    bottom: 22px;
+    font-size: 9px;
+    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
+    color: #fff;
+    text-transform: uppercase;
+    opacity: 0.5;
+    letter-spacing: 2px;
+}
+
+.gear-display,
+.gear-display-external {
+    position: absolute;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    color: var(--neon-pink);
+    text-shadow: 0 0 20px rgba(240, 146, 255, 0.6);
+    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
+}
+
+.gear-display {
+    bottom: 45px;
+    font-size: 42px;
+}
+
+.gear-display-external {
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 45px;
+    height: 35px;
+    background: rgba(10, 0, 20, 0.95);
+    border: 1px solid rgba(240, 146, 255, 0.5);
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    z-index: 5;
+    box-shadow: 0 -5px 15px rgba(240, 146, 255, 0.2);
+}
+
+.rpm-digit {
+    position: absolute;
+    bottom: 42px;
+    width: 100%;
+    text-align: center;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+    opacity: 0.8;
+    letter-spacing: 1.5px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+#steering-buttons {
+    position: absolute;
+    bottom: 40px;
+    left: 40px;
+    gap: 20px;
+    z-index: 6000;
+    display: none;
+}
+
+.steer-btn {
+    width: 70px;
+    height: 70px;
+    flex-direction: row;
+    font-size: 28px;
+    color: #0ffffa;
+    border-color: #0ffffa;
+    box-shadow: 0 0 15px rgba(15, 255, 250, 0.3);
+    text-shadow: 0 0 5px rgba(15, 255, 250, 0.5);
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.steer-btn:active {
+    background: rgba(15, 255, 250, 0.4);
+}
+
+/* Responsive Scaling for Small Screens & Mobile Landscape */
+@media (max-width: 900px),
+(max-height: 500px) {
+    #hud {
+        transform: scale(0.6);
+        transform-origin: top left;
+        top: 5px;
+        left: 5px;
+        min-width: 150px;
+        padding: 10px;
+    }
+
+    .dash-cluster {
+        transform: translateX(-50%) scale(0.45);
+        transform-origin: bottom center;
+        bottom: 0px;
+        gap: 5px;
+    }
+
+    .ui-container {
+        transform: scale(0.65);
+        transform-origin: bottom right;
+        bottom: 10px;
+        right: 15px;
+        gap: 15px;
+    }
+
+    #steering-zone,
+    #steering-buttons {
+        transform: scale(1.15);
+        transform-origin: bottom left;
+        bottom: 25px;
+        left: 20px;
+    }
+}

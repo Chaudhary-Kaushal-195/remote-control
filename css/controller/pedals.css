@@ -1,0 +1,66 @@
+/* Pedals */
+.pedal-group {
+    display: flex;
+    gap: 30px;
+    align-items: flex-end;
+}
+
+.pedal {
+    width: 80px;
+    border-radius: 12px;
+    border: 3px solid;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    position: relative;
+    transition: transform 0.1s, background 0.1s;
+}
+
+#reverse {
+    height: 100px;
+    border-color: #f092ff;
+    color: #f092ff;
+    opacity: 0.7;
+}
+
+#brake {
+    height: 120px;
+    width: 100px;
+    border-color: #ff0055;
+    color: #ff0055;
+    box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+}
+
+#gas {
+    height: 160px;
+    width: 90px;
+    border-color: #0ffffa;
+    color: #0ffffa;
+    box-shadow: 0 0 15px rgba(15, 255, 250, 0.4);
+}
+
+.pedal:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.label {
+    position: absolute;
+    top: -30px;
+    font-size: 12px;
+    letter-spacing: 2px;
+}
+
+#pedal-zone {
+    position: absolute;
+    bottom: 220px;
+    right: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    position: relative;
+    transition: transform 0.1s, background 0.1s;
+}

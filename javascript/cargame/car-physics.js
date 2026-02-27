@@ -1,50 +1,7 @@
 import * as THREE from 'three';
 
-// --- AUDIO ENGINE VIA NATIVE ESM ---
-let isAudioInit = false;
-
-window.initAudio = async () => {
-    const overlay = document.getElementById('sound-overlay');
-    if (overlay) overlay.style.display = 'none';
-    const orbit = document.getElementById('orbit-zone');
-    if (orbit) orbit.style.pointerEvents = 'auto'; // Enable camera orbiting after start
-
-    if (!isAudioInit) {
-        isAudioInit = true;
-
-        if (window.startTypeScriptEngineAudio) {
-            window.startTypeScriptEngineAudio();
-        } else {
-            console.error("Vite TypeScript app not loaded yet or start function not exposed on window.");
-        }
-
-        setTimeout(() => {
-            if (typeof window.manualGearIndex !== 'undefined') {
-                window.manualGearIndex = 1;
-            }
-            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', code: 'ArrowUp' }));
-            setTimeout(() => document.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowUp', code: 'ArrowUp' })), 50);
-        }, 100);
-    }
-};
-
-// --- SCENE SETUP ---
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x05000a);
-scene.fog = new THREE.FogExp2(0x05000a, 0.03);
-
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1.0, 1000);
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(window.innerWidth, window.innerHeight);
-
-// Wait for DOM
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('canvas-container').appendChild(renderer.domElement);
-});
-
 let fuelLevel = 100;
-let engineTemp = 20; // Starts cold
+let engineTemp = 20;
 let rpm = 0;
 let speed = 0;
 
@@ -56,42 +13,6 @@ window.triggerBackfireVisual = function (isBig) {
     backfireTick = isBigBackfire ? 20 : 8;
 };
 
-// --- CAMERA MODES ---
-let cameraMode = 0; // 0: Normal, 1: Inside, 2: Near
-const cameraModes = ["NORMAL", "INSIDE", "ACTION"];
-
-window.cycleCamera = () => {
-    cameraMode = (cameraMode + 1) % 3;
-    const btn = document.getElementById('cam-btn');
-    if (btn) btn.innerText = `🎥 VIEW: ${cameraModes[cameraMode]}`;
-};
-
-// --- CHESSBOARD FLOOR ---
-const canvas = document.createElement('canvas');
-canvas.width = 512;
-canvas.height = 512;
-const ctx = canvas.getContext('2d');
-ctx.fillStyle = '#cccccc'; // Light grey/white
-ctx.fillRect(0, 0, 512, 512);
-ctx.fillStyle = '#1a1a1a'; // Dark grey/black
-ctx.fillRect(0, 0, 256, 256);
-ctx.fillRect(256, 256, 256, 256);
-
-const floorTex = new THREE.CanvasTexture(canvas);
-floorTex.wrapS = THREE.RepeatWrapping;
-floorTex.wrapT = THREE.RepeatWrapping;
-// Repeats to make the blocks huge. 100,000 width / 40 scale = 2500 repeats
-floorTex.repeat.set(2500, 2500);
-
-const floorMat = new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.8 });
-const floorGeo = new THREE.PlaneGeometry(100000, 100000);
-const floor = new THREE.Mesh(floorGeo, floorMat);
-floor.rotation.x = -Math.PI / 2; // Lay flat
-scene.add(floor);
-
-scene.add(new THREE.AmbientLight(0xffffff, 1.0));
-
-// --- CAR ASSEMBLY ---
 const car = new THREE.Group();
 const paintMat = new THREE.MeshStandardMaterial({ color: 0xc1006e, roughness: 0.2, metalness: 0.8 });
 const cyanNeon = new THREE.MeshBasicMaterial({ color: 0x00ffff });
@@ -191,51 +112,18 @@ const flameMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: tru
 const flame = new THREE.Mesh(flameGeo, flameMat);
 exhaust.add(flame);
 
-scene.add(car);
-
-// --- ORBIT SYSTEM ---
-let orbitX = 0, orbitY = 0.5;
-window.startOrbit = (x, y, id) => {
-    window.isOrbiting = true;
-    window.orbitTouchId = id;
-    window.lastOrbitTouch = { x, y };
-};
-window.moveOrbit = (x, y) => {
-    if (window.isOrbiting) {
-        let dx = x - window.lastOrbitTouch.x;
-        let dy = y - window.lastOrbitTouch.y;
-        orbitX -= dx * 0.005;
-        orbitY = Math.max(0.1, Math.min(1.5, orbitY + dy * 0.005));
-        window.lastOrbitTouch = { x, y };
-    }
-};
-window.endOrbit = () => {
-    window.isOrbiting = false;
-    window.orbitTouchId = null;
-};
-// Mouse Orbit Fallbacks
-document.addEventListener('DOMContentLoaded', () => {
-    const orbitZone = document.getElementById('orbit-zone');
-    if (orbitZone) {
-        orbitZone.addEventListener('mousedown', () => window.isOrbiting = true);
-        window.addEventListener('mouseup', () => window.isOrbiting = false);
-        window.addEventListener('mousemove', (e) => {
-            if (window.isOrbiting) {
-                orbitX -= e.movementX * 0.005;
-                orbitY = Math.max(0.1, Math.min(1.5, orbitY + e.movementY * 0.005));
-            }
-        });
-    }
-});
-
+window.scene.add(car);
+window.car = car; // Store globally if needed
 
 // --- ANIMATION LOOP ---
 let lastTime = performance.now();
 
 function animate() {
     requestAnimationFrame(animate);
+    if (!window.renderer || !window.scene || !window.camera) return;
+
     if (window.isPaused) {
-        renderer.render(scene, camera);
+        window.renderer.render(window.scene, window.camera);
         return;
     }
 
@@ -260,10 +148,9 @@ function animate() {
     let engineData = null;
     if (window.getEngineData) engineData = window.getEngineData();
 
-    // Max achievable KPH per gear at 10000 RPM
     const maxGearSpeedsKPH = {
-        '-1': 60,   // Reverse
-        '0': 0,     // Neutral
+        '-1': 60,
+        '0': 0,
         '1': 100,
         '2': 180,
         '3': 260,
@@ -275,16 +162,13 @@ function animate() {
     if (engineData) {
         let currentGear = engineData.gear.toString();
         let maxGearKPH = maxGearSpeedsKPH[currentGear] || 0;
-
         let calculatedKPH = (engineData.rpm / 10000) * maxGearKPH;
 
-        // Convert realistic KPH to ThreeJS scene speed (internal speed = KPH / 3.6)
         if (engineData.gear === -1) {
             speed = -calculatedKPH / 3.6;
         } else {
             speed = calculatedKPH / 3.6;
         }
-
         rpm = engineData.rpm;
     } else {
         if (window.inputs && window.inputs.fwd) speed += 0.025;
@@ -307,55 +191,48 @@ function animate() {
         if (i < 2) w.anchor.rotation.y = -(window.wheelAngle / 180) * 0.7;
     });
 
-    // FORCE FRAME SYNC: Instantly update car's world matrix for the camera to track it on the same frame
     car.updateMatrixWorld(true);
 
     let camTarget = new THREE.Vector3();
     let camPos = new THREE.Vector3();
 
-    // Limit the dramatic camera pull-away effect at high speeds
     let kph = Math.abs(speed * 3.6);
-    let speedOffset = Math.min(kph / 150, 1.0) * 2.5; // Starts capping the pull-away around 150 KPH, max offset 2.5 units
-    let fovTightness = 0.12 + Math.min(kph / 500, 1.0) * 0.8; // Increases lerp speed dramatically as car goes faster
+    let speedOffset = Math.min(kph / 150, 1.0) * 2.5;
+    let fovTightness = 0.12 + Math.min(kph / 500, 1.0) * 0.8;
 
-    if (cameraMode === 0) {
+    if (window.cameraMode === 0) {
         camPos.set(0, 4 + (speedOffset * 0.2), -9 - speedOffset);
         camTarget.set(0, 0.5, 0);
-    } else if (cameraMode === 1) {
-        camPos.set(0, 1.3, 0.5); // Hood cam stays static
+    } else if (window.cameraMode === 1) {
+        camPos.set(0, 1.3, 0.5);
         camTarget.set(0, 1.2, 5);
     } else {
         camPos.set(0, 2 + (speedOffset * 0.1), -6 - (speedOffset * 0.5));
         camTarget.set(0, 0.5, 0);
     }
 
-    const orbitMatrix = new THREE.Matrix4().makeRotationY(orbitX);
+    if (window.orbitX === undefined) window.orbitX = 0;
+    const orbitMatrix = new THREE.Matrix4().makeRotationY(window.orbitX);
     camPos.applyMatrix4(orbitMatrix);
 
     const worldPos = camPos.applyMatrix4(car.matrixWorld);
     const worldTarget = camTarget.applyMatrix4(car.matrixWorld);
 
-    if (cameraMode === 1) {
-        // Instant rigid lock for inside view to avoid high-speed drag-behind
-        camera.position.copy(worldPos);
+    if (window.cameraMode === 1) {
+        window.camera.position.copy(worldPos);
     } else {
-        // Smooth trailing chase for outer views
-        camera.position.lerp(worldPos, fovTightness);
+        window.camera.position.lerp(worldPos, fovTightness);
     }
 
-    camera.lookAt(worldTarget);
+    window.camera.lookAt(worldTarget);
 
-    renderer.render(scene, camera);
+    window.renderer.render(window.scene, window.camera);
 
-    // Call external HUD update function if it exists
     if (window.updateHUD) {
         const rawSpeed = Math.abs(speed * 3.6);
-
-        // Sim physics for visuals
         if (rawSpeed > 1) fuelLevel -= 0.001;
         if (rawSpeed > 1 && engineTemp < 90) engineTemp += 0.002;
         else if (engineTemp > 20) engineTemp -= 0.001;
-
         window.updateHUD(rawSpeed, rpm, engineTemp, fuelLevel, engineData, window.manualGearIndex);
     }
 
@@ -382,4 +259,6 @@ function animate() {
         if (strip.position.z > 1.8) strip.position.z = -2;
     });
 }
-animate();
+
+// Guarantee execution after DOM and other globals parse
+setTimeout(animate, 200);
