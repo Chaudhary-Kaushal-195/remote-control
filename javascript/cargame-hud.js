@@ -64,9 +64,16 @@ window.updateHUD = function (rawSpeed, rpm, engineTemp, fuelLevel, engineData, m
 
     const rpmArc = document.getElementById('rpm-arc');
     if (rpmArc) {
-        // SVG circle/arc of radius 40 has length ~188 (2pi*40 * 240/360)
         const offset = 188 - (Math.min(1, rpm / 10000) * 188);
         rpmArc.style.strokeDashoffset = offset;
+
+        // Elegance: Redline pulse
+        if (rpm > 8000) {
+            const pulse = (Math.sin(Date.now() * 0.02) + 1) / 2;
+            rpmArc.style.filter = `drop-shadow(0 0 ${5 + pulse * 10}px #ff0000)`;
+        } else {
+            rpmArc.style.filter = 'none';
+        }
     }
 
     const rpmBox = document.getElementById('rpm-box');
