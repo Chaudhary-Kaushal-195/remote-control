@@ -1,3 +1,8 @@
+@import url('controller/layout.css');
+@import url('controller/steering.css');
+@import url('controller/pedals.css');
+@import url('controller/qr.css');
+
 body {
     margin: 0;
     padding: 0;
@@ -14,11 +19,6 @@ body {
     width: 100vw;
     height: 100vh;
 }
-
-@import url('controller/layout.css');
-@import url('controller/steering.css');
-@import url('controller/pedals.css');
-@import url('controller/qr.css');
 
 /* Compatibility Overlay */
 #desktop-blocker {
