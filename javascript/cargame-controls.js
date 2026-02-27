@@ -222,24 +222,33 @@ document.addEventListener('DOMContentLoaded', () => {
         if (['b', 'B'].includes(e.key)) window.inputs.brake = false;
     });
 
+    // Helper to dispatch key events for engine audio integration
+    const dispatchKey = (key, type) => {
+        document.dispatchEvent(new KeyboardEvent(type, { key: key, code: key }));
+    };
+
     // Touch Support for On-Screen Pads
     window.addEventListener('mousedown', (e) => {
-        if (e.target.closest('#gas')) window.inputs.fwd = true;
-        if (e.target.closest('#rev-btn')) window.inputs.bwd = true;
-        if (e.target.closest('#handbrake')) window.inputs.handbrake = true;
+        if (e.target.closest('#gas')) { window.inputs.fwd = true; dispatchKey('ArrowUp', 'keydown'); }
+        if (e.target.closest('#rev-btn')) { window.inputs.bwd = true; dispatchKey('ArrowDown', 'keydown'); }
+        if (e.target.closest('#handbrake')) { window.inputs.handbrake = true; dispatchKey(' ', 'keydown'); }
         if (e.target.closest('#steer-left')) window.inputs.left = true;
         if (e.target.closest('#steer-right')) window.inputs.right = true;
     });
 
     const resetInputs = (e) => {
-        if (e.target.closest('#gas')) window.inputs.fwd = false;
-        if (e.target.closest('#rev-btn')) window.inputs.bwd = false;
-        if (e.target.closest('#handbrake')) window.inputs.handbrake = false;
+        if (e.target.closest('#gas')) { window.inputs.fwd = false; dispatchKey('ArrowUp', 'keyup'); }
+        if (e.target.closest('#rev-btn')) { window.inputs.bwd = false; dispatchKey('ArrowDown', 'keyup'); }
+        if (e.target.closest('#handbrake')) { window.inputs.handbrake = false; dispatchKey(' ', 'keyup'); }
         if (e.target.closest('#steer-left')) window.inputs.left = false;
         if (e.target.closest('#steer-right')) window.inputs.right = false;
     };
     window.addEventListener('mouseup', resetInputs);
     window.addEventListener('mouseout', resetInputs);
+
+    // Gear shift integration (if engine supports Q/E)
+    // Looking at common engine-audio implementations, Q/E or Shift/Ctrl are used.
+    // We'll leave the manualGearIndex logic as is, but also dispatch keys if needed.
 
     // Advanced Touch Routing
     let activeId = null, lastAngle = 0;
@@ -256,9 +265,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 continue;
             }
 
-            if (t.target.closest('#gas')) window.inputs.fwd = true;
-            if (t.target.closest('#rev-btn')) window.inputs.bwd = true;
-            if (t.target.closest('#handbrake')) window.inputs.handbrake = true;
+            if (t.target.closest('#gas')) { window.inputs.fwd = true; dispatchKey('ArrowUp', 'keydown'); }
+            if (t.target.closest('#rev-btn')) { window.inputs.bwd = true; dispatchKey('ArrowDown', 'keydown'); }
+            if (t.target.closest('#handbrake')) { window.inputs.handbrake = true; dispatchKey(' ', 'keydown'); }
             if (t.target.closest('#steer-left')) window.inputs.left = true;
             if (t.target.closest('#steer-right')) window.inputs.right = true;
 
@@ -293,9 +302,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('touchend', (e) => {
         for (let t of e.changedTouches) {
             if (t.identifier === window.orbitTouchId && window.endOrbit) window.endOrbit();
-            if (t.target.closest('#gas')) window.inputs.fwd = false;
-            if (t.target.closest('#rev-btn')) window.inputs.bwd = false;
-            if (t.target.closest('#handbrake')) window.inputs.handbrake = false;
+            if (t.target.closest('#gas')) { window.inputs.fwd = false; dispatchKey('ArrowUp', 'keyup'); }
+            if (t.target.closest('#rev-btn')) { window.inputs.bwd = false; dispatchKey('ArrowDown', 'keyup'); }
+            if (t.target.closest('#handbrake')) { window.inputs.handbrake = false; dispatchKey(' ', 'keyup'); }
             if (t.target.closest('#steer-left')) window.inputs.left = false;
             if (t.target.closest('#steer-right')) window.inputs.right = false;
             if (t.identifier === window.activeTouchId) window.activeTouchId = null;
