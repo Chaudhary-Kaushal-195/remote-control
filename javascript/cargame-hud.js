@@ -46,7 +46,7 @@ window.updateHUD = function (rawSpeed, rpm, engineTemp, fuelLevel, engineData, m
     if (unitLabel) unitLabel.innerText = `unit: ${window.gameSettings.units.toUpperCase()}`;
 
     // Analog Needle & Arc Logic (Multi-Gauge Clusters)
-    const maxSpeed = 350; // New limit for the dial for real car physics 350 KPH
+    const maxSpeed = 500; // New limit for the dial for real car physics 500 KPH
     const needleAngle = -120 + ((rawSpeed / maxSpeed) * 240);
     const speedNeedleGrp = document.getElementById('speed-needle-grp');
     if (speedNeedleGrp) speedNeedleGrp.setAttribute('transform', `rotate(${needleAngle}, 50, 50)`);

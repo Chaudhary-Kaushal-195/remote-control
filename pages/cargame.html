@@ -50,8 +50,26 @@
         <!-- MAIN SPEEDO -->
         <div class="gauge-pod gauge-main">
             <svg width="180" height="180" viewBox="0 0 100 100">
+                <!-- Background Arc -->
                 <path d="M 21.7 78.3 A 40 40 0 1 1 78.3 78.3" fill="none" stroke="rgba(255,255,255,0.05)"
                     stroke-width="5" stroke-linecap="round" />
+
+                <!-- Speed Ticks & Labels (0-500) -->
+                <g id="speed-ticks">
+                    <text x="21" y="78" fill="#fff" font-size="4" font-family="Orbitron" text-anchor="middle"
+                        opacity="0.3">0</text>
+                    <text x="14" y="55" fill="#fff" font-size="4" font-family="Orbitron" text-anchor="middle"
+                        opacity="0.3">100</text>
+                    <text x="25" y="30" fill="#fff" font-size="4" font-family="Orbitron" text-anchor="middle"
+                        opacity="0.3">200</text>
+                    <text x="50" y="22" fill="#fff" font-size="4" font-family="Orbitron" text-anchor="middle"
+                        opacity="0.3">300</text>
+                    <text x="75" y="30" fill="#fff" font-size="4" font-family="Orbitron" text-anchor="middle"
+                        opacity="0.3">400</text>
+                    <text x="86" y="55" fill="#fff" font-size="4" font-family="Orbitron" text-anchor="middle"
+                        opacity="0.3">500</text>
+                </g>
+
                 <path id="speed-arc" d="M 21.7 78.3 A 40 40 0 1 1 78.3 78.3" fill="none" stroke="var(--neon-blue)"
                     stroke-width="6" stroke-linecap="round" stroke-dasharray="188" stroke-dashoffset="188" />
 
