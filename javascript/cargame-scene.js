@@ -288,14 +288,19 @@ function animate() {
     let camTarget = new THREE.Vector3();
     let camPos = new THREE.Vector3();
 
+    // Limit the dramatic camera pull-away effect at high speeds
+    let kph = Math.abs(speed * 3.6);
+    let speedOffset = Math.min(kph / 150, 1.0) * 2.5; // Starts capping the pull-away around 150 KPH, max offset 2.5 units
+    let fovTightness = 0.12 + Math.min(kph / 500, 1.0) * 0.8; // Increases lerp speed dramatically as car goes faster
+
     if (cameraMode === 0) {
-        camPos.set(0, 4, -9);
+        camPos.set(0, 4 + (speedOffset * 0.2), -9 - speedOffset);
         camTarget.set(0, 0.5, 0);
     } else if (cameraMode === 1) {
-        camPos.set(0, 1.3, 0.5);
+        camPos.set(0, 1.3, 0.5); // Hood cam stays static
         camTarget.set(0, 1.2, 5);
     } else {
-        camPos.set(0, 2, -6);
+        camPos.set(0, 2 + (speedOffset * 0.1), -6 - (speedOffset * 0.5));
         camTarget.set(0, 0.5, 0);
     }
 
@@ -305,7 +310,7 @@ function animate() {
     const worldPos = camPos.applyMatrix4(car.matrixWorld);
     const worldTarget = camTarget.applyMatrix4(car.matrixWorld);
 
-    camera.position.lerp(worldPos, 0.12);
+    camera.position.lerp(worldPos, fovTightness);
     camera.lookAt(worldTarget);
 
     renderer.render(scene, camera);
