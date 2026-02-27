@@ -33,7 +33,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x05000a);
 scene.fog = new THREE.FogExp2(0x05000a, 0.03);
 
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1.0, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -306,6 +306,9 @@ function animate() {
         w.roller.rotation.x += speed * dt * 5.0;
         if (i < 2) w.anchor.rotation.y = -(window.wheelAngle / 180) * 0.7;
     });
+
+    // FORCE FRAME SYNC: Instantly update car's world matrix for the camera to track it on the same frame
+    car.updateMatrixWorld(true);
 
     let camTarget = new THREE.Vector3();
     let camPos = new THREE.Vector3();
