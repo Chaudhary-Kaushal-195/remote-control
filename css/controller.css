@@ -13,10 +13,10 @@ body {
     height: 100vh;
 }
 
-@import url('./controller/layout.css');
-@import url('./controller/steering.css');
-@import url('./controller/pedals.css');
-@import url('./controller/qr.css');
+@import url('controller/layout.css');
+@import url('controller/steering.css');
+@import url('controller/pedals.css');
+@import url('controller/qr.css');
 
 /* Compatibility Overlay */
 #desktop-blocker {
