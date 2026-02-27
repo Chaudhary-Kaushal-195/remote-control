@@ -1,17 +1,39 @@
 {
   "name": "Dr. Vice - Game Hub",
   "short_name": "DrVice",
-  "start_url": "index.html",
+  "start_url": "pages/index.html",
   "display": "standalone",
   "background_color": "#0a0015",
   "theme_color": "#f092ff",
-  "orientation": "landscape",
+  "orientation": "any",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Launch Game",
+      "url": "pages/cargame.html",
+      "icons": [
+        {
+          "src": "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
+          "sizes": "512x512"
+        }
+      ]
+    },
+    {
+      "name": "Mobile Remote",
+      "url": "pages/controller.html",
+      "icons": [
+        {
+          "src": "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
+          "sizes": "512x512"
+        }
+      ]
     }
   ]
 }
