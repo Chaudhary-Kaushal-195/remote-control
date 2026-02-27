@@ -189,6 +189,12 @@ window.toggleControllerConnection = () => {
         }
     } else {
         window.setupRemote();
+        if (peer) {
+            const qrOverlay = document.getElementById('qr-overlay');
+            const settingsModal = document.getElementById('settings-modal');
+            if (qrOverlay) qrOverlay.style.display = 'flex';
+            if (settingsModal) settingsModal.style.display = 'none';
+        }
     }
 };
 
