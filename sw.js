@@ -12,6 +12,7 @@ const ASSETS = [
     './javascript/cargame-controls.js',
     './javascript/cargame-hud.js',
     './javascript/controller.js',
+    './typescript/audio-engine/dist/assets/engine-audio.js',
     './manifest.json',
     'https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js',
     'https://unpkg.com/html5-qrcode'
