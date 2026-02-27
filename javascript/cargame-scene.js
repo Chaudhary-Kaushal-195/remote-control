@@ -66,7 +66,29 @@ window.cycleCamera = () => {
     if (btn) btn.innerText = `🎥 VIEW: ${cameraModes[cameraMode]}`;
 };
 
-scene.add(new THREE.GridHelper(2000, 100, 0x00ffff, 0x222222));
+// --- CHESSBOARD FLOOR ---
+const canvas = document.createElement('canvas');
+canvas.width = 512;
+canvas.height = 512;
+const ctx = canvas.getContext('2d');
+ctx.fillStyle = '#cccccc'; // Light grey/white
+ctx.fillRect(0, 0, 512, 512);
+ctx.fillStyle = '#1a1a1a'; // Dark grey/black
+ctx.fillRect(0, 0, 256, 256);
+ctx.fillRect(256, 256, 256, 256);
+
+const floorTex = new THREE.CanvasTexture(canvas);
+floorTex.wrapS = THREE.RepeatWrapping;
+floorTex.wrapT = THREE.RepeatWrapping;
+// Repeats to make the blocks huge. 100,000 width / 40 scale = 2500 repeats
+floorTex.repeat.set(2500, 2500);
+
+const floorMat = new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.8 });
+const floorGeo = new THREE.PlaneGeometry(100000, 100000);
+const floor = new THREE.Mesh(floorGeo, floorMat);
+floor.rotation.x = -Math.PI / 2; // Lay flat
+scene.add(floor);
+
 scene.add(new THREE.AmbientLight(0xffffff, 1.0));
 
 // --- CAR ASSEMBLY ---
@@ -310,7 +332,14 @@ function animate() {
     const worldPos = camPos.applyMatrix4(car.matrixWorld);
     const worldTarget = camTarget.applyMatrix4(car.matrixWorld);
 
-    camera.position.lerp(worldPos, fovTightness);
+    if (cameraMode === 1) {
+        // Instant rigid lock for inside view to avoid high-speed drag-behind
+        camera.position.copy(worldPos);
+    } else {
+        // Smooth trailing chase for outer views
+        camera.position.lerp(worldPos, fovTightness);
+    }
+
     camera.lookAt(worldTarget);
 
     renderer.render(scene, camera);
