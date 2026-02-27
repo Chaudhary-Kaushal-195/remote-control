@@ -106,14 +106,16 @@ function update(time: DOMHighResTimeStamp): void {
     if (drivetrain.downShift) {
         engine.throttle = 0.8; // Rev matching
     } else {
-        if (keys['Space']) {
+        const isFwd = keys['Space'] || keys['KeyW'] || (window as any).inputs?.fwd;
+        if (isFwd) {
             engine.throttle = clamp(engine.throttle += 0.2, 0, 1);
         } else {
             engine.throttle = clamp(engine.throttle -= 0.2, 0, 1);
         }
     }
 
-    if (keys['KeyB']) {
+    const isBrake = keys['KeyB'] || keys['KeyS'] || (window as any).inputs?.bwd || (window as any).inputs?.brake;
+    if (isBrake) {
         drivetrain.omega -= 0.3; // Brakes
     }
 

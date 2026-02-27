@@ -260,3 +260,29 @@
             display: flex;
             gap: 20px;
         }
+/* FORCE LANDSCAPE OVERLAY */
+@media screen and (orientation: portrait) {
+    body::before {
+        content: \
+🔄
+PLEASE
+ROTATE
+YOUR
+DEVICE
+TO
+LANDSCAPE\;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: #000;
+        color: #0ffffa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        text-align: center;
+        z-index: 999999;
+        padding: 20px;
+    }
+}
+
