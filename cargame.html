@@ -14,7 +14,7 @@
         body {
             margin: 0;
             overflow: hidden;
-            background: #05000a;
+            background: transparent;
             font-family: 'Courier New', monospace;
             user-select: none;
             touch-action: none;
@@ -827,7 +827,7 @@
             scene.fog = new THREE.FogExp2(0x05000a, 0.03);
 
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.getElementById('canvas-container').appendChild(renderer.domElement);
