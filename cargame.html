@@ -204,7 +204,6 @@
             background: #ff4400;
         }
 
-        /* Regular brake pedal removed */
 
         #gas {
             width: 70px;
@@ -767,7 +766,7 @@
             <div class="stripe"></div>
             <div class="stripe"></div>
         </div>
-        <!-- Brake pedal removed -->
+
         <div id="gas" class="pedal">
             <div class="pedal-label">GAS</div>
             <div class="stripe"></div>
@@ -1343,7 +1342,6 @@
             window.addEventListener('mouseout', resetMouseInputs);
 
             // Native event listeners for the visual game
-            // (The TypeScript engine-audio natively listens to document so we don't need to forward anything anymore!)
 
             window.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
@@ -1474,7 +1472,7 @@
                 camera.position.lerp(worldPos, 0.12);
                 camera.lookAt(worldTarget);
 
-                // Dat.gui state is dropped here because the iframe is rendering its own original dat.gui.
+
 
                 renderer.render(scene, camera);
 
