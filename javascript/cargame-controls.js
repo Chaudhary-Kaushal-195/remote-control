@@ -19,6 +19,11 @@ window.togglePause = () => {
     document.getElementById('pause-btn').innerText = window.isPaused ? "▶ RESUME" : "⏸ PAUSE";
     const overlay = document.getElementById('pause-overlay');
     if (overlay) overlay.style.display = window.isPaused ? 'flex' : 'none';
+
+    // Attempt to suspend/resume Web Audio Engine if it exists
+    if (window.setEngineAudioMute) {
+        window.setEngineAudioMute(window.isPaused);
+    }
 };
 
 window.checkSteeringChange = () => {

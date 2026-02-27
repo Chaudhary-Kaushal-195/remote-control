@@ -130,3 +130,14 @@ window.getEngineData = function () {
         gear: vehicle.drivetrain.gear
     };
 };
+
+// @ts-ignore
+window.setEngineAudioMute = function (isMuted: boolean) {
+    if (!vehicle || !vehicle.audio || !vehicle.audio.ctx) return;
+
+    if (isMuted) {
+        vehicle.audio.ctx.suspend();
+    } else {
+        vehicle.audio.ctx.resume();
+    }
+};
