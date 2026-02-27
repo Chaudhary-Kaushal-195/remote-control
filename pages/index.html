@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. Vice - Ultimate Game Hub</title>
+    <!-- Linked CSS from separate folder -->
+    <link rel="stylesheet" href="../css/index.css">
+</head>
+
+<body>
+    <div class="bg-grid"></div>
+
+    <div class="container" id="main-content">
+        <div class="header">
+            <h1>DR. VICE</h1>
+            <p>ADVANCED P2P RACING HUB</p>
+        </div>
+
+        <div class="main-hero">
+            <a href="cargame.html" class="card primary">
+                <div class="card-info">
+                    <div class="card-title">LAUNCH GAME</div>
+                    <div class="card-desc">Start the desktop experience</div>
+                </div>
+                <div class="card-icon">🎮</div>
+            </a>
+
+            <a href="controller.html?mode=manual" class="card secondary">
+                <div class="card-info">
+                    <div class="card-title">MOBILE REMOTE</div>
+                    <div class="card-desc">Connect phone steering</div>
+                </div>
+                <div class="card-icon">🤳</div>
+            </a>
+        </div>
+
+        <p style="font-size: 10px; opacity: 0.3; margin-top: 50px;">VERSION 2.0 ULTIMATE</p>
+    </div>
+
+    <div class="settings-btn" onclick="toggleSettings()">⚙️</div>
+
+    <div id="settings-modal" onclick="event.target === this && toggleSettings()">
+        <div class="modal-content">
+            <h2 style="margin-top:0; color:var(--neon-pink);">HUB SETTINGS</h2>
+
+            <div class="setting-row">
+                <div class="setting-label">Steering Mode</div>
+                <select id="setting-steering" onchange="saveSettings()">
+                    <option value="wheel">Analog Wheel</option>
+                    <option value="buttons">Left/Right Buttons</option>
+                    <option value="gyro">Gyro Only (Pro)</option>
+                </select>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-label">Speed Format</div>
+                <select id="setting-units" onchange="saveSettings()">
+                    <option value="kph">KPH (Kilometers)</option>
+                    <option value="mph">MPH (Miles)</option>
+                </select>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-label">Engine Volume</div>
+                <input type="range" id="setting-engine-vol" min="0" max="100" value="80" onchange="saveSettings()">
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-label">Music Volume</div>
+                <input type="range" id="setting-music-vol" min="0" max="100" value="50" onchange="saveSettings()">
+            </div>
+
+            <button class="close-modal" onclick="toggleSettings()">APPLY & CLOSE</button>
+        </div>
+    </div>
+
+    <!-- Linked JS from separate folder -->
+    <script src="../javascript/index.js"></script>
+</body>
+
+</html>

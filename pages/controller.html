@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- SW path updated since we moved into pages/ -->
+    <link rel="manifest" href="../manifest.json">
+    <title>Dr. Control - Universal Remote</title>
+
+    <!-- Link to isolated CSS -->
+    <link rel="stylesheet" href="../css/controller.css">
+
+    <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+
+<body>
+
+    <div id="status">STATUS: STANDBY</div>
+    <div id="debug-tilt">Steer: DISCONNECTED</div>
+    <button id="fix-sensors" onclick="startGyro()">ENABLE STEERING SENSORS</button>
+
+    <div id="overlay">
+        <h1 style="color:#0ffffa; margin-bottom:10px;">DR. CONTROL</h1>
+        <p style="font-size:12px; margin-bottom:20px; opacity:0.8;">SCAN OR ENTER LAPTOP ID</p>
+
+        <button class="scan-btn" onclick="startScanning()">🤳 SCAN QR CODE</button>
+
+        <div style="margin: 15px 0; opacity: 0.5;">— OR —</div>
+
+        <input type="text" id="hostIdInput" placeholder="Enter ID (e.g. a1b2)">
+        <button onclick="connectToHost()">CONNECT MANUALLY</button>
+        <p style="font-size:10px; margin-top:40px; color:#f092ff;">TIP: Make sure Bluetooth or WiFi is on.</p>
+    </div>
+
+    <div id="reader-container">
+        <h2 style="color:#0ffffa;">POINT AT LAPTOP</h2>
+        <div id="reader"></div>
+        <button onclick="stopScanning()" style="margin-top:30px; background:rgba(255,255,255,0.1);">CANCEL</button>
+    </div>
+
+    <div id="desktop-blocker">
+        <h1>⚠️ INCOMPATIBLE DEVICE</h1>
+        <p>This Remote App requires <b>Gyroscope Sensors</b> and <b>Touch Controls</b> found only on mobile phones and
+            tablets.</p>
+        <p style="font-size: 14px; opacity: 0.7;">Please open this link on your <b>Smartphone</b> to play!</p>
+        <button onclick="window.location.href='index.html'"
+            style="margin-top:20px; background:rgba(255,255,255,0.1); color:#fff; border:1px solid #fff;">BACK TO
+            HUB</button>
+    </div>
+
+    <div id="ui-container">
+        <div id="wheel-zone">
+            <div id="wheel-inner"></div>
+        </div>
+
+        <div id="button-steering">
+            <div class="steer-btn" id="steer-left">⬅️</div>
+            <div class="steer-btn" id="steer-right">➡️</div>
+        </div>
+
+        <div id="pedal-zone" class="pedal-group">
+            <div id="reverse" class="pedal" style="--c:#00ffff; height:80px;">REV</div>
+            <div id="brake" class="pedal" style="--c:#f092ff; height:90px; width:70px;">STOP</div>
+            <div id="gas" class="pedal" style="--c:#0ffffa; height:120px;">GAS</div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+    <!-- Link to isolated custom Javascript -->
+    <script src="../javascript/controller.js"></script>
+</body>
+
+</html>

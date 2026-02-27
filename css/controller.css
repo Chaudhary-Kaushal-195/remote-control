@@ -1,0 +1,262 @@
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #0a0015;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            user-select: none;
+            touch-action: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        #status {
+            position: absolute;
+            top: 10px;
+            font-size: 14px;
+            color: #f092ff;
+            text-shadow: 0 0 10px #f092ff;
+        }
+
+        /* Controller Layout */
+        #ui-container {
+            display: flex;
+            width: 90%;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        /* Analog Stick / Wheel Visual */
+        #wheel-zone {
+            width: 140px;
+            height: 140px;
+            border: 3px solid #f092ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(240, 146, 255, 0.4);
+        }
+
+        #wheel-inner {
+            width: 40px;
+            height: 40px;
+            background: #f092ff;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #f092ff;
+            transition: transform 0.1s;
+        }
+
+        /* Pedals */
+        .pedal-group {
+            display: flex;
+            gap: 30px;
+            align-items: flex-end;
+        }
+
+        .pedal {
+            width: 80px;
+            border-radius: 12px;
+            border: 3px solid;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+            transition: transform 0.1s, background 0.1s;
+        }
+
+        #reverse {
+            height: 100px;
+            border-color: #f092ff;
+            color: #f092ff;
+            opacity: 0.7;
+        }
+
+        #brake {
+            height: 120px;
+            width: 100px;
+            border-color: #ff0055;
+            color: #ff0055;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+        }
+
+        #gas {
+            height: 160px;
+            width: 90px;
+            border-color: #0ffffa;
+            color: #0ffffa;
+            box-shadow: 0 0 15px rgba(15, 255, 250, 0.4);
+        }
+
+        .pedal:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .label {
+            position: absolute;
+            top: -30px;
+            font-size: 12px;
+            letter-spacing: 2px;
+        }
+
+        /* Connection Overlay */
+        #overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 0, 21, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            text-align: center;
+        }
+
+        input {
+            background: none;
+            border: 2px solid #f092ff;
+            color: #f092ff;
+            padding: 15px;
+            font-size: 20px;
+            text-align: center;
+            border-radius: 10px;
+            width: 250px;
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        button {
+            background: #f092ff;
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        #debug-tilt {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        #fix-sensors {
+            position: absolute;
+            top: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #f092ff;
+            color: #f092ff;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+            z-index: 101;
+        }
+
+        #reader-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0015;
+            z-index: 2000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #reader {
+            width: 300px;
+            height: 300px;
+            border: 2px solid #0ffffa;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(15, 255, 250, 0.4);
+        }
+
+        .scan-btn {
+            background: #f092ff !important;
+            color: #000 !important;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        /* Compatibility Overlay */
+        #desktop-blocker {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #0a0015;
+            z-index: 5000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #desktop-blocker h1 {
+            color: #ff0055;
+            text-shadow: 0 0 15px #ff0055;
+        }
+
+        #desktop-blocker p {
+            color: #f092ff;
+            max-width: 400px;
+            line-height: 1.5;
+        }
+
+        /* Button Steering Mode */
+        #button-steering {
+            display: none;
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85%;
+            height: 140px;
+            z-index: 50;
+            gap: 20px;
+        }
+
+        .steer-btn {
+            flex: 1;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #f092ff;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            color: #f092ff;
+            -webkit-user-select: none;
+            user-select: none;
+            transition: 0.1s;
+        }
+
+        .steer-btn:active {
+            background: #f092ff;
+            color: #000;
+            box-shadow: 0 0 30px #f092ff;
+        }
+
+        #pedal-zone {
+            position: absolute;
+            bottom: 220px;
+            right: 40px;
+            display: flex;
+            gap: 20px;
+        }
