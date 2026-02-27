@@ -1,55 +1,58 @@
 /* Analog Stick / Wheel Visual */
 #wheel-zone {
-    width: 140px;
-    height: 140px;
-    border: 3px solid #f092ff;
+    width: 150px;
+    height: 150px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.3);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 20px rgba(240, 146, 255, 0.4);
+    box-shadow: inset 0 0 20px rgba(240, 146, 255, 0.2), 0 0 15px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 #wheel-inner {
-    width: 40px;
-    height: 40px;
-    background: #f092ff;
+    width: 50px;
+    height: 50px;
+    background: radial-gradient(circle, #f092ff 0%, #a200b3 100%);
     border-radius: 50%;
-    box-shadow: 0 0 15px #f092ff;
-    transition: transform 0.1s;
+    box-shadow: 0 0 20px #f092ff;
+    transition: transform 0.05s ease-out;
 }
 
 /* Button Steering Mode */
 #button-steering {
     display: none;
-    position: absolute;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 85%;
-    height: 140px;
-    z-index: 50;
-    gap: 20px;
+    width: 240px;
+    height: 120px;
+    gap: 15px;
 }
 
 .steer-btn {
     flex: 1;
     height: 100%;
     background: rgba(255, 255, 255, 0.05);
-    border: 2px solid #f092ff;
+    border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 50px;
-    color: #f092ff;
+    color: #fff;
     -webkit-user-select: none;
     user-select: none;
-    transition: 0.1s;
+    transition: all 0.1s;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
 }
 
 .steer-btn:active {
-    background: #f092ff;
-    color: #000;
-    box-shadow: 0 0 30px #f092ff;
+    background: rgba(240, 146, 255, 0.3);
+    border-color: #f092ff;
+    color: #f092ff;
+    transform: scale(0.95) translateY(5px);
+    box-shadow: 0 0 30px rgba(240, 146, 255, 0.4);
 }
