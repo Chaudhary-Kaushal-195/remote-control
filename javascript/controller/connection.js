@@ -1,3 +1,10 @@
+// Screen Orientation Lock (For Mobile Devices)
+if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock('landscape').catch(err => {
+        console.log("Orientation lock failed/not supported:", err);
+    });
+}
+
 // Desktop Restriction Check
 const isDesktop = !('ontouchstart' in window) || (window.innerWidth > 1024);
 if (isDesktop && !window.location.href.includes('localhost')) {
@@ -72,6 +79,11 @@ window.onload = () => {
 let html5QrCode = null;
 
 window.startScanning = () => {
+    // Attempt to force landscape specifically for scanning again
+    if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(() => { });
+    }
+
     document.getElementById('reader-container').style.display = 'flex';
     html5QrCode = new Html5Qrcode("reader");
     const config = { fps: 20, qrbox: { width: 280, height: 280 }, aspectRatio: 1.0 };

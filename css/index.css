@@ -209,22 +209,23 @@
         /* FORCE LANDSCAPE OVERLAY */
         @media screen and (orientation: portrait) {
             body::before {
-                content: "🔄 PLEASE ROTATE YOUR DEVICE TO LANDSCAPE";
+                content: "🔄 PLEASE ROTATE YOUR DEVICE";
                 position: fixed;
                 top: 0;
                 left: 0;
                 width: 100vw;
                 height: 100vh;
-                background: #000;
+                background: rgba(10, 0, 21, 0.95);
                 color: #0ffffa;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-family: 'Courier New', monospace;
-                font-weight: bold;
+                font-family: inherit;
+                font-weight: 900;
+                font-size: 20px;
                 text-align: center;
                 z-index: 999999;
-                padding: 20px;
+                padding: 40px;
                 box-sizing: border-box;
             }
         }

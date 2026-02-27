@@ -110,24 +110,26 @@ button:active {
     z-index: 101;
 }
 
-/* FORCE LANDSCAPE OVERLAY & ROTATE */
+/* FALLBACK LANDSCAPE WARNING IF API FAILS */
 @media screen and (orientation: portrait) {
-
-    /* Instead of a blocker, physically rotate the controller sideways */
-    body {
-        transform: rotate(-90deg);
-        transform-origin: center center;
-        width: 100vh;
-        height: 100vw;
+    body::before {
+        content: "🔄 PLEASE ROTATE YOUR DEVICE";
         position: fixed;
-        top: 50%;
-        left: 50%;
-        margin-top: -50vw;
-        margin-left: -50vh;
-    }
-
-    #desktop-blocker {
-        transform: rotate(90deg);
-        /* Counter-rotate if it shows up */
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(10, 0, 21, 0.95);
+        color: #0ffffa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: inherit;
+        font-weight: 900;
+        font-size: 20px;
+        text-align: center;
+        z-index: 999999;
+        padding: 40px;
+        box-sizing: border-box;
     }
 }
