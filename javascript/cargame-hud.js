@@ -61,6 +61,14 @@ window.updateHUD = function (rawSpeed, rpm, engineTemp, fuelLevel, engineData, m
     const rpmAngle = -120 + ((rpm / 10000) * 240);
     const rpmNeedleGrp = document.getElementById('rpm-needle-grp');
     if (rpmNeedleGrp) rpmNeedleGrp.setAttribute('transform', `rotate(${rpmAngle}, 50, 50)`);
+
+    const rpmArc = document.getElementById('rpm-arc');
+    if (rpmArc) {
+        // SVG circle/arc of radius 40 has length ~188 (2pi*40 * 240/360)
+        const offset = 188 - (Math.min(1, rpm / 10000) * 188);
+        rpmArc.style.strokeDashoffset = offset;
+    }
+
     const rpmBox = document.getElementById('rpm-box');
     if (rpmBox) rpmBox.innerText = Math.round(rpm);
 
