@@ -17,7 +17,10 @@
 /* Connection Overlay */
 #overlay {
     position: fixed;
-    inset: 0;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     background: rgba(10, 0, 21, 0.95);
     display: flex;
     flex-direction: column;
@@ -25,6 +28,7 @@
     justify-content: center;
     z-index: 100;
     text-align: center;
+    box-sizing: border-box;
 }
 
 input {
@@ -36,7 +40,8 @@ input {
     text-align: center;
     border-radius: 10px;
     width: 250px;
-    margin-bottom: 20px;
+    max-width: 80%;
+    margin: 10px 0;
     outline: none;
 }
 
@@ -49,6 +54,8 @@ button {
     font-weight: bold;
     border-radius: 10px;
     cursor: pointer;
+    margin: 10px 0;
+    max-width: 90%;
 }
 
 #debug-tilt {
@@ -73,14 +80,15 @@ button {
 }
 
 /* FORCE LANDSCAPE OVERLAY */
+/* FORCE LANDSCAPE OVERLAY */
 @media screen and (orientation: portrait) {
     body::before {
         content: "🔄 PLEASE ROTATE YOUR DEVICE TO LANDSCAPE";
         position: fixed;
         top: 0;
         left: 0;
-        right: 0;
-        bottom: 0;
+        width: 100vw;
+        height: 100vh;
         background: #000;
         color: #0ffffa;
         display: flex;
@@ -91,5 +99,6 @@ button {
         text-align: center;
         z-index: 999999;
         padding: 20px;
+        box-sizing: border-box;
     }
 }
