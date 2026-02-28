@@ -38,7 +38,7 @@ export class Engine {
     constructor() {
         this.init();
     }
-    
+
     init(config?: Partial<Engine>) {
         console.log(this.limiter);
         if (config) Object.assign(this, config);
@@ -49,13 +49,13 @@ export class Engine {
         this.theta = 0;
         this.alpha = 0;
         this.omega = 0;
-    
+
         this.prevTheta = 0;
         this.prevOmega = 0;
         this.dTheta = 0;
         this.rpm = 0;
     }
-    
+
     integrate(load_inertia: number = 0, time: number, dt: number) {
 
         /* Limiter */
@@ -77,18 +77,18 @@ export class Engine {
         let idleTorque = 0;
         if (this.throttle < 0.1 && this.rpm < this.idle * 1.5) {
             const rIdle = ratio(this.rpm, this.idle * 0.9, this.idle);
-            idleTorque = (1-rIdle) * this.engine_braking * 10;
+            idleTorque = (1 - rIdle) * this.engine_braking * 10;
         }
-        
+
         /* Torque */
         const t1 = Math.pow(this.throttle, 1.2) * this.torque;
-        const t2 = Math.pow(1-this.throttle, 1.2) * this.engine_braking;
+        const t2 = Math.pow(1 - this.throttle, 1.2) * this.engine_braking;
         const torque = t1 - t2 + idleTorque;
 
         /* Integrate */
         const I = load_inertia + this.inertia;
         const dAlpha = torque / I;
-        
+
         this.prevTheta = this.theta;
         this.omega += dAlpha * dt;
         this.theta += this.omega * dt;
@@ -117,29 +117,27 @@ export class Engine {
     }
 
     solveVel(drivetrain: Drivetrain, h: number) {
-        // let dv = 0;
-        // dv -= drivetrain.omega;
-        // dv += this.omega;
-        // dv *= Math.min(1.0, 0.1 * h);
+        if (drivetrain.gear === 0) {
+            // Re-simulate free-spinning engine friction to drag revs down naturally 
+            // instead of instantly snapping to idle when put into neutral
+            this.omega += (0 - this.omega) * 0.5 * h;
+        } else {
+            let damping = 12;
+            if (drivetrain.gear > 3)
+                damping = 9;
 
-        // this.omega += this.getCorrection(dv, h, 0.0);
-
-        // const damping = 1 + 1 * Math.pow(drivetrain.gear, 2);
-        let damping = 12;
-        if (drivetrain.gear > 3)
-            damping = 9;
-
-        this.omega += (drivetrain.omega - this.omega) * damping * h;
+            this.omega += (drivetrain.omega - this.omega) * damping * h;
+        }
     }
 
     getCorrection(corr: number, h: number, compliance = 0) {
-        const w = corr * corr * 1/this.inertia; // idk?
+        const w = corr * corr * 1 / this.inertia; // idk?
         const dlambda = -corr / (w + compliance / h / h);
         return corr * -dlambda;
     }
 
     applySounds(samples: Record<string, DynamicAudioNode>, gearRatio = 0, rpmPitchFactor = 0.2) {
-        
+
         const { gain1: high, gain2: low } = AudioManager.crossFade(this.rpm, 3000, 6500);
         const { gain1: on, gain2: off } = AudioManager.crossFade(this.throttle, 0, 1);
         const limiterGain = ratio(this.rpm, this.soft_limiter * 0.93, this.limiter);
@@ -166,7 +164,7 @@ export class Engine {
         if (samples['tranny_on'] && samples['tranny_off']) {
             samples['tranny_on'].audio.detune.value = this.rpm * gearRatio * 0.05 - 100;
             samples['tranny_on'].gain.gain.value = gearRatio > 0 ? on * samples['tranny_on'].volume : 0;
-            
+
             samples['tranny_off'].audio.detune.value = this.rpm * gearRatio * 0.035 - 800;
             samples['tranny_off'].gain.gain.value = gearRatio > 0 ? off * samples['tranny_off'].volume : 0;
         }
