@@ -173,9 +173,18 @@ function animate() {
             // Smooth coasting in neutral (drag)
             speed *= 0.99;
         } else {
-            // Smoothly interpolate towards the target speed so it doesn't instantly jump
-            // The factor (dt * 5.0) provides a realistic delay / catch up effect
-            speed += (targetSpeed - speed) * (dt * 5.0);
+            // Calculate natural smooth jump
+            let smoothedDiff = (targetSpeed - speed) * (dt * 4.0);
+
+            // Limit maximum jump so putting reverse at 90kph acts like brakes 
+            // instead of teleporting the car backwards instantly
+            let isBrakingOrReversing = (speed > 0 && targetSpeed <= 0) || (speed < 0 && targetSpeed >= 0);
+            let limit = isBrakingOrReversing ? (dt * 30.0) : (dt * 12.0); // Braking force is stronger than acceleration
+
+            if (smoothedDiff > limit) smoothedDiff = limit;
+            if (smoothedDiff < -limit) smoothedDiff = -limit;
+
+            speed += smoothedDiff;
         }
 
         rpm = engineData.rpm;
