@@ -164,11 +164,20 @@ function animate() {
         let maxGearKPH = maxGearSpeedsKPH[currentGear] || 0;
         let calculatedKPH = (engineData.rpm / 10000) * maxGearKPH;
 
+        let targetSpeed = calculatedKPH / 3.6;
         if (engineData.gear === -1) {
-            speed = -calculatedKPH / 3.6;
-        } else {
-            speed = calculatedKPH / 3.6;
+            targetSpeed = -targetSpeed;
         }
+
+        if (engineData.gear === 0) {
+            // Smooth coasting in neutral (drag)
+            speed *= 0.99;
+        } else {
+            // Smoothly interpolate towards the target speed so it doesn't instantly jump
+            // The factor (dt * 5.0) provides a realistic delay / catch up effect
+            speed += (targetSpeed - speed) * (dt * 5.0);
+        }
+
         rpm = engineData.rpm;
     } else {
         if (window.inputs && window.inputs.fwd) speed += 0.025;
