@@ -3,6 +3,7 @@ window.isPaused = false;
 window.gameSettings = {
     steering: 'wheel',
     units: 'kph',
+    transmission: 'automatic',
     controlHud: 'on',
     engineVol: 80,
     musicVol: 50
@@ -43,6 +44,7 @@ window.handleGyroPrompt = (action) => {
 window.saveSettings = () => {
     window.gameSettings.steering = document.getElementById('setting-steering').value;
     window.gameSettings.units = document.getElementById('setting-units').value;
+    window.gameSettings.transmission = document.getElementById('setting-transmission').value;
     window.gameSettings.engineVol = document.getElementById('setting-engine-vol').value;
     window.gameSettings.musicVol = document.getElementById('setting-music-vol').value;
     const hudToggle = document.getElementById('setting-hud-toggle');
@@ -59,6 +61,9 @@ window.loadSettingsToModal = function () {
         const s = JSON.parse(saved);
         document.getElementById('setting-steering').value = s.steering || 'wheel';
         document.getElementById('setting-units').value = s.units || 'kph';
+        if (document.getElementById('setting-transmission')) {
+            document.getElementById('setting-transmission').value = s.transmission || 'automatic';
+        }
         document.getElementById('setting-engine-vol').value = s.engineVol || 80;
         document.getElementById('setting-music-vol').value = s.musicVol || 50;
         if (document.getElementById('setting-hud-toggle')) {

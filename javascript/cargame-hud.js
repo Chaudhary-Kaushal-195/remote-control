@@ -39,6 +39,11 @@ window.applyHUDVisibility = () => {
             if (steeringButtons) steeringButtons.style.display = 'none';
             if (window.setGyroState) window.setGyroState(true);
         }
+
+        const revBtn = document.getElementById('rev-btn');
+        if (revBtn) {
+            revBtn.style.display = window.gameSettings.transmission === 'manual' ? 'none' : 'flex';
+        }
     }
 };
 

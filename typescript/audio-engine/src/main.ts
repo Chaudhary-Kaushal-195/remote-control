@@ -103,14 +103,30 @@ function update(time: DOMHighResTimeStamp): void {
         return;
     }
 
+    const isAuto = (window as any).gameSettings?.transmission !== 'manual';
+    const isFwd = keys['Space'] || keys['KeyW'] || (window as any).inputs?.fwd;
+    const isBlink = keys['KeyB'] || keys['KeyS'] || (window as any).inputs?.bwd || (window as any).inputs?.brake;
+    const isRevOnly = (window as any).inputs?.bwd; // Specifically the REV button
+
     if (drivetrain.downShift) {
         engine.throttle = 0.8; // Rev matching
     } else {
-        const isFwd = keys['Space'] || keys['KeyW'] || (window as any).inputs?.fwd;
         if (isFwd) {
             engine.throttle = clamp(engine.throttle += 0.2, 0, 1);
+            if (isAuto && drivetrain.gear < 1) drivetrain.changeGear(1);
+        } else if (isAuto && isRevOnly) {
+            engine.throttle = clamp(engine.throttle += 0.2, 0, 1);
+            if (drivetrain.gear > -1) drivetrain.changeGear(-1);
         } else {
             engine.throttle = clamp(engine.throttle -= 0.2, 0, 1);
+        }
+    }
+
+    if (isAuto && drivetrain.gear > 0) {
+        if (engine.rpm > engine.limiter - 800) {
+            drivetrain.nextGear();
+        } else if (engine.rpm < 3500 && drivetrain.gear > 1) {
+            drivetrain.prevGear();
         }
     }
 

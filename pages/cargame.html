@@ -212,6 +212,14 @@
             </div>
 
             <div class="setting-row">
+                <div class="setting-label">Transmission</div>
+                <select id="setting-transmission" onchange="window.saveSettings()">
+                    <option value="automatic">Automatic</option>
+                    <option value="manual">Manual</option>
+                </select>
+            </div>
+
+            <div class="setting-row">
                 <div class="setting-label">Speed Format</div>
                 <select id="setting-units" onchange="window.saveSettings()">
                     <option value="kph">KPH (Kilometers)</option>
@@ -258,19 +266,21 @@
     <div id="orbit-zone"></div>
 
     <div class="ui-container" style="z-index: 6000;">
-        <div id="handbrake" class="pedal">
-            <div class="pedal-label" style="color:#ff4400; top: -20px; font-size: 13px;">E-BRAKE</div>
-            <div class="stripe"></div>
-            <div class="stripe"></div>
-            <div class="stripe"></div>
-        </div>
+        <div style="display: flex; gap: 15px; flex-direction: row; align-items: flex-end;">
+            <div id="handbrake" class="pedal">
+                <div class="pedal-label" style="color:#ff4400; top: -20px; font-size: 13px;">BRAKE</div>
+                <div class="stripe"></div>
+                <div class="stripe"></div>
+                <div class="stripe"></div>
+            </div>
 
-        <div id="gas" class="pedal">
-            <div class="pedal-label">GAS</div>
-            <div class="stripe"></div>
-            <div class="stripe"></div>
-            <div class="stripe"></div>
-            <div class="stripe"></div>
+            <div id="gas" class="pedal">
+                <div class="pedal-label">GAS</div>
+                <div class="stripe"></div>
+                <div class="stripe"></div>
+                <div class="stripe"></div>
+                <div class="stripe"></div>
+            </div>
         </div>
         <div id="rev-btn" class="pedal">REV</div>
     </div>
