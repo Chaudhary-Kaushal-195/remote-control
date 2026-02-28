@@ -27,36 +27,34 @@ window.applyHUDVisibility = () => {
         if (steeringZone) steeringZone.style.display = 'none';
         if (steeringButtons) steeringButtons.style.display = 'none';
         if (uiContainer) uiContainer.style.display = 'none';
-        if (settingsBtn) settingsBtn.parentElement.style.display = 'none';
-        return; // Stop here if HUD is off
-    }
+        if (settingsBtn && settingsBtn.parentElement) settingsBtn.parentElement.style.display = 'none';
+        return;
+    } else {
+        if (uiContainer) uiContainer.style.display = 'flex';
+        if (settingsBtn && settingsBtn.parentElement) settingsBtn.parentElement.style.display = 'flex';
+        if (camBtn) camBtn.style.display = 'flex';
+        if (transBtn) transBtn.style.display = 'flex';
+        if (pauseBtn) pauseBtn.style.display = 'flex';
 
-    // If we reach here, HUD is ON
-    if (uiContainer) uiContainer.style.display = 'flex';
-    if (settingsBtn) settingsBtn.parentElement.style.display = 'flex';
-    if (camBtn) camBtn.style.display = 'flex';
-    if (transBtn) transBtn.style.display = 'flex';
-    if (pauseBtn) pauseBtn.style.display = 'flex';
+        if (window.gameSettings && window.gameSettings.steering === 'wheel') {
+            if (steeringZone) steeringZone.style.display = 'block';
+            if (steeringButtons) steeringButtons.style.display = 'none';
+            if (window.setGyroState) window.setGyroState(false);
+        } else if (window.gameSettings && window.gameSettings.steering === 'buttons') {
+            if (steeringZone) steeringZone.style.display = 'none';
+            if (steeringButtons) steeringButtons.style.display = 'flex';
+            if (window.setGyroState) window.setGyroState(false);
+        } else if (window.gameSettings && window.gameSettings.steering === 'gyro') {
+            if (steeringZone) steeringZone.style.display = 'none';
+            if (steeringButtons) steeringButtons.style.display = 'none';
+            if (window.setGyroState) window.setGyroState(true);
+        }
 
-    if (window.gameSettings && window.gameSettings.steering === 'wheel') {
-        if (steeringZone) steeringZone.style.display = 'block';
-        if (steeringButtons) steeringButtons.style.display = 'none';
-        if (window.setGyroState) window.setGyroState(false);
-    } else if (window.gameSettings && window.gameSettings.steering === 'buttons') {
-        if (steeringZone) steeringZone.style.display = 'none';
-        if (steeringButtons) steeringButtons.style.display = 'flex';
-        if (window.setGyroState) window.setGyroState(false);
-    } else if (window.gameSettings && window.gameSettings.steering === 'gyro') {
-        if (steeringZone) steeringZone.style.display = 'none';
-        if (steeringButtons) steeringButtons.style.display = 'none';
-        if (window.setGyroState) window.setGyroState(true);
+        const revBtn = document.getElementById('rev-btn');
+        if (revBtn) {
+            revBtn.style.display = window.gameSettings.transmission === 'manual' ? 'none' : 'flex';
+        }
     }
-
-    const revBtn = document.getElementById('rev-btn');
-    if (revBtn) {
-        revBtn.style.display = window.gameSettings.transmission === 'manual' ? 'none' : 'flex';
-    }
-}
 };
 
 window.updateHUD = function (rawSpeed, rpm, engineTemp, fuelLevel, engineData, manualGearIndex) {
@@ -64,10 +62,11 @@ window.updateHUD = function (rawSpeed, rpm, engineTemp, fuelLevel, engineData, m
     if (!speedBox || !window.gameSettings) return;
 
     // Speed display
-    const displaySpeed = window.gameSettings.units === 'mph' ? Math.round(rawSpeed * 0.62) : Math.round(rawSpeed);
-    speedBox.innerText = `${displaySpeed} ${window.gameSettings.units.toUpperCase()}`;
+    const units = window.gameSettings.units || 'kph';
+    const displaySpeed = units === 'mph' ? Math.round(rawSpeed * 0.62) : Math.round(rawSpeed);
+    speedBox.innerText = `${displaySpeed} ${units.toUpperCase()}`;
     const unitLabel = document.getElementById('unit-label');
-    if (unitLabel) unitLabel.innerText = `unit: ${window.gameSettings.units.toUpperCase()}`;
+    if (unitLabel) unitLabel.innerText = `unit: ${units.toUpperCase()}`;
 
     // Analog Needle & Arc Logic (Multi-Gauge Clusters)
     const maxSpeed = 500; // New limit for the dial for real car physics 500 KPH
@@ -120,9 +119,10 @@ window.updateHUD = function (rawSpeed, rpm, engineTemp, fuelLevel, engineData, m
         else if (engineData.gear === 0) gearVal = "N";
         else gearVal = engineData.gear.toString();
     } else {
-        if (manualGearIndex === -1) gearVal = "R";
-        else if (manualGearIndex === 0) gearVal = "N";
-        else gearVal = manualGearIndex.toString();
+        const gear = manualGearIndex !== undefined ? manualGearIndex : 0;
+        if (gear === -1) gearVal = "R";
+        else if (gear === 0) gearVal = "N";
+        else gearVal = gear.toString();
     }
     const gearBox = document.getElementById('gear-box');
     if (gearBox) gearBox.innerText = gearVal;

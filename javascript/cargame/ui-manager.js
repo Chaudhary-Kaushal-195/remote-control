@@ -16,7 +16,7 @@ window.toggleTransmission = () => {
     } else {
         window.gameSettings.transmission = 'automatic';
     }
-    
+
     // Update the button visuals immediately
     const transBtn = document.getElementById('trans-trigger-btn');
     if (transBtn) {
