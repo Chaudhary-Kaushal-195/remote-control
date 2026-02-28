@@ -92,7 +92,7 @@ function update(time: DOMHighResTimeStamp): void {
     });
 
     currentTime = (new Date()).getTime();
-    dt = (currentTime - lastTime) / 1000;
+    dt = Math.min((currentTime - lastTime) / 1000, 0.1);
     lastTime = currentTime;
 
     if (dt === 0) {

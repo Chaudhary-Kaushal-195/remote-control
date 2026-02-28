@@ -1,3 +1,10 @@
+// Screen Orientation Lock (For Mobile Devices)
+if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock('landscape').catch(err => {
+        console.log("Orientation lock failed/not supported:", err);
+    });
+}
+
 // HUD Management
 window.initHUD = function () {
     // Initial display logic
