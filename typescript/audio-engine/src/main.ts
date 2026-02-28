@@ -50,15 +50,19 @@ document.addEventListener('keyup', e => {
 
     keys[e.code] = false;
 
-    if (e.code.startsWith('Digit')) {
-        const nextGear = +e.key;
-        drivetrain.changeGear(nextGear);
-    }
+    const isManual = (window as any).gameSettings?.transmission === 'manual';
 
-    if (e.code == 'ArrowUp')
-        drivetrain.nextGear();
-    if (e.code == 'ArrowDown')
-        drivetrain.prevGear();
+    if (isManual) {
+        if (e.code.startsWith('Digit')) {
+            const nextGear = +e.key;
+            drivetrain.changeGear(nextGear);
+        }
+
+        if (e.code == 'ArrowUp')
+            drivetrain.nextGear();
+        if (e.code == 'ArrowDown')
+            drivetrain.prevGear();
+    }
 });
 
 /* Initialization */
