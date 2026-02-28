@@ -159,7 +159,10 @@
         </div>
     </div>
 
-    <button id="pause-btn" class="hud-btn" onclick="window.togglePause()">⏸ PAUSE</button>
+    <div style="position: absolute; top: 25px; right: 25px; display: flex; gap: 12px; z-index: 6001;">
+        <button id="settings-trigger-btn" class="hud-btn-circle" onclick="window.toggleSettings()">⚙️</button>
+        <button id="pause-btn" class="hud-btn" onclick="window.togglePause()">⏸ PAUSE</button>
+    </div>
 
     <div id="sound-overlay" onclick="window.initAudio()">
         <h1>🏎️ DR. VICE</h1>
