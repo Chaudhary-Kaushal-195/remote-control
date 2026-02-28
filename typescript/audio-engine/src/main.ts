@@ -99,7 +99,7 @@ function update(time: DOMHighResTimeStamp): void {
     dt = Math.min((currentTime - lastTime) / 1000, 0.1);
     lastTime = currentTime;
 
-    if (dt === 0) {
+    if (dt === 0 || (window as any).isPaused) {
         return;
     }
 
