@@ -122,7 +122,7 @@ function update(time: DOMHighResTimeStamp): void {
     }
 
     if (isAuto && drivetrain.gear > 0) {
-        if (engine.rpm > engine.limiter - 800) {
+        if (engine.rpm > engine.limiter - 150) {
             drivetrain.nextGear();
         } else if (engine.rpm < 3500 && drivetrain.gear > 1) {
             drivetrain.prevGear();
@@ -135,6 +135,15 @@ function update(time: DOMHighResTimeStamp): void {
             drivetrain.omega = Math.max(0, drivetrain.omega - 0.3); // Brake going forward
         } else if (drivetrain.omega < 0) {
             drivetrain.omega = Math.min(0, drivetrain.omega + 0.3); // Brake going backward
+        }
+    }
+
+    // Auto shift to neutral if braking at low speed in 1st or Reverse
+    if (isAuto && isBrake && !drivetrain.isShifting) {
+        if (drivetrain.gear === 1 && drivetrain.omega < 10) {
+            drivetrain.changeGear(0);
+        } else if (drivetrain.gear === -1 && drivetrain.omega > -10) {
+            drivetrain.changeGear(0);
         }
     }
 
