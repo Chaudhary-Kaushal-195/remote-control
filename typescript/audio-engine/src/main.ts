@@ -121,8 +121,8 @@ function update(time: DOMHighResTimeStamp): void {
         }
     }
 
-    if (isAuto && drivetrain.gear > 0) {
-        if (engine.rpm > engine.limiter - 150) {
+    if (isAuto && drivetrain.gear > 0 && !drivetrain.isShifting) {
+        if (engine.rpm > engine.limiter - 150 && drivetrain.gear < drivetrain.gears.length) {
             drivetrain.nextGear();
         } else if (engine.rpm < 3500 && drivetrain.gear > 1) {
             drivetrain.prevGear();
