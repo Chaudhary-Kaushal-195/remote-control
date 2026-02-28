@@ -99,11 +99,14 @@ export class Drivetrain {
     getGearRatio(gear?: number) {
         gear = gear ?? this.gear;
 
-        gear = clamp(gear, 0, this.gears.length);
+        gear = clamp(gear, -1, this.gears.length);
 
-        const ratio = gear > 0
-            ? this.gears[gear - 1]
-            : 0;
+        let ratio = 0;
+        if (gear > 0) {
+            ratio = this.gears[gear - 1];
+        } else if (gear === -1) {
+            ratio = -this.gears[0]; // Reverse is negative 1st gear ratio
+        }
 
         return ratio;
     }
@@ -116,9 +119,9 @@ export class Drivetrain {
 
         const prevRatio = this.getGearRatio(this.gear);
         const nextRatio = this.getGearRatio(gear);
-        const ratioRatio = prevRatio > 0 ? nextRatio / prevRatio : 0;
+        const ratioRatio = prevRatio !== 0 ? Math.abs(nextRatio / prevRatio) : 0;
 
-        if (ratioRatio === 1)
+        if (gear === this.gear)
             return;
 
         /* Neutral */
@@ -133,7 +136,7 @@ export class Drivetrain {
             this.omega = this.omega * ratioRatio;
 
             this.gear = gear;
-            this.gear = clamp(gear, 0, this.gears.length);
+            this.gear = clamp(gear, -1, this.gears.length);
             this.downShift = false;
             this.isShifting = false;
 
