@@ -19,6 +19,8 @@ window.applyHUDVisibility = () => {
     const steeringButtons = document.getElementById('steering-buttons');
     const uiContainer = document.querySelector('.ui-container');
     const settingsBtn = document.getElementById('settings-trigger-btn');
+    const camBtn = document.getElementById('cam-trigger-btn');
+    const transBtn = document.getElementById('trans-trigger-btn');
     const pauseBtn = document.getElementById('pause-btn');
 
     if (!isHudOn) {

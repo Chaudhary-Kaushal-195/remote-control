@@ -29,6 +29,16 @@
     backdrop-filter: blur(10px);
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     box-shadow: 0 0 15px rgba(15, 255, 250, 0.2);
+    font-family: 'Inter', sans-serif;
+    /* For better emoji rendering */
+}
+
+#trans-trigger-btn {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 12px;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
 }
 
 .hud-btn-circle:hover {

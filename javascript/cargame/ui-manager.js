@@ -9,6 +9,21 @@ window.gameSettings = {
     musicVol: 50
 };
 
+window.toggleTransmission = () => {
+    const isAuto = window.gameSettings.transmission === 'automatic';
+    window.gameSettings.transmission = isAuto ? 'manual' : 'automatic';
+
+    // Update HUD button text
+    const transBtn = document.getElementById('trans-trigger-btn');
+    if (transBtn) {
+        transBtn.innerText = window.gameSettings.transmission === 'automatic' ? "AUTO" : "MANUAL";
+        transBtn.style.borderColor = window.gameSettings.transmission === 'automatic' ? "var(--neon-blue)" : "var(--neon-pink)";
+        transBtn.style.color = window.gameSettings.transmission === 'automatic' ? "var(--neon-blue)" : "var(--neon-pink)";
+    }
+
+    window.saveSettings();
+};
+
 window.togglePause = () => {
     window.isPaused = !window.isPaused;
     document.getElementById('pause-btn').innerText = window.isPaused ? "▶ RESUME" : "⏸ PAUSE";
@@ -44,7 +59,7 @@ window.handleGyroPrompt = (action) => {
 window.saveSettings = () => {
     window.gameSettings.steering = document.getElementById('setting-steering').value;
     window.gameSettings.units = document.getElementById('setting-units').value;
-    window.gameSettings.transmission = document.getElementById('setting-transmission').value;
+    // window.gameSettings.transmission = document.getElementById('setting-transmission').value; // Now handled by HUD toggle
     window.gameSettings.engineVol = document.getElementById('setting-engine-vol').value;
     window.gameSettings.musicVol = document.getElementById('setting-music-vol').value;
     const hudToggle = document.getElementById('setting-hud-toggle');
@@ -67,6 +82,16 @@ window.loadSettingsToModal = function () {
         }
         document.getElementById('setting-engine-vol').value = s.engineVol || 80;
         document.getElementById('setting-music-vol').value = s.musicVol || 50;
+
+        // Sync HUD button on load
+        const transBtn = document.getElementById('trans-trigger-btn');
+        const currentTrans = s.transmission || 'automatic';
+        if (transBtn) {
+            transBtn.innerText = currentTrans === 'automatic' ? "AUTO" : "MANUAL";
+            transBtn.style.borderColor = currentTrans === 'automatic' ? "var(--neon-blue)" : "var(--neon-pink)";
+            transBtn.style.color = currentTrans === 'automatic' ? "var(--neon-blue)" : "var(--neon-pink)";
+        }
+
         if (document.getElementById('setting-hud-toggle')) {
             document.getElementById('setting-hud-toggle').value = s.controlHud || 'on';
         }
