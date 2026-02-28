@@ -113,10 +113,10 @@ function update(time: DOMHighResTimeStamp): void {
     } else {
         if (isFwd) {
             engine.throttle = clamp(engine.throttle += 0.2, 0, 1);
-            if (isAuto && drivetrain.gear < 1) drivetrain.changeGear(1);
+            if (isAuto && drivetrain.gear < 1 && !drivetrain.isShifting) drivetrain.changeGear(1);
         } else if (isAuto && isRevOnly) {
             engine.throttle = clamp(engine.throttle += 0.2, 0, 1);
-            if (drivetrain.gear > -1) drivetrain.changeGear(-1);
+            if (drivetrain.gear > -1 && !drivetrain.isShifting) drivetrain.changeGear(-1);
         } else {
             engine.throttle = clamp(engine.throttle -= 0.2, 0, 1);
         }

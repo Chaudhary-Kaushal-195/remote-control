@@ -6,6 +6,7 @@ export class Drivetrain {
     gear = 0;
     clutch = 1.0;
     downShift = false;
+    isShifting = false;
 
     // gears = [3.17, 2.36, 1.80, 1.47, 1.24, 1.11];
     gears = [3.4, 2.36, 1.85, 1.47, 1.24, 1.07];
@@ -18,7 +19,7 @@ export class Drivetrain {
 
     theta_wheel: number = 0;
     omega_wheel: number = 0;
-    
+
     /* Inertia of geartrain + drive shaft [kg m2] */
     inertia = 0.1 + 0.05; /* 0.5 * MR^2 */
     damping = 12;
@@ -84,10 +85,10 @@ export class Drivetrain {
 
     getCorrection(corr: number, h: number, compliance = 0) {
 
-        const w = corr * corr * 1/this.inertia; // idk?
+        const w = corr * corr * 1 / this.inertia; // idk?
 
         const dlambda = -corr / (w + compliance / h / h);
-        
+
         return corr * -dlambda;
     }
 
@@ -100,8 +101,8 @@ export class Drivetrain {
 
         gear = clamp(gear, 0, this.gears.length);
 
-        const ratio = gear > 0 
-            ? this.gears[gear - 1] 
+        const ratio = gear > 0
+            ? this.gears[gear - 1]
             : 0;
 
         return ratio;
@@ -121,7 +122,8 @@ export class Drivetrain {
             return;
 
         /* Neutral */
-        this.gear = 0; 
+        this.gear = 0;
+        this.isShifting = true;
 
         if (ratioRatio > 1)
             this.downShift = true;
@@ -133,6 +135,7 @@ export class Drivetrain {
             this.gear = gear;
             this.gear = clamp(gear, 0, this.gears.length);
             this.downShift = false;
+            this.isShifting = false;
 
             console.log('Changed', this.gear);
 
