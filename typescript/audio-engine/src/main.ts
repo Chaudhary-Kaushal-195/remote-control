@@ -105,8 +105,7 @@ function update(time: DOMHighResTimeStamp): void {
 
     const isAuto = (window as any).gameSettings?.transmission !== 'manual';
     const isFwd = keys['Space'] || keys['KeyW'] || (window as any).inputs?.fwd;
-    const isBlink = keys['KeyB'] || keys['KeyS'] || (window as any).inputs?.bwd || (window as any).inputs?.brake;
-    const isRevOnly = (window as any).inputs?.bwd; // Specifically the REV button
+    const isRevOnly = keys['KeyR'] || (window as any).inputs?.bwd; // Specifically the REV button and R key
 
     if (drivetrain.downShift) {
         engine.throttle = 0.8; // Rev matching
@@ -130,9 +129,13 @@ function update(time: DOMHighResTimeStamp): void {
         }
     }
 
-    const isBrake = keys['KeyB'] || keys['KeyS'] || (window as any).inputs?.bwd || (window as any).inputs?.brake;
+    const isBrake = keys['KeyB'] || (window as any).inputs?.brake;
     if (isBrake) {
-        drivetrain.omega -= 0.3; // Brakes
+        if (drivetrain.omega > 0) {
+            drivetrain.omega = Math.max(0, drivetrain.omega - 0.3); // Brake going forward
+        } else if (drivetrain.omega < 0) {
+            drivetrain.omega = Math.min(0, drivetrain.omega + 0.3); // Brake going backward
+        }
     }
 
     vehicle.update(time, dt);
