@@ -78,6 +78,11 @@ window.startTypeScriptEngineAudio = async function () {
 
     if (startBtn) startBtn.style.display = 'none';
     if (controls) controls.style.display = 'block';
+
+    // Apply initial volume from gameSettings
+    if ((window as any).gameSettings?.engineVol !== undefined) {
+        (window as any).setEngineVolume((window as any).gameSettings.engineVol);
+    }
 }
 
 startBtn?.addEventListener('click', (window as any).startTypeScriptEngineAudio, { once: true })
@@ -174,4 +179,11 @@ window.setEngineAudioMute = function (isMuted: boolean) {
     } else {
         vehicle.audio.ctx.resume();
     }
+};
+
+// @ts-ignore
+window.setEngineVolume = function (vol: number) {
+    if (!vehicle || !vehicle.audio) return;
+    // Map 0-100 to 0.0-1.0
+    vehicle.audio.setVolume(vol / 100);
 };

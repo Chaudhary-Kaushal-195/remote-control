@@ -53,6 +53,7 @@ window.saveSettings = () => {
     localStorage.setItem('drViceSettings', JSON.stringify(window.gameSettings));
 
     if (window.applyHUDVisibility) window.applyHUDVisibility();
+    if (window.setEngineVolume) window.setEngineVolume(window.gameSettings.engineVol);
 };
 
 window.loadSettingsToModal = function () {

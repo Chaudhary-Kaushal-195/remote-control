@@ -6,7 +6,7 @@ export class DynamicAudioNode {
         public audio: AudioBufferSourceNode,
         public rpm: number = 1000,
         public volume: number = 1.0,
-    ) {}
+    ) { }
 }
 
 export class AudioSource {
@@ -28,12 +28,12 @@ export class AudioManager {
 
         this.ctx = new AudioContext();
         this.volume = new GainNode(this.ctx);
-        // this.volume.gain.value = 0.2;
+        this.volume.gain.value = 0.5; // Default middle volume
 
         for (const key in sources) {
             this.samples[key] = await this.add(sources[key]);
         }
-        
+
         if (this.ctx.state === 'suspended')
             this.ctx.resume();
     }
@@ -73,6 +73,11 @@ export class AudioManager {
         return {
             gain1, gain2
         }
+    }
+
+    public setVolume(vol: number) {
+        if (!this.volume) return;
+        this.volume.gain.setTargetAtTime(vol, this.ctx.currentTime, 0.05);
     }
 
     public dispose() {
