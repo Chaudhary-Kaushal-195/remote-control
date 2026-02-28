@@ -18,13 +18,17 @@ window.applyHUDVisibility = () => {
     const steeringZone = document.getElementById('steering-zone');
     const steeringButtons = document.getElementById('steering-buttons');
     const uiContainer = document.querySelector('.ui-container');
+    const settingsBtn = document.getElementById('settings-trigger-btn');
+    const pauseBtn = document.getElementById('pause-btn');
 
     if (!isHudOn) {
         if (steeringZone) steeringZone.style.display = 'none';
         if (steeringButtons) steeringButtons.style.display = 'none';
         if (uiContainer) uiContainer.style.display = 'none';
+        if (settingsBtn) settingsBtn.parentElement.style.display = 'none';
     } else {
         if (uiContainer) uiContainer.style.display = 'flex';
+        if (settingsBtn) settingsBtn.parentElement.style.display = 'flex';
 
         if (window.gameSettings && window.gameSettings.steering === 'wheel') {
             if (steeringZone) steeringZone.style.display = 'block';
