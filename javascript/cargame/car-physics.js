@@ -169,9 +169,20 @@ function animate() {
             targetSpeed = -targetSpeed;
         }
 
+        let isBraking = window.inputs && window.inputs.brake;
+        if (isBraking) {
+            targetSpeed = 0;
+        }
+
         if (engineData.gear === 0) {
-            // Smooth coasting in neutral (drag)
-            speed *= 0.99;
+            if (isBraking) {
+                let brakeForce = 0.5 * (dt * 60.0);
+                if (speed > 0) speed = Math.max(0, speed - brakeForce);
+                if (speed < 0) speed = Math.min(0, speed + brakeForce);
+            } else {
+                // Smooth coasting in neutral (drag)
+                speed *= 0.99;
+            }
         } else {
             // Calculate natural smooth jump
             let smoothedDiff = (targetSpeed - speed) * (dt * 4.0);
@@ -180,6 +191,7 @@ function animate() {
             // instead of teleporting the car backwards instantly
             let isBrakingOrReversing = (speed > 0 && targetSpeed <= 0) || (speed < 0 && targetSpeed >= 0);
             let limit = isBrakingOrReversing ? (dt * 30.0) : (dt * 12.0); // Braking force is stronger than acceleration
+            if (isBraking) limit = dt * 50.0;
 
             if (smoothedDiff > limit) smoothedDiff = limit;
             if (smoothedDiff < -limit) smoothedDiff = -limit;
