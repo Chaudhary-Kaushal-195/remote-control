@@ -28,29 +28,35 @@ window.applyHUDVisibility = () => {
         if (steeringButtons) steeringButtons.style.display = 'none';
         if (uiContainer) uiContainer.style.display = 'none';
         if (settingsBtn) settingsBtn.parentElement.style.display = 'none';
-    } else {
-        if (uiContainer) uiContainer.style.display = 'flex';
-        if (settingsBtn) settingsBtn.parentElement.style.display = 'flex';
-
-        if (window.gameSettings && window.gameSettings.steering === 'wheel') {
-            if (steeringZone) steeringZone.style.display = 'block';
-            if (steeringButtons) steeringButtons.style.display = 'none';
-            if (window.setGyroState) window.setGyroState(false);
-        } else if (window.gameSettings && window.gameSettings.steering === 'buttons') {
-            if (steeringZone) steeringZone.style.display = 'none';
-            if (steeringButtons) steeringButtons.style.display = 'flex';
-            if (window.setGyroState) window.setGyroState(false);
-        } else if (window.gameSettings && window.gameSettings.steering === 'gyro') {
-            if (steeringZone) steeringZone.style.display = 'none';
-            if (steeringButtons) steeringButtons.style.display = 'none';
-            if (window.setGyroState) window.setGyroState(true);
-        }
-
-        const revBtn = document.getElementById('rev-btn');
-        if (revBtn) {
-            revBtn.style.display = window.gameSettings.transmission === 'manual' ? 'none' : 'flex';
-        }
+        return; // Stop here if HUD is off
     }
+
+    // If we reach here, HUD is ON
+    if (uiContainer) uiContainer.style.display = 'flex';
+    if (settingsBtn) settingsBtn.parentElement.style.display = 'flex';
+    if (camBtn) camBtn.style.display = 'flex';
+    if (transBtn) transBtn.style.display = 'flex';
+    if (pauseBtn) pauseBtn.style.display = 'flex';
+
+    if (window.gameSettings && window.gameSettings.steering === 'wheel') {
+        if (steeringZone) steeringZone.style.display = 'block';
+        if (steeringButtons) steeringButtons.style.display = 'none';
+        if (window.setGyroState) window.setGyroState(false);
+    } else if (window.gameSettings && window.gameSettings.steering === 'buttons') {
+        if (steeringZone) steeringZone.style.display = 'none';
+        if (steeringButtons) steeringButtons.style.display = 'flex';
+        if (window.setGyroState) window.setGyroState(false);
+    } else if (window.gameSettings && window.gameSettings.steering === 'gyro') {
+        if (steeringZone) steeringZone.style.display = 'none';
+        if (steeringButtons) steeringButtons.style.display = 'none';
+        if (window.setGyroState) window.setGyroState(true);
+    }
+
+    const revBtn = document.getElementById('rev-btn');
+    if (revBtn) {
+        revBtn.style.display = window.gameSettings.transmission === 'manual' ? 'none' : 'flex';
+    }
+}
 };
 
 window.updateHUD = function (rawSpeed, rpm, engineTemp, fuelLevel, engineData, manualGearIndex) {

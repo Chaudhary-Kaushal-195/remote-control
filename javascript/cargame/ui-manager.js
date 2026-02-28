@@ -10,18 +10,27 @@ window.gameSettings = {
 };
 
 window.toggleTransmission = () => {
-    const isAuto = window.gameSettings.transmission === 'automatic';
-    window.gameSettings.transmission = isAuto ? 'manual' : 'automatic';
-
-    // Update HUD button text
+    // Correctly toggle between 'automatic' and 'manual'
+    if (window.gameSettings.transmission === 'automatic') {
+        window.gameSettings.transmission = 'manual';
+    } else {
+        window.gameSettings.transmission = 'automatic';
+    }
+    
+    // Update the button visuals immediately
     const transBtn = document.getElementById('trans-trigger-btn');
     if (transBtn) {
-        transBtn.innerText = window.gameSettings.transmission === 'automatic' ? "AUTO" : "MANUAL";
-        transBtn.style.borderColor = window.gameSettings.transmission === 'automatic' ? "var(--neon-blue)" : "var(--neon-pink)";
-        transBtn.style.color = window.gameSettings.transmission === 'automatic' ? "var(--neon-blue)" : "var(--neon-pink)";
+        const isAuto = window.gameSettings.transmission === 'automatic';
+        transBtn.innerText = isAuto ? "AUTO" : "MANUAL";
+        transBtn.style.borderColor = isAuto ? "var(--neon-blue)" : "var(--neon-pink)";
+        transBtn.style.color = isAuto ? "var(--neon-blue)" : "var(--neon-pink)";
     }
 
-    window.saveSettings();
+    // Save to localStorage directly to avoid reading from (possibly closed) modal
+    localStorage.setItem('drViceSettings', JSON.stringify(window.gameSettings));
+
+    // Update visibility of elements that depend on transmission state (like REV pedal)
+    if (window.applyHUDVisibility) window.applyHUDVisibility();
 };
 
 window.togglePause = () => {
@@ -57,11 +66,11 @@ window.handleGyroPrompt = (action) => {
 };
 
 window.saveSettings = () => {
-    window.gameSettings.steering = document.getElementById('setting-steering').value;
-    window.gameSettings.units = document.getElementById('setting-units').value;
-    // window.gameSettings.transmission = document.getElementById('setting-transmission').value; // Now handled by HUD toggle
-    window.gameSettings.engineVol = document.getElementById('setting-engine-vol').value;
-    window.gameSettings.musicVol = document.getElementById('setting-music-vol').value;
+    window.gameSettings.steering = document.getElementById('setting-steering')?.value || window.gameSettings.steering;
+    window.gameSettings.units = document.getElementById('setting-units')?.value || window.gameSettings.units;
+    // Transmission is handled by toggleTransmission
+    window.gameSettings.engineVol = document.getElementById('setting-engine-vol')?.value || window.gameSettings.engineVol;
+    window.gameSettings.musicVol = document.getElementById('setting-music-vol')?.value || window.gameSettings.musicVol;
     const hudToggle = document.getElementById('setting-hud-toggle');
     if (hudToggle) window.gameSettings.controlHud = hudToggle.value;
 
