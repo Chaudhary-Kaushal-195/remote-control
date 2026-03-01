@@ -1,7 +1,21 @@
-// Screen Orientation Lock (For Mobile Devices)
+// Global Orientation Force Logic
+window.checkOrientation = () => {
+    const isPortrait = window.innerHeight > window.innerWidth;
+    if (isPortrait) {
+        document.body.classList.add('force-landscape-active');
+    } else {
+        document.body.classList.remove('force-landscape-active');
+    }
+};
+
+window.addEventListener('resize', window.checkOrientation);
+window.addEventListener('load', window.checkOrientation);
+window.checkOrientation();
+
+// Screen Orientation Lock (Attempt native lock first)
 if (screen.orientation && screen.orientation.lock) {
-    screen.orientation.lock('landscape').catch(err => {
-        console.log("Orientation lock failed/not supported:", err);
+    screen.orientation.lock('landscape').catch(() => {
+        console.log("Native orientation lock failed, falling back to CSS force-rotate.");
     });
 }
 

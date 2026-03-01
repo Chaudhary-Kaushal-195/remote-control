@@ -44,3 +44,29 @@ body {
     max-width: 400px;
     line-height: 1.5;
 }
+
+/* FORCE LANDSCAPE CSS LOGIC */
+body.force-landscape-active {
+    width: 100vh !important;
+    height: 100vw !important;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(90deg);
+    transform-origin: center center;
+    overflow: hidden;
+}
+
+body.force-landscape-active #ui-container,
+body.force-landscape-active #overlay,
+body.force-landscape-active #remote-settings-modal {
+    width: 100vh !important;
+    height: 100vw !important;
+}
+
+/* Remove old passive rotate warning */
+@media screen and (orientation: portrait) {
+    body::before {
+        display: none !important;
+    }
+}
