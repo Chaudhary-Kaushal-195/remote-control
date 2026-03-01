@@ -31,6 +31,11 @@ window.toggleTransmission = () => {
 
     // Update visibility of elements that depend on transmission state (like REV pedal)
     if (window.applyHUDVisibility) window.applyHUDVisibility();
+
+    // Sync to remote if connected
+    if (window.conn && window.conn.open) {
+        window.conn.send({ type: 'config', config: window.gameSettings });
+    }
 };
 
 window.togglePause = () => {
@@ -78,6 +83,11 @@ window.saveSettings = () => {
 
     if (window.applyHUDVisibility) window.applyHUDVisibility();
     if (window.setEngineVolume) window.setEngineVolume(window.gameSettings.engineVol);
+
+    // Sync to remote if connected
+    if (window.conn && window.conn.open) {
+        window.conn.send({ type: 'config', config: window.gameSettings });
+    }
 };
 
 window.loadSettingsToModal = function () {

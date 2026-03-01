@@ -72,6 +72,21 @@ window.setupRemote = () => {
             if (data.type === 'pedal') {
                 window.inputs[data.pedal] = data.active;
             }
+            if (data.type === 'updateSettings') {
+                // Sync settings from remote
+                window.gameSettings = Object.assign(window.gameSettings, data.settings);
+                localStorage.setItem('drViceSettings', JSON.stringify(window.gameSettings));
+                if (window.loadSettingsToModal) window.loadSettingsToModal();
+                if (window.applyHUDVisibility) window.applyHUDVisibility();
+                // Send back confirmation to sync other remote if connected
+                window.conn.send({ type: 'config', config: window.gameSettings });
+            }
+            if (data.type === 'keydown') {
+                document.dispatchEvent(new KeyboardEvent('keydown', { key: data.key }));
+            }
+            if (data.type === 'keyup') {
+                document.dispatchEvent(new KeyboardEvent('keyup', { key: data.key }));
+            }
         });
     });
 };
