@@ -43,17 +43,23 @@ window.enableGyro = () => {
     window.addEventListener('deviceorientation', (e) => {
         lastEvent = Date.now();
 
+        // Detect if we are in "Mock Landscape" (Portrait Window)
+        const isForcedLandscape = document.body.classList.contains('force-landscape-active');
         const screenAngle = (screen.orientation && screen.orientation.angle !== undefined)
             ? screen.orientation.angle
             : (window.orientation || 0);
 
         let rawTilt = 0;
 
-        // Standard Landscape Steering (90 or 270 degrees)
-        // Uses Beta for horizontal roll when in landscape
-        if (screenAngle === 90) rawTilt = e.beta;
-        else if (screenAngle === -90 || screenAngle === 270) rawTilt = -e.beta;
-        else rawTilt = -e.gamma; // Portrait fallback
+        if (isForcedLandscape) {
+            // Physically portrait, uses gamma for side-to-side tilt
+            rawTilt = -e.gamma;
+        } else {
+            // Standard Landscape Steering (90 or 270 degrees)
+            if (screenAngle === 90) rawTilt = e.beta;
+            else if (screenAngle === -90 || screenAngle === 270) rawTilt = -e.beta;
+            else rawTilt = -e.gamma; // Fallback
+        }
 
         if (rawTilt === null || rawTilt === undefined || isNaN(rawTilt)) {
             tiltDisplay.innerText = "Steer: SENSOR BLOCKED";

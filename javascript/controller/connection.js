@@ -1,15 +1,31 @@
-// Native Hardware Orientation Lock (Standard Gaming Experience)
-// Allows 180 degree rotation between both landscape sides (primary/secondary)
+// UNIVERSAL ORIENTATION ENGINE (Hill Climb Racing Style)
 window.lockAppOrientation = () => {
     if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('landscape').catch(() => {
-            console.log("Hardware orientation lock failed or unsupported on this browser.");
-        });
+        screen.orientation.lock('landscape').catch(() => { });
     }
 };
 
-// Initial attempt
-window.lockAppOrientation();
+window.checkOrientation = () => {
+    // Check if truly portrait physically
+    const isPortrait = window.innerHeight > window.innerWidth;
+    const hasClass = document.body.classList.contains('force-landscape-active');
+
+    if (isPortrait && !hasClass) {
+        document.body.classList.add('force-landscape-active');
+    } else if (!isPortrait && hasClass) {
+        document.body.classList.remove('force-landscape-active');
+    }
+};
+
+// Initial system activation
+window.addEventListener('resize', window.checkOrientation);
+window.addEventListener('orientationchange', window.checkOrientation);
+window.addEventListener('load', window.checkOrientation);
+window.checkOrientation();
+
+// First interaction triggers the hardware lock (Hill Climb style)
+document.addEventListener('touchstart', window.lockAppOrientation, { once: true });
+document.addEventListener('mousedown', window.lockAppOrientation, { once: true });
 
 
 

@@ -13,9 +13,27 @@
             margin: 0;
             overflow: hidden;
             height: 100vh;
+            width: 100vw;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: none !important;
+        }
+
+        /* FORCE LANDSCAPE CSS LOGIC (Hill Climb Style) */
+        body.force-landscape-active {
+            width: 100vh !important;
+            height: 100vw !important;
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) rotate(90deg) !important;
+            transform-origin: center center !important;
+        }
+
+        body.force-landscape-active .container {
+            width: 100vh !important;
+            max-width: 600px;
         }
 
         /* Animated Grid Background */

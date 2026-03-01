@@ -18,6 +18,24 @@ body {
     justify-content: center;
     width: 100vw;
     height: 100vh;
+    transition: none !important;
+}
+
+/* FORCE LANDSCAPE CSS LOGIC (Hill Climb Style) */
+body.force-landscape-active {
+    width: 100vh !important;
+    height: 100vw !important;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) rotate(90deg) !important;
+    transform-origin: center center !important;
+}
+
+body.force-landscape-active #ui-container,
+body.force-landscape-active #overlay {
+    width: 100vh !important;
+    height: 100vw !important;
 }
 
 /* Compatibility Overlay */
