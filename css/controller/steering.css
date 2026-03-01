@@ -1,26 +1,53 @@
 /* Analog Stick / Wheel Visual */
 #wheel-zone {
-    width: 150px;
-    height: 150px;
-    border: 4px solid rgba(255, 255, 255, 0.1);
-    background: rgba(0, 0, 0, 0.3);
+    width: 220px;
+    height: 220px;
+    border: 8px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.4);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: inset 0 0 20px rgba(240, 146, 255, 0.2), 0 0 15px rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(5px);
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 255, 250, 0.1);
+    backdrop-filter: blur(10px);
     -webkit-user-select: none;
     user-select: none;
+    position: relative;
 }
 
 #wheel-inner {
-    width: 50px;
-    height: 50px;
-    background: radial-gradient(circle, #f092ff 0%, #a200b3 100%);
+    width: 180px;
+    height: 180px;
+    background: transparent;
+    border: 15px solid #333;
     border-radius: 50%;
-    box-shadow: 0 0 20px #f092ff;
-    transition: transform 0.05s ease-out;
+    box-shadow: inset 0 0 10px #000, 0 0 15px rgba(15, 255, 250, 0.4);
+    position: relative;
+    pointer-events: none;
+    border-top-color: var(--neon-blue);
+    /* Top marker */
+}
+
+#wheel-inner::before,
+#wheel-inner::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #222;
+    border: 2px solid #444;
+}
+
+#wheel-inner::before {
+    width: 100%;
+    height: 20px;
+}
+
+#wheel-inner::after {
+    width: 20px;
+    height: 60%;
+    top: 70%;
 }
 
 /* Button Steering Mode */

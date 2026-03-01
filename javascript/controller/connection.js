@@ -43,6 +43,7 @@ window.connectToHost = async () => {
             if (window.vibrate) window.vibrate([50, 50, 50]);
             if (window.setupPedals) window.setupPedals();
             if (window.setupSteeringListeners) window.setupSteeringListeners();
+            if (window.setupRemoteWheel) window.setupRemoteWheel();
         });
 
         window.conn.on('data', (data) => {

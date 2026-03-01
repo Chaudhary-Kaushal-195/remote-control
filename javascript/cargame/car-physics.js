@@ -128,7 +128,9 @@ function animate() {
     }
 
     if (!window.activeTouchId) {
-        if (window.gyroActive) {
+        const useGyroOrRemoteWheel = window.gameSettings && (window.gameSettings.steering === 'gyro' || window.gameSettings.steering === 'wheel');
+
+        if (useGyroOrRemoteWheel && window.gyroActive) {
             window.wheelAngle = window.wheelAngle * 0.9 + window.gyroTilt * 0.1;
         } else if (window.inputs && window.inputs.left) {
             window.wheelAngle = Math.max(-180, window.wheelAngle - 5);

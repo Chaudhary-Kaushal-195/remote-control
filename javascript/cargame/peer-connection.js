@@ -82,10 +82,10 @@ window.setupRemote = () => {
                 window.conn.send({ type: 'config', config: window.gameSettings });
             }
             if (data.type === 'keydown') {
-                document.dispatchEvent(new KeyboardEvent('keydown', { key: data.key }));
+                window.dispatchEvent(new KeyboardEvent('keydown', { key: data.key, bubbles: true, cancelable: true }));
             }
             if (data.type === 'keyup') {
-                document.dispatchEvent(new KeyboardEvent('keyup', { key: data.key }));
+                window.dispatchEvent(new KeyboardEvent('keyup', { key: data.key, bubbles: true, cancelable: true }));
             }
         });
     });

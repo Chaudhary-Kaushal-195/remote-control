@@ -57,13 +57,18 @@ window.enableGyro = () => {
         }
 
         const finalTilt = Math.max(-45, Math.min(45, tilt)) * 4;
-        if (window.conn && window.conn.open) {
+        if (window.conn && window.conn.open && window.currentSteeringMode === 'gyro') {
             window.conn.send({ type: 'gyro', tilt: finalTilt });
-            tiltDisplay.innerText = "Steer: " + Math.round(finalTilt);
+            tiltDisplay.innerText = "Steer (Gyro): " + Math.round(finalTilt);
             tiltDisplay.style.color = "#0ffffa";
+        } else {
+            tiltDisplay.innerText = "Steer (Gyro): PAUSED";
+            tiltDisplay.style.color = "rgba(255,255,255,0.2)";
         }
 
-        if (wheelInner) wheelInner.style.transform = `translateX(${tilt * 1.5}px)`;
+        if (wheelInner && window.currentSteeringMode === 'gyro') {
+            wheelInner.style.transform = `rotate(${finalTilt}deg)`;
+        }
     }, true);
 }
 

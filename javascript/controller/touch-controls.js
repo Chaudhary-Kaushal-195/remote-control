@@ -1,3 +1,8 @@
+window.currentSteeringMode = 'gyro';
+window.activeWheelTouchId = null;
+window.lastWheelAngle = 0;
+window.remoteWheelAngle = 0;
+
 window.vibrate = (ms) => {
     if (navigator.vibrate) navigator.vibrate(ms);
 }
@@ -66,7 +71,60 @@ window.syncSettingsToHost = () => {
     });
 };
 
+window.setupRemoteWheel = () => {
+    const wheelZone = document.getElementById('wheel-zone');
+    const wheelInner = document.getElementById('wheel-inner');
+    if (!wheelZone) return;
+
+    const getAngle = (tx, ty) => {
+        const r = wheelZone.getBoundingClientRect();
+        return Math.atan2(ty - (r.top + r.height / 2), tx - (r.left + r.width / 2));
+    };
+
+    wheelZone.addEventListener('touchstart', (e) => {
+        if (window.currentSteeringMode !== 'wheel') return;
+        const t = e.changedTouches[0];
+        window.activeWheelTouchId = t.identifier;
+        window.lastWheelAngle = getAngle(t.clientX, t.clientY);
+        e.preventDefault();
+    }, { passive: false });
+
+    wheelZone.addEventListener('touchmove', (e) => {
+        if (window.currentSteeringMode !== 'wheel') return;
+        for (let t of e.changedTouches) {
+            if (t.identifier === window.activeWheelTouchId) {
+                const cur = getAngle(t.clientX, t.clientY);
+                let d = cur - window.lastWheelAngle;
+                if (d > Math.PI) d -= Math.PI * 2;
+                if (d < -Math.PI) d += Math.PI * 2;
+
+                window.remoteWheelAngle = Math.max(-180, Math.min(180, window.remoteWheelAngle + (d * 180 / Math.PI) * 1.5));
+                if (wheelInner) wheelInner.style.transform = `rotate(${window.remoteWheelAngle}deg)`;
+
+                if (window.conn && window.conn.open) {
+                    window.conn.send({ type: 'gyro', tilt: window.remoteWheelAngle });
+                }
+                window.lastWheelAngle = cur;
+                break;
+            }
+        }
+        e.preventDefault();
+    }, { passive: false });
+
+    wheelZone.addEventListener('touchend', (e) => {
+        for (let t of e.changedTouches) {
+            if (t.identifier === window.activeWheelTouchId) {
+                window.activeWheelTouchId = null;
+                // Auto-center or leave? Let's auto-center slowly via physics later, 
+                // but for now we stop sending updates.
+                break;
+            }
+        }
+    });
+};
+
 window.applyGameConfig = (config) => {
+    window.currentSteeringMode = config.steering;
     const wheel = document.getElementById('wheel-zone');
     const buttons = document.getElementById('button-steering');
     const pedals = document.getElementById('pedal-zone');
