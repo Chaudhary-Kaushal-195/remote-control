@@ -163,3 +163,107 @@
     letter-spacing: 1.5px;
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
+
+/* RESTORED STEERING WHEEL & PEDALS (Desktop Optimized) */
+#steering-zone {
+    position: absolute;
+    bottom: 40px;
+    left: 40px;
+    width: 140px;
+    height: 140px;
+    z-index: 50;
+}
+
+#wheel-visual {
+    width: 100%;
+    height: 100%;
+    border: 3px solid #f092ff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px rgba(240, 146, 255, 0.4);
+    position: relative;
+    transition: transform 0.1s ease-out;
+}
+
+.spoke-center {
+    width: 30px;
+    height: 22px;
+    border: 2px solid #f092ff;
+    border-radius: 50% 50% 40% 40%;
+    z-index: 2;
+}
+
+.spoke-hand {
+    position: absolute;
+    width: 68%;
+    height: 38%;
+    border: 2px solid #f092ff;
+    border-radius: 30% 30% 70% 70%;
+    top: 40%;
+}
+
+.ui-container {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 15px;
+    z-index: 55;
+}
+
+.pedal {
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    border: 2px solid;
+    background: rgba(0, 0, 0, 0.6);
+    font-size: 14px;
+    position: relative;
+    cursor: pointer;
+}
+
+#handbrake {
+    width: 70px;
+    height: 150px;
+    border-color: #ff4400;
+    color: #ff4400;
+}
+
+#gas {
+    width: 70px;
+    height: 150px;
+    border-color: #0ffffa;
+    color: #0ffffa;
+}
+
+#rev-btn {
+    width: 70px;
+    height: 45px;
+    border-color: #0ffffa;
+    color: #0ffffa;
+    margin-top: 10px;
+}
+
+#steering-buttons {
+    position: absolute;
+    bottom: 40px;
+    left: 40px;
+    gap: 20px;
+    z-index: 6000;
+    display: none;
+    /* Only shown in specific modes */
+}
+
+/* HIDE ON MOBILE (SYSTEM-WIDE SYNC) */
+@media (max-width: 1024px) {
+    .desktop-only {
+        display: none !important;
+    }
+}

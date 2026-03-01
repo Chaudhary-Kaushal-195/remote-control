@@ -243,7 +243,39 @@
         </div>
     </div>
 
-    <!-- Mobile-specific touch controls removed; desktop now relies on keyboard or remote -->
+    <!-- ON-SCREEN DESKTOP CONTROLS (Restored for Laptop/Desktop Mouse/Touch Use) -->
+    <div id="steering-zone" class="desktop-only" style="z-index: 6000;">
+        <div id="wheel-visual">
+            <div class="spoke-center"></div>
+            <div class="spoke-hand"></div>
+        </div>
+    </div>
+
+    <div id="steering-buttons" class="desktop-only">
+        <div id="steer-left" class="pedal steer-btn">&#9664;</div>
+        <div id="steer-right" class="pedal steer-btn">&#9654;</div>
+    </div>
+
+    <div class="ui-container desktop-only" style="z-index: 6000;">
+        <div style="display: flex; gap: 15px; flex-direction: row; align-items: flex-end;">
+            <div id="handbrake" class="pedal">
+                <div class="pedal-label" style="color:#ff4400; top: -20px; font-size: 13px;">BRAKE</div>
+                <div class="stripe"></div>
+                <div class="stripe"></div>
+                <div class="stripe"></div>
+            </div>
+
+            <div id="gas" class="pedal">
+                <div class="pedal-label">GAS</div>
+                <div class="stripe"></div>
+                <div class="stripe"></div>
+                <div class="stripe"></div>
+                <div class="stripe"></div>
+            </div>
+        </div>
+        <div id="rev-btn" class="pedal">REV</div>
+    </div>
+
     <div id="orbit-zone"></div>
 
     <!-- 3D CANVAS CONTAINER -->
