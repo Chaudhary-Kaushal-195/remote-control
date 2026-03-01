@@ -42,18 +42,19 @@
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 1024;
 
             if (isMobile) {
-                // Remove PC Game Launch from mobile
+                // Mobile: Hide Game, Show Remote as Primary
                 document.getElementById('pc-launch-card').style.display = 'none';
-                // Make remote button primary
-                document.getElementById('mobile-remote-card').classList.replace('secondary', 'primary');
-                document.getElementById('mobile-remote-card').style.width = '100%';
+                const remoteCard = document.getElementById('mobile-remote-card');
+                remoteCard.classList.replace('secondary', 'primary');
+                remoteCard.style.width = '100.5%'; // Match grid gap
             } else {
-                // Desktop: Keep both or emphasize game
-                // (Already handled by CSS but we can refine here)
+                // Desktop: Hide Remote, Show Game Only
+                document.getElementById('mobile-remote-card').style.display = 'none';
+                document.getElementById('pc-launch-card').style.width = '100.5%';
             }
         </script>
 
-        <p style="font-size: 10px; opacity: 0.3; margin-top: 50px;">VERSION 2.1 REMOTE-ONLY</p>
+        <p style="font-size: 10px; opacity: 0.3; margin-top: 50px;">VERSION 2.2 SPECIALIZED</p>
     </div>
 
     <div class="settings-btn" onclick="toggleSettings()">⚙️</div>
