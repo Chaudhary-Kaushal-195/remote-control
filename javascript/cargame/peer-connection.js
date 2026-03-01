@@ -82,10 +82,16 @@ window.setupRemote = () => {
                 window.conn.send({ type: 'config', config: window.gameSettings });
             }
             if (data.type === 'keydown') {
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: data.key, bubbles: true, cancelable: true }));
+                const keyMap = { 'ArrowUp': 38, 'ArrowDown': 40, 'w': 87, 's': 83, 'a': 65, 'd': 68, 'b': 66, ' ': 32 };
+                const kc = keyMap[data.key] || 0;
+                const ev = new KeyboardEvent('keydown', { key: data.key, code: data.key, keyCode: kc, which: kc, bubbles: true, cancelable: true });
+                document.dispatchEvent(ev);
             }
             if (data.type === 'keyup') {
-                window.dispatchEvent(new KeyboardEvent('keyup', { key: data.key, bubbles: true, cancelable: true }));
+                const keyMap = { 'ArrowUp': 38, 'ArrowDown': 40, 'w': 87, 's': 83, 'a': 65, 'd': 68, 'b': 66, ' ': 32 };
+                const kc = keyMap[data.key] || 0;
+                const ev = new KeyboardEvent('keyup', { key: data.key, code: data.key, keyCode: kc, which: kc, bubbles: true, cancelable: true });
+                document.dispatchEvent(ev);
             }
         });
     });

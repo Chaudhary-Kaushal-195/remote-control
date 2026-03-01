@@ -121,6 +121,28 @@ window.setupRemoteWheel = () => {
             }
         }
     });
+
+    const animateAutoCenter = () => {
+        if (!window.activeWheelTouchId && window.currentSteeringMode === 'wheel') {
+            if (Math.abs(window.remoteWheelAngle) > 0.5) {
+                // Return to center (0) with smooth damping
+                window.remoteWheelAngle *= 0.85;
+                if (wheelInner) wheelInner.style.transform = `rotate(${window.remoteWheelAngle}deg)`;
+
+                if (window.conn && window.conn.open) {
+                    window.conn.send({ type: 'gyro', tilt: window.remoteWheelAngle });
+                }
+            } else if (window.remoteWheelAngle !== 0) {
+                window.remoteWheelAngle = 0;
+                if (wheelInner) wheelInner.style.transform = `rotate(0deg)`;
+                if (window.conn && window.conn.open) {
+                    window.conn.send({ type: 'gyro', tilt: 0 });
+                }
+            }
+        }
+        requestAnimationFrame(animateAutoCenter);
+    };
+    requestAnimationFrame(animateAutoCenter);
 };
 
 window.applyGameConfig = (config) => {
