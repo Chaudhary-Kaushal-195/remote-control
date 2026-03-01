@@ -44,23 +44,3 @@ body {
     max-width: 400px;
     line-height: 1.5;
 }
-
-/* FORCE LANDSCAPE CSS LOGIC (Dashboard Lock) */
-body.force-landscape-active {
-    width: 100vh !important;
-    height: 100vw !important;
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) rotate(90deg) !important;
-    transform-origin: center center !important;
-    overflow: hidden !important;
-    transition: none !important;
-}
-
-body.force-landscape-active #ui-container,
-body.force-landscape-active #overlay,
-body.force-landscape-active #remote-settings-modal {
-    width: 100vh !important;
-    height: 100vw !important;
-}

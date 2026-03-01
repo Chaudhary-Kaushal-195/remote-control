@@ -42,25 +42,17 @@ window.enableGyro = () => {
     window.addEventListener('deviceorientation', (e) => {
         lastEvent = Date.now();
 
-        // Logical Tilt Detection (Orientation Agnostic Steering)
-        const isForcedLandscape = document.body.classList.contains('force-landscape-active');
         const screenAngle = (screen.orientation && screen.orientation.angle !== undefined)
             ? screen.orientation.angle
             : (window.orientation || 0);
 
         let rawTilt = 0;
 
-        // If physically portrait BUT we are "faking" landscape (Portrait Window)
-        if (isForcedLandscape) {
-            // In a portrait holding state, gamma is the lateral roll
-            rawTilt = -e.gamma;
-        } else {
-            // In a native landscape holding state, beta is the lateral roll
-            // Normalize it to match the gamma feel (usually inverted for steering)
-            if (screenAngle === 90) rawTilt = e.beta;
-            else if (screenAngle === -90 || screenAngle === 270) rawTilt = -e.beta;
-            else rawTilt = -e.gamma; // Fallback to portrait roll
-        }
+        // Standard Landscape Steering (90 or 270 degrees)
+        // Uses Beta for horizontal roll when in landscape
+        if (screenAngle === 90) rawTilt = e.beta;
+        else if (screenAngle === -90 || screenAngle === 270) rawTilt = -e.beta;
+        else rawTilt = -e.gamma; // Portrait fallback
 
         if (rawTilt === null || rawTilt === undefined || isNaN(rawTilt)) {
             tiltDisplay.innerText = "Steer: SENSOR BLOCKED";

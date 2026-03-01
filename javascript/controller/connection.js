@@ -1,35 +1,8 @@
-// Global Orientation Management
-window.isRotating = false;
-window.checkOrientation = () => {
-    if (window.isRotating) return;
-
-    // Check if browser is physically stuck in portrait (width < height)
-    const isPhysicalPortrait = window.innerHeight > window.innerWidth;
-    const isCSSForced = document.body.classList.contains('force-landscape-active');
-
-    // Fallback: If browser failed to rotate natively to landscape
-    if (isPhysicalPortrait && !isCSSForced) {
-        window.isRotating = true;
-        document.body.classList.add('force-landscape-active');
-        setTimeout(() => { window.isRotating = false; }, 400);
-    }
-    // If browser successfully rotated or user turned phone
-    else if (!isPhysicalPortrait && isCSSForced) {
-        window.isRotating = true;
-        document.body.classList.remove('force-landscape-active');
-        setTimeout(() => { window.isRotating = false; }, 400);
-    }
-};
-
-window.addEventListener('resize', window.checkOrientation);
-window.addEventListener('orientationchange', window.checkOrientation);
-window.addEventListener('load', window.checkOrientation);
-window.checkOrientation();
-
-// Native Hardware Lock (Primary)
+// Native Hardware Orientation Lock (Standard Gaming Experience)
+// Allows 180 degree rotation between both landscape sides (primary/secondary)
 if (screen.orientation && screen.orientation.lock) {
     screen.orientation.lock('landscape').catch(() => {
-        console.log("Hardware lock unsupported. Falling back to CSS engine.");
+        console.log("Hardware orientation lock failed or unsupported on this browser.");
     });
 }
 
