@@ -98,7 +98,7 @@ window.setupRemoteWheel = () => {
                 if (d > Math.PI) d -= Math.PI * 2;
                 if (d < -Math.PI) d += Math.PI * 2;
 
-                window.remoteWheelAngle = Math.max(-180, Math.min(180, window.remoteWheelAngle + (d * 180 / Math.PI) * 1.5));
+                window.remoteWheelAngle = Math.max(-180, Math.min(180, window.remoteWheelAngle + (d * 180 / Math.PI) * 2.2));
                 if (wheelInner) wheelInner.style.transform = `rotate(${window.remoteWheelAngle}deg)`;
 
                 if (window.conn && window.conn.open) {
@@ -111,22 +111,23 @@ window.setupRemoteWheel = () => {
         e.preventDefault();
     }, { passive: false });
 
-    wheelZone.addEventListener('touchend', (e) => {
+    const stopWheelTouch = (e) => {
         for (let t of e.changedTouches) {
             if (t.identifier === window.activeWheelTouchId) {
                 window.activeWheelTouchId = null;
-                // Auto-center or leave? Let's auto-center slowly via physics later, 
-                // but for now we stop sending updates.
                 break;
             }
         }
-    });
+    };
+
+    wheelZone.addEventListener('touchend', stopWheelTouch);
+    wheelZone.addEventListener('touchcancel', stopWheelTouch);
 
     const animateAutoCenter = () => {
         if (!window.activeWheelTouchId && window.currentSteeringMode === 'wheel') {
             if (Math.abs(window.remoteWheelAngle) > 0.5) {
                 // Return to center (0) with smooth damping
-                window.remoteWheelAngle *= 0.85;
+                window.remoteWheelAngle *= 0.94;
                 if (wheelInner) wheelInner.style.transform = `rotate(${window.remoteWheelAngle}deg)`;
 
                 if (window.conn && window.conn.open) {
