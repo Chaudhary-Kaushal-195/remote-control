@@ -27,7 +27,12 @@ window.applyHUDVisibility = () => {
         if (steeringZone) steeringZone.style.display = 'none';
         if (steeringButtons) steeringButtons.style.display = 'none';
         if (uiContainer) uiContainer.style.display = 'none';
-        if (settingsBtn && settingsBtn.parentElement) settingsBtn.parentElement.style.display = 'none';
+
+        // Ensure the control hub buttons remain visible as requested
+        if (settingsBtn && settingsBtn.parentElement) settingsBtn.parentElement.style.display = 'flex';
+        if (camBtn) camBtn.style.display = 'flex';
+        if (transBtn) transBtn.style.display = 'flex';
+        if (pauseBtn) pauseBtn.style.display = 'flex';
         return;
     } else {
         if (uiContainer) uiContainer.style.display = 'flex';
