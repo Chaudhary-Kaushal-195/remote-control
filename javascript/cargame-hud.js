@@ -74,20 +74,19 @@ window.updateHUD = function (rawSpeed, rpm, engineTemp, fuelLevel, engineData, m
     if (unitLabel) unitLabel.innerText = `unit: ${units.toUpperCase()}`;
 
     // Analog Needle & Arc Logic (270 Degree Sweep: 135deg to 405deg)
-    const maxSpeed = 500;
+    const maxSpeed = 600;
     const speedNeedleAngle = -135 + ((rawSpeed / maxSpeed) * 270);
     const speedNeedleGrp = document.getElementById('speed-needle-grp');
     if (speedNeedleGrp) speedNeedleGrp.setAttribute('transform', `rotate(${speedNeedleAngle}, 50, 50)`);
 
     const arc = document.getElementById('speed-arc');
     if (arc) {
-        // SVG Arc length for 270 deg at radius 40 is 188.5
         const offset = 188.5 - (Math.min(1, rawSpeed / maxSpeed) * 188.5);
         arc.style.strokeDashoffset = offset;
     }
 
-    // RPM Logic (Standardized to 9000 RPM range for better visual sweep)
-    const maxRpm = 10000;
+    // RPM Logic (Standardized to 12000 RPM range to align 6000 RPM at Top-Center)
+    const maxRpm = 12000;
     const rpmNeedleAngle = -135 + ((rpm / maxRpm) * 270);
     const rpmNeedleGrp = document.getElementById('rpm-needle-grp');
     if (rpmNeedleGrp) rpmNeedleGrp.setAttribute('transform', `rotate(${rpmNeedleAngle}, 50, 50)`);
