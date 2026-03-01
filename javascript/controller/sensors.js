@@ -1,4 +1,5 @@
 window.startGyro = () => {
+    if (window.lockAppOrientation) window.lockAppOrientation();
     if (window.vibrate) window.vibrate(50);
     const fixBtn = document.getElementById('fix-sensors');
     const tiltDisplay = document.getElementById('debug-tilt');

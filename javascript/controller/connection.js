@@ -1,10 +1,15 @@
 // Native Hardware Orientation Lock (Standard Gaming Experience)
 // Allows 180 degree rotation between both landscape sides (primary/secondary)
-if (screen.orientation && screen.orientation.lock) {
-    screen.orientation.lock('landscape').catch(() => {
-        console.log("Hardware orientation lock failed or unsupported on this browser.");
-    });
-}
+window.lockAppOrientation = () => {
+    if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(() => {
+            console.log("Hardware orientation lock failed or unsupported on this browser.");
+        });
+    }
+};
+
+// Initial attempt
+window.lockAppOrientation();
 
 
 
@@ -29,6 +34,9 @@ window.connectToHost = async () => {
     const hostIdInput = document.getElementById('hostIdInput');
     const hostId = hostIdInput.value.trim().toLowerCase();
     if (!hostId) return alert("Please enter the ID seen on your laptop!");
+
+    // Enforce orientation lock on user interaction
+    if (window.lockAppOrientation) window.lockAppOrientation();
 
     status.innerText = "STATUS: INITIALIZING PEER...";
     if (window.peer) window.peer.destroy();
@@ -83,6 +91,8 @@ window.onload = () => {
 let html5QrCode = null;
 
 window.startScanning = () => {
+    // Enforce orientation lock on user interaction
+    if (window.lockAppOrientation) window.lockAppOrientation();
     // Attempt to force landscape specifically for scanning again
     if (screen.orientation && screen.orientation.lock) {
         screen.orientation.lock('landscape').catch(() => { });
