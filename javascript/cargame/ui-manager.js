@@ -119,6 +119,26 @@ window.toggleSettings = () => {
     }
 };
 
+window.toggleDebugPanel = () => {
+    const gui = document.querySelector('.dg.ac');
+    if (!gui) return;
+    const isHidden = gui.style.display === 'none';
+    gui.style.display = isHidden ? 'block' : 'none';
+
+    const btn = document.getElementById('details-trigger-btn');
+    if (btn) {
+        btn.innerText = isHidden ? "CLOSE CONTROLS" : "MORE DETAILS";
+        btn.style.borderColor = isHidden ? "var(--neon-pink)" : "var(--neon-blue)";
+        btn.style.color = isHidden ? "var(--neon-pink)" : "var(--neon-blue)";
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     window.loadSettingsToModal();
+
+    // Hide debug panel by default after a short delay for dat.gui to init
+    setTimeout(() => {
+        const gui = document.querySelector('.dg.ac');
+        if (gui) gui.style.display = 'none';
+    }, 500);
 });

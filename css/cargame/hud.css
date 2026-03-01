@@ -54,6 +54,11 @@
     z-index: 50 !important;
 }
 
+/* HIDE NATIVE DAT.GUI CLOSE BUTTON SINCE WE HAVE A CUSTOM TOGGLE */
+.dg .close-button {
+    display: none !important;
+}
+
 /* STEERING WHEEL */
 #steering-zone {
     position: absolute;
