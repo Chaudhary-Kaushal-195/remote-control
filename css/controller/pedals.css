@@ -3,6 +3,9 @@
     display: flex;
     gap: 20px;
     align-items: flex-end;
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
 }
 
 .pedal {

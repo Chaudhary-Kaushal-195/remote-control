@@ -1,8 +1,8 @@
 /* Analog Stick / Wheel Visual */
 #wheel-zone {
-    width: 140px;
-    height: 140px;
-    border: 5px solid rgba(255, 255, 255, 0.05);
+    width: 160px;
+    height: 160px;
+    border: 6px solid rgba(255, 255, 255, 0.05);
     background: rgba(0, 0, 0, 0.4);
     border-radius: 50%;
     display: flex;
@@ -13,13 +13,13 @@
     -webkit-user-select: none;
     user-select: none;
     position: absolute;
-    bottom: 10px;
-    left: 10px;
+    bottom: 30px;
+    left: 30px;
 }
 
 #wheel-inner {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     background: transparent;
     border: 10px solid #333;
     border-radius: 50%;
@@ -55,9 +55,19 @@
 /* Button Steering Mode */
 #button-steering {
     display: none;
-    width: 240px;
-    height: 120px;
+    /* Controlled by JS applyGameConfig */
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    width: 200px;
+    height: 100px;
     gap: 15px;
+    display: flex;
+    /* only if parent is visible */
+}
+
+#button-steering[style*="display: none"] {
+    display: none !important;
 }
 
 .steer-btn {

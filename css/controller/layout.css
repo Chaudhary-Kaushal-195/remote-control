@@ -13,11 +13,6 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    padding: 30px 60px;
-    box-sizing: border-box;
     pointer-events: none;
     /* Allows touches to pass through empty space */
 }
