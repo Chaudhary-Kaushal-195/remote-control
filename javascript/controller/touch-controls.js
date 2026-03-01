@@ -64,11 +64,28 @@ window.syncSettingsToHost = () => {
     if (!window.conn) return;
     const steering = document.getElementById('remote-setting-steering').value;
     const transmission = document.getElementById('remote-setting-transmission').value;
+    const engineVol = parseInt(document.getElementById('remote-setting-engine-vol').value);
+    const musicVol = parseInt(document.getElementById('remote-setting-music-vol').value);
 
     window.conn.send({
         type: 'updateSettings',
-        settings: { steering, transmission }
+        settings: { steering, transmission, engineVol, musicVol }
     });
+};
+
+window.toggleTransmissionFromRemote = () => {
+    if (!window.conn) return;
+    const current = document.getElementById('remote-setting-transmission').value;
+    const next = current === 'automatic' ? 'manual' : 'automatic';
+    document.getElementById('remote-setting-transmission').value = next;
+    window.syncSettingsToHost();
+};
+
+window.cycleCameraFromRemote = () => {
+    if (!window.conn) return;
+    window.conn.send({ type: 'keydown', key: 'c' });
+    setTimeout(() => window.conn.send({ type: 'keyup', key: 'c' }), 50);
+    window.vibrate(30);
 };
 
 window.setupRemoteWheel = () => {
@@ -167,6 +184,19 @@ window.applyGameConfig = (config) => {
         document.getElementById('remote-setting-steering').value = config.steering;
     if (document.getElementById('remote-setting-transmission'))
         document.getElementById('remote-setting-transmission').value = config.transmission;
+    if (document.getElementById('remote-setting-engine-vol'))
+        document.getElementById('remote-setting-engine-vol').value = config.engineVol;
+    if (document.getElementById('remote-setting-music-vol'))
+        document.getElementById('remote-setting-music-vol').value = config.musicVol;
+
+    // Update Transmission Button Visual
+    const transBtn = document.getElementById('remote-trans-btn');
+    if (transBtn) {
+        const isAuto = config.transmission === 'automatic';
+        transBtn.innerText = isAuto ? "AUTO" : "MANUAL";
+        transBtn.style.borderColor = isAuto ? "var(--neon-blue)" : "var(--neon-pink)";
+        transBtn.style.color = isAuto ? "var(--neon-blue)" : "var(--neon-pink)";
+    }
 
     // Reset visibility
     if (wheel) wheel.style.display = 'none';

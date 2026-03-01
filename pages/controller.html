@@ -53,7 +53,10 @@
 
     <div id="ui-container">
         <!-- TOP CONTROLS -->
-        <div style="position: absolute; top: 30px; right: 30px; display: flex; gap: 10px; z-index: 100;">
+        <div style="position: absolute; top: 30px; right: 30px; display: flex; gap: 15px; z-index: 100;">
+            <button id="remote-trans-btn" class="ctrl-hub-btn" onclick="window.toggleTransmissionFromRemote()"
+                style="font-size: 10px; font-weight: bold; width: 66px !important; height: 66px !important;">AUTO</button>
+            <button id="remote-cam-btn" class="ctrl-hub-btn" onclick="window.cycleCameraFromRemote()">📷</button>
             <button id="remote-settings-btn" class="ctrl-hub-btn" onclick="window.toggleRemoteSettings()">⚙️</button>
         </div>
 
@@ -95,11 +98,23 @@
             </div>
 
             <div class="setting-row">
-                <label>TRANSMISSION</label>
+                <label>TRNMSN</label>
                 <select id="remote-setting-transmission" onchange="window.syncSettingsToHost()">
                     <option value="automatic">AUTOMATIC</option>
                     <option value="manual">MANUAL</option>
                 </select>
+            </div>
+
+            <div class="setting-row">
+                <label>ENGINE VOL</label>
+                <input type="range" id="remote-setting-engine-vol" min="0" max="100" value="80"
+                    oninput="window.syncSettingsToHost()">
+            </div>
+
+            <div class="setting-row">
+                <label>MUSIC VOL</label>
+                <input type="range" id="remote-setting-music-vol" min="0" max="100" value="50"
+                    oninput="window.syncSettingsToHost()">
             </div>
 
             <button onclick="window.toggleRemoteSettings()" style="margin-top: 20px; width: 100%;">BACK TO

@@ -78,17 +78,19 @@ window.setupRemote = () => {
                 localStorage.setItem('drViceSettings', JSON.stringify(window.gameSettings));
                 if (window.loadSettingsToModal) window.loadSettingsToModal();
                 if (window.applyHUDVisibility) window.applyHUDVisibility();
+                if (window.setEngineVolume) window.setEngineVolume(window.gameSettings.engineVol);
+
                 // Send back confirmation to sync other remote if connected
                 window.conn.send({ type: 'config', config: window.gameSettings });
             }
             if (data.type === 'keydown') {
-                const keyMap = { 'ArrowUp': 38, 'ArrowDown': 40, 'w': 87, 's': 83, 'a': 65, 'd': 68, 'b': 66, ' ': 32 };
+                const keyMap = { 'ArrowUp': 38, 'ArrowDown': 40, 'w': 87, 's': 83, 'a': 65, 'd': 68, 'b': 66, ' ': 32, 'c': 67 };
                 const kc = keyMap[data.key] || 0;
                 const ev = new KeyboardEvent('keydown', { key: data.key, code: data.key, keyCode: kc, which: kc, bubbles: true, cancelable: true });
                 document.dispatchEvent(ev);
             }
             if (data.type === 'keyup') {
-                const keyMap = { 'ArrowUp': 38, 'ArrowDown': 40, 'w': 87, 's': 83, 'a': 65, 'd': 68, 'b': 66, ' ': 32 };
+                const keyMap = { 'ArrowUp': 38, 'ArrowDown': 40, 'w': 87, 's': 83, 'a': 65, 'd': 68, 'b': 66, ' ': 32, 'c': 67 };
                 const kc = keyMap[data.key] || 0;
                 const ev = new KeyboardEvent('keyup', { key: data.key, code: data.key, keyCode: kc, which: kc, bubbles: true, cancelable: true });
                 document.dispatchEvent(ev);
