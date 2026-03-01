@@ -1,17 +1,22 @@
-#pause-btn {
+.hud-btn {
     background: rgba(10, 0, 20, 0.7);
-    border: 1px solid var(--neon-blue);
+    border: 1.5px solid var(--neon-blue);
     color: var(--neon-blue);
-    padding: 12px 24px;
+    padding: 10px 20px;
     border-radius: 50px;
     font-family: 'Orbitron', sans-serif;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 13px;
     letter-spacing: 2px;
     cursor: pointer;
     backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     box-shadow: 0 0 15px rgba(15, 255, 250, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+    text-transform: uppercase;
 }
 
 .hud-btn-circle {
@@ -30,33 +35,26 @@
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     box-shadow: 0 0 15px rgba(15, 255, 250, 0.2);
     font-family: 'Inter', sans-serif;
-    /* For better emoji rendering */
 }
 
 #trans-trigger-btn {
-    font-family: 'Orbitron', sans-serif;
+    min-width: 100px;
     font-weight: 900;
-    font-size: 12px;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
 }
 
+.hud-btn:hover,
 .hud-btn-circle:hover {
-    background: var(--neon-blue);
-    color: #000;
-    transform: rotate(90deg) scale(1.1);
-    box-shadow: 0 0 25px rgba(15, 255, 250, 0.5);
-}
-
-#pause-btn:hover {
-    background: var(--neon-blue);
-    color: #000;
     box-shadow: 0 0 25px rgba(15, 255, 250, 0.5);
     transform: translateY(-2px);
 }
 
-#pause-btn:active {
-    transform: translateY(0);
+.hud-btn-circle:hover {
+    transform: rotate(90deg) scale(1.1);
+}
+
+.hud-btn:active,
+.hud-btn-circle:active {
+    transform: scale(0.95);
 }
 
 /* Sound Overlay */
