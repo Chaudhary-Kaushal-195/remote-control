@@ -73,34 +73,45 @@ window.updateHUD = function (rawSpeed, rpm, engineTemp, fuelLevel, engineData, m
     const unitLabel = document.getElementById('unit-label');
     if (unitLabel) unitLabel.innerText = `unit: ${units.toUpperCase()}`;
 
-    // Analog Needle & Arc Logic (Multi-Gauge Clusters)
-    const maxSpeed = 500; // New limit for the dial for real car physics 500 KPH
-    const needleAngle = -120 + ((rawSpeed / maxSpeed) * 240);
+    // Analog Needle & Arc Logic (270 Degree Sweep: 135deg to 405deg)
+    const maxSpeed = 500;
+    const speedNeedleAngle = -135 + ((rawSpeed / maxSpeed) * 270);
     const speedNeedleGrp = document.getElementById('speed-needle-grp');
-    if (speedNeedleGrp) speedNeedleGrp.setAttribute('transform', `rotate(${needleAngle}, 50, 50)`);
+    if (speedNeedleGrp) speedNeedleGrp.setAttribute('transform', `rotate(${speedNeedleAngle}, 50, 50)`);
 
     const arc = document.getElementById('speed-arc');
     if (arc) {
-        const offset = 188 - (Math.min(1, rawSpeed / maxSpeed) * 188);
+        // SVG Arc length for 270 deg at radius 40 is 188.5
+        const offset = 188.5 - (Math.min(1, rawSpeed / maxSpeed) * 188.5);
         arc.style.strokeDashoffset = offset;
     }
 
-    // RPM Logic (Simulated matching)
-    const rpmAngle = -120 + ((rpm / 10000) * 240);
+    // RPM Logic (Standardized to 9000 RPM range for better visual sweep)
+    const maxRpm = 10000;
+    const rpmNeedleAngle = -135 + ((rpm / maxRpm) * 270);
     const rpmNeedleGrp = document.getElementById('rpm-needle-grp');
-    if (rpmNeedleGrp) rpmNeedleGrp.setAttribute('transform', `rotate(${rpmAngle}, 50, 50)`);
+    if (rpmNeedleGrp) rpmNeedleGrp.setAttribute('transform', `rotate(${rpmNeedleAngle}, 50, 50)`);
 
     const rpmArc = document.getElementById('rpm-arc');
     if (rpmArc) {
-        const offset = 188 - (Math.min(1, rpm / 10000) * 188);
+        const offset = 188.5 - (Math.min(1, rpm / maxRpm) * 188.5);
         rpmArc.style.strokeDashoffset = offset;
 
-        // Elegance: Redline pulse
+        // Shift Light & Redline Pulse
+        const shiftLight = document.getElementById('shift-light');
         if (rpm > 8000) {
             const pulse = (Math.sin(Date.now() * 0.02) + 1) / 2;
             rpmArc.style.filter = `drop-shadow(0 0 ${5 + pulse * 10}px #ff0000)`;
+            if (shiftLight) {
+                shiftLight.style.opacity = pulse > 0.5 ? "1" : "0.2";
+                shiftLight.setAttribute('fill', '#ff0000');
+            }
         } else {
             rpmArc.style.filter = 'none';
+            if (shiftLight) {
+                shiftLight.style.opacity = "0.1";
+                shiftLight.setAttribute('fill', '#fff');
+            }
         }
     }
 
