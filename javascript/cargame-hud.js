@@ -141,5 +141,5 @@ window.updateHUD = function (rawSpeed, rpm, engineTemp, fuelLevel, engineData, m
         else gearVal = gear.toString();
     }
     const gearBox = document.getElementById('gear-box');
-    if (gearBox) gearBox.innerText = gearVal;
+    if (gearBox) gearBox.textContent = gearVal;
 };

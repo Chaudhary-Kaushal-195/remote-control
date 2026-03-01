@@ -97,7 +97,12 @@
 
                     <!-- Indicators inside Meter -->
                     <g id="meter-indicators">
-                        <!-- Shift Light (Right of needle) -->
+                        <!-- Gear Indicator (Left side, symmetrical to shift light) -->
+                        <text id="gear-box" x="35" y="48" text-anchor="middle" fill="var(--neon-pink)"
+                            font-family="Orbitron" font-weight="900" font-size="14"
+                            style="text-shadow: 0 0 10px rgba(240, 146, 255, 0.6);">N</text>
+
+                        <!-- Shift Light (Right side) -->
                         <circle id="shift-light" cx="65" cy="45" r="3" fill="#fff" opacity="0.1" />
                     </g>
 
@@ -107,11 +112,6 @@
                     </g>
                     <circle cx="50" cy="50" r="3" fill="#fff" opacity="0.2" />
                 </svg>
-
-                <!-- Gear Display (Integrated inside on the left) -->
-                <div id="gear-box" class="gear-display-external"
-                    style="top:40px; left:35px; border-bottom:1px solid rgba(240, 146, 255, 0.5); border-radius:8px;">N
-                </div>
 
                 <!-- Digital RPM Readout -->
                 <div id="rpm-box" class="rpm-digit" style="bottom: 50px; font-size: 18px;">0</div>
