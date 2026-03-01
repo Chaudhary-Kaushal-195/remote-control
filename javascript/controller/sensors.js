@@ -41,22 +41,36 @@ window.enableGyro = () => {
 
     window.addEventListener('deviceorientation', (e) => {
         lastEvent = Date.now();
-        let tilt = -e.gamma;
 
-        const orientation = (screen.orientation && screen.orientation.angle !== undefined)
+        // Logical Tilt Detection (Orientation Agnostic Steering)
+        const isForcedLandscape = document.body.classList.contains('force-landscape-active');
+        const screenAngle = (screen.orientation && screen.orientation.angle !== undefined)
             ? screen.orientation.angle
             : (window.orientation || 0);
 
-        if (orientation === 90) tilt = e.beta;
-        if (orientation === -90) tilt = -e.beta;
+        let rawTilt = 0;
 
-        if (tilt === null || tilt === undefined || isNaN(tilt)) {
+        // If physically portrait BUT we are "faking" landscape (Portrait Window)
+        if (isForcedLandscape) {
+            // In a portrait holding state, gamma is the lateral roll
+            rawTilt = -e.gamma;
+        } else {
+            // In a native landscape holding state, beta is the lateral roll
+            // Normalize it to match the gamma feel (usually inverted for steering)
+            if (screenAngle === 90) rawTilt = e.beta;
+            else if (screenAngle === -90 || screenAngle === 270) rawTilt = -e.beta;
+            else rawTilt = -e.gamma; // Fallback to portrait roll
+        }
+
+        if (rawTilt === null || rawTilt === undefined || isNaN(rawTilt)) {
             tiltDisplay.innerText = "Steer: SENSOR BLOCKED";
             tiltDisplay.style.color = "red";
             return;
         }
 
-        const finalTilt = Math.max(-45, Math.min(45, tilt)) * 4;
+        // Apply gain and clamp (2.2x gain for faster response on phone)
+        const finalTilt = Math.max(-45, Math.min(45, rawTilt)) * 4;
+
         if (window.conn && window.conn.open && window.currentSteeringMode === 'gyro') {
             window.conn.send({ type: 'gyro', tilt: finalTilt });
             tiltDisplay.innerText = "Steer (Gyro): " + Math.round(finalTilt);

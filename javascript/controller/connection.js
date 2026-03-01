@@ -1,16 +1,34 @@
-// Global Orientation Force Logic
+// Global Orientation Force Logic (Enforced Dashboard Mode)
+window.isRotating = false;
+window.lastWidth = 0;
 window.checkOrientation = () => {
+    if (window.isRotating) return;
+
+    // Check if truly portrait or if browser is just resizing
     const isPortrait = window.innerHeight > window.innerWidth;
-    if (isPortrait) {
+    const hasClass = document.body.classList.contains('force-landscape-active');
+
+    // Only toggle if state actually changes and ignore small resizes (like keyboard)
+    if (isPortrait && !hasClass) {
+        window.isRotating = true;
         document.body.classList.add('force-landscape-active');
-    } else {
+        setTimeout(() => { window.isRotating = false; }, 300);
+    } else if (!isPortrait && hasClass) {
+        window.isRotating = true;
         document.body.classList.remove('force-landscape-active');
+        setTimeout(() => { window.isRotating = false; }, 300);
     }
 };
 
 window.addEventListener('resize', window.checkOrientation);
+window.addEventListener('orientationchange', window.checkOrientation);
 window.addEventListener('load', window.checkOrientation);
 window.checkOrientation();
+
+// Try to invoke native lock again (useful for some Android Chrome versions)
+if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock('landscape-primary').catch(() => { });
+}
 
 // Screen Orientation Lock (Attempt native lock first)
 if (screen.orientation && screen.orientation.lock) {
