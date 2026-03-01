@@ -1,7 +1,7 @@
 /* Analog Stick / Wheel Visual */
 #wheel-zone {
-    width: 160px;
-    height: 160px;
+    width: 175px;
+    height: 175px;
     border: 6px solid rgba(255, 255, 255, 0.05);
     background: rgba(0, 0, 0, 0.4);
     border-radius: 50%;
@@ -18,8 +18,8 @@
 }
 
 #wheel-inner {
-    width: 120px;
-    height: 120px;
+    width: 135px;
+    height: 135px;
     background: transparent;
     border: 10px solid #333;
     border-radius: 50%;

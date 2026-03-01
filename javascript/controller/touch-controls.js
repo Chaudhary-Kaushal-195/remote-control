@@ -83,15 +83,19 @@ window.setupRemoteWheel = () => {
 
     wheelZone.addEventListener('touchstart', (e) => {
         if (window.currentSteeringMode !== 'wheel') return;
+        // Search for a touch inside the wheel zone if we don't have one
         const t = e.changedTouches[0];
         window.activeWheelTouchId = t.identifier;
         window.lastWheelAngle = getAngle(t.clientX, t.clientY);
+
         e.preventDefault();
+        e.stopPropagation();
     }, { passive: false });
 
     wheelZone.addEventListener('touchmove', (e) => {
         if (window.currentSteeringMode !== 'wheel') return;
-        for (let t of e.changedTouches) {
+        for (let i = 0; i < e.touches.length; i++) {
+            const t = e.touches[i];
             if (t.identifier === window.activeWheelTouchId) {
                 const cur = getAngle(t.clientX, t.clientY);
                 let d = cur - window.lastWheelAngle;
@@ -109,19 +113,23 @@ window.setupRemoteWheel = () => {
             }
         }
         e.preventDefault();
+        e.stopPropagation();
     }, { passive: false });
 
-    const stopWheelTouch = (e) => {
-        for (let t of e.changedTouches) {
-            if (t.identifier === window.activeWheelTouchId) {
-                window.activeWheelTouchId = null;
-                break;
+    const stopWheelTouchGlobal = (e) => {
+        if (e.changedTouches) {
+            for (let t of e.changedTouches) {
+                if (t.identifier === window.activeWheelTouchId) {
+                    window.activeWheelTouchId = null;
+                    break;
+                }
             }
         }
+        if (e.touches && e.touches.length === 0) window.activeWheelTouchId = null;
     };
 
-    wheelZone.addEventListener('touchend', stopWheelTouch);
-    wheelZone.addEventListener('touchcancel', stopWheelTouch);
+    window.addEventListener('touchend', stopWheelTouchGlobal);
+    window.addEventListener('touchcancel', stopWheelTouchGlobal);
 
     const animateAutoCenter = () => {
         if (!window.activeWheelTouchId && window.currentSteeringMode === 'wheel') {
