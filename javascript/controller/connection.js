@@ -1,22 +1,23 @@
-// Global Orientation Force Logic (Enforced Dashboard Mode)
+// Global Orientation Management
 window.isRotating = false;
-window.lastWidth = 0;
 window.checkOrientation = () => {
     if (window.isRotating) return;
 
-    // Check if truly portrait or if browser is just resizing
-    const isPortrait = window.innerHeight > window.innerWidth;
-    const hasClass = document.body.classList.contains('force-landscape-active');
+    // Check if browser is physically stuck in portrait (width < height)
+    const isPhysicalPortrait = window.innerHeight > window.innerWidth;
+    const isCSSForced = document.body.classList.contains('force-landscape-active');
 
-    // Only toggle if state actually changes and ignore small resizes (like keyboard)
-    if (isPortrait && !hasClass) {
+    // Fallback: If browser failed to rotate natively to landscape
+    if (isPhysicalPortrait && !isCSSForced) {
         window.isRotating = true;
         document.body.classList.add('force-landscape-active');
-        setTimeout(() => { window.isRotating = false; }, 300);
-    } else if (!isPortrait && hasClass) {
+        setTimeout(() => { window.isRotating = false; }, 400);
+    }
+    // If browser successfully rotated or user turned phone
+    else if (!isPhysicalPortrait && isCSSForced) {
         window.isRotating = true;
         document.body.classList.remove('force-landscape-active');
-        setTimeout(() => { window.isRotating = false; }, 300);
+        setTimeout(() => { window.isRotating = false; }, 400);
     }
 };
 
@@ -25,17 +26,14 @@ window.addEventListener('orientationchange', window.checkOrientation);
 window.addEventListener('load', window.checkOrientation);
 window.checkOrientation();
 
-// Try to invoke native lock again (useful for some Android Chrome versions)
-if (screen.orientation && screen.orientation.lock) {
-    screen.orientation.lock('landscape-primary').catch(() => { });
-}
-
-// Screen Orientation Lock (Attempt native lock first)
+// Native Hardware Lock (Primary)
 if (screen.orientation && screen.orientation.lock) {
     screen.orientation.lock('landscape').catch(() => {
-        console.log("Native orientation lock failed, falling back to CSS force-rotate.");
+        console.log("Hardware lock unsupported. Falling back to CSS engine.");
     });
 }
+
+
 
 // Desktop Restriction Check
 const isDesktop = !('ontouchstart' in window) || (window.innerWidth > 1024);

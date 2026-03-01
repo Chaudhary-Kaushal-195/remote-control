@@ -1,9 +1,4 @@
-// Screen Orientation Lock (For Mobile Devices)
-if (screen.orientation && screen.orientation.lock) {
-    screen.orientation.lock('landscape').catch(err => {
-        console.log("Orientation lock failed/not supported:", err);
-    });
-}
+
 
 function toggleSettings() {
     const modal = document.getElementById('settings-modal');
