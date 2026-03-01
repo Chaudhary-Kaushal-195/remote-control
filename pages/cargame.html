@@ -11,6 +11,13 @@
     <link rel="manifest" href="../manifest.json">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <script>
+        // Redirect if mobile - Mobile devices only act as controllers
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 1024) {
+            window.location.href = 'controller.html';
+        }
+    </script>
 </head>
 
 <body>
@@ -236,40 +243,8 @@
         </div>
     </div>
 
-    <!-- Steering visuals -->
-    <div id="steering-zone" style="z-index: 6000;">
-        <div id="wheel-visual">
-            <div class="spoke-center"></div>
-            <div class="spoke-hand"></div>
-        </div>
-    </div>
-
-    <div id="steering-buttons">
-        <div id="steer-left" class="pedal steer-btn">&#9664;</div>
-        <div id="steer-right" class="pedal steer-btn">&#9654;</div>
-    </div>
-
+    <!-- Mobile-specific touch controls removed; desktop now relies on keyboard or remote -->
     <div id="orbit-zone"></div>
-
-    <div class="ui-container" style="z-index: 6000;">
-        <div style="display: flex; gap: 15px; flex-direction: row; align-items: flex-end;">
-            <div id="handbrake" class="pedal">
-                <div class="pedal-label" style="color:#ff4400; top: -20px; font-size: 13px;">BRAKE</div>
-                <div class="stripe"></div>
-                <div class="stripe"></div>
-                <div class="stripe"></div>
-            </div>
-
-            <div id="gas" class="pedal">
-                <div class="pedal-label">GAS</div>
-                <div class="stripe"></div>
-                <div class="stripe"></div>
-                <div class="stripe"></div>
-                <div class="stripe"></div>
-            </div>
-        </div>
-        <div id="rev-btn" class="pedal">REV</div>
-    </div>
 
     <!-- 3D CANVAS CONTAINER -->
     <div id="canvas-container"

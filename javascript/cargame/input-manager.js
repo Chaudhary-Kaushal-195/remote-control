@@ -82,51 +82,28 @@ document.addEventListener('DOMContentLoaded', () => {
         document.dispatchEvent(new KeyboardEvent(type, { key: key, code: key }));
     };
 
+    // Remove mobile/mouse pedal/steering logic as they are now handled by remote controller or keyboard
     window.addEventListener('mousedown', (e) => {
-        if (e.target.closest('#gas')) { window.inputs.fwd = true; dispatchKey('w', 'keydown'); }
-        if (e.target.closest('#rev-btn')) { window.inputs.bwd = true; dispatchKey('s', 'keydown'); }
-        if (e.target.closest('#handbrake')) { window.inputs.brake = true; window.inputs.handbrake = true; dispatchKey('b', 'keydown'); }
-        if (e.target.closest('#steer-left')) window.inputs.left = true;
-        if (e.target.closest('#steer-right')) window.inputs.right = true;
+        if (e.target === orbitZone && window.startOrbit) {
+            window.startOrbit(e.clientX, e.clientY, 999);
+        }
     });
 
-    const resetInputs = (e) => {
-        if (e.target.closest('#gas')) { window.inputs.fwd = false; dispatchKey('w', 'keyup'); }
-        if (e.target.closest('#rev-btn')) { window.inputs.bwd = false; dispatchKey('s', 'keyup'); }
-        if (e.target.closest('#handbrake')) { window.inputs.handbrake = false; window.inputs.brake = false; dispatchKey('b', 'keyup'); }
-        if (e.target.closest('#steer-left')) window.inputs.left = false;
-        if (e.target.closest('#steer-right')) window.inputs.right = false;
-    };
-    window.addEventListener('mouseup', resetInputs);
-    window.addEventListener('mouseout', resetInputs);
+    window.addEventListener('mousemove', (e) => {
+        if (window.orbitActive && window.moveOrbit) {
+            window.moveOrbit(e.clientX, e.clientY);
+        }
+    });
 
-    let activeId = null, lastAngle = 0;
-    const getAngle = (tx, ty) => {
-        if (!wheelZone) return 0;
-        const r = wheelZone.getBoundingClientRect();
-        return Math.atan2(ty - (r.top + r.height / 2), tx - (r.left + r.width / 2));
-    };
+    window.addEventListener('mouseup', () => {
+        if (window.endOrbit) window.endOrbit();
+    });
 
     window.addEventListener('touchstart', (e) => {
         for (let t of e.changedTouches) {
             if (t.target === orbitZone && window.startOrbit) {
                 window.startOrbit(t.clientX, t.clientY, t.identifier);
                 continue;
-            }
-
-            if (t.target.closest('#gas')) { window.inputs.fwd = true; dispatchKey('w', 'keydown'); }
-            if (t.target.closest('#rev-btn')) { window.inputs.bwd = true; dispatchKey('s', 'keydown'); }
-            if (t.target.closest('#handbrake')) { window.inputs.brake = true; window.inputs.handbrake = true; dispatchKey('b', 'keydown'); }
-            if (t.target.closest('#steer-left')) window.inputs.left = true;
-            if (t.target.closest('#steer-right')) window.inputs.right = true;
-
-            if (wheelZone) {
-                const r = wheelZone.getBoundingClientRect();
-                if (t.clientX >= r.left && t.clientX <= r.right && t.clientY >= r.top && t.clientY <= r.bottom) {
-                    activeId = t.identifier; lastAngle = getAngle(t.clientX, t.clientY);
-                    window.activeTouchId = activeId;
-                    window.activeLastAngle = lastAngle;
-                }
             }
         }
     }, { passive: false });
@@ -135,14 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let t of e.changedTouches) {
             if (t.identifier === window.orbitTouchId && window.moveOrbit) {
                 window.moveOrbit(t.clientX, t.clientY);
-            } else if (t.identifier === window.activeTouchId) {
-                const cur = getAngle(t.clientX, t.clientY);
-                let d = cur - window.activeLastAngle;
-                if (d > Math.PI) d -= Math.PI * 2; if (d < -Math.PI) d += Math.PI * 2;
-                window.wheelAngle = Math.max(-180, Math.min(180, (window.wheelAngle || 0) + (d * 180 / Math.PI) * 1.3));
-                const visual = document.getElementById('wheel-visual');
-                if (visual) visual.style.transform = `rotate(${window.wheelAngle}deg)`;
-                window.activeLastAngle = cur;
             }
         }
         if (e.cancelable && !e.target.closest('button')) e.preventDefault();
@@ -151,12 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('touchend', (e) => {
         for (let t of e.changedTouches) {
             if (t.identifier === window.orbitTouchId && window.endOrbit) window.endOrbit();
-            if (t.target.closest('#gas')) { window.inputs.fwd = false; dispatchKey('w', 'keyup'); }
-            if (t.target.closest('#rev-btn')) { window.inputs.bwd = false; dispatchKey('s', 'keyup'); }
-            if (t.target.closest('#handbrake')) { window.inputs.handbrake = false; window.inputs.brake = false; dispatchKey('b', 'keyup'); }
-            if (t.target.closest('#steer-left')) window.inputs.left = false;
-            if (t.target.closest('#steer-right')) window.inputs.right = false;
-            if (t.identifier === window.activeTouchId) window.activeTouchId = null;
         }
     });
 });
