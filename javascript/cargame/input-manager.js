@@ -83,17 +83,17 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.addEventListener('mousedown', (e) => {
-        if (e.target.closest('#gas')) { window.inputs.fwd = true; dispatchKey('ArrowUp', 'keydown'); }
-        if (e.target.closest('#rev-btn')) { window.inputs.bwd = true; dispatchKey('ArrowDown', 'keydown'); }
-        if (e.target.closest('#handbrake')) { window.inputs.handbrake = true; dispatchKey(' ', 'keydown'); }
+        if (e.target.closest('#gas')) { window.inputs.fwd = true; dispatchKey('w', 'keydown'); }
+        if (e.target.closest('#rev-btn')) { window.inputs.bwd = true; dispatchKey('s', 'keydown'); }
+        if (e.target.closest('#handbrake')) { window.inputs.brake = true; window.inputs.handbrake = true; dispatchKey('b', 'keydown'); }
         if (e.target.closest('#steer-left')) window.inputs.left = true;
         if (e.target.closest('#steer-right')) window.inputs.right = true;
     });
 
     const resetInputs = (e) => {
-        if (e.target.closest('#gas')) { window.inputs.fwd = false; dispatchKey('ArrowUp', 'keyup'); }
-        if (e.target.closest('#rev-btn')) { window.inputs.bwd = false; dispatchKey('ArrowDown', 'keyup'); }
-        if (e.target.closest('#handbrake')) { window.inputs.handbrake = false; dispatchKey(' ', 'keyup'); }
+        if (e.target.closest('#gas')) { window.inputs.fwd = false; dispatchKey('w', 'keyup'); }
+        if (e.target.closest('#rev-btn')) { window.inputs.bwd = false; dispatchKey('s', 'keyup'); }
+        if (e.target.closest('#handbrake')) { window.inputs.handbrake = false; window.inputs.brake = false; dispatchKey('b', 'keyup'); }
         if (e.target.closest('#steer-left')) window.inputs.left = false;
         if (e.target.closest('#steer-right')) window.inputs.right = false;
     };
@@ -114,9 +114,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 continue;
             }
 
-            if (t.target.closest('#gas')) { window.inputs.fwd = true; dispatchKey('ArrowUp', 'keydown'); }
-            if (t.target.closest('#rev-btn')) { window.inputs.bwd = true; dispatchKey('ArrowDown', 'keydown'); }
-            if (t.target.closest('#handbrake')) { window.inputs.handbrake = true; dispatchKey(' ', 'keydown'); }
+            if (t.target.closest('#gas')) { window.inputs.fwd = true; dispatchKey('w', 'keydown'); }
+            if (t.target.closest('#rev-btn')) { window.inputs.bwd = true; dispatchKey('s', 'keydown'); }
+            if (t.target.closest('#handbrake')) { window.inputs.brake = true; window.inputs.handbrake = true; dispatchKey('b', 'keydown'); }
             if (t.target.closest('#steer-left')) window.inputs.left = true;
             if (t.target.closest('#steer-right')) window.inputs.right = true;
 
@@ -151,9 +151,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('touchend', (e) => {
         for (let t of e.changedTouches) {
             if (t.identifier === window.orbitTouchId && window.endOrbit) window.endOrbit();
-            if (t.target.closest('#gas')) { window.inputs.fwd = false; dispatchKey('ArrowUp', 'keyup'); }
-            if (t.target.closest('#rev-btn')) { window.inputs.bwd = false; dispatchKey('ArrowDown', 'keyup'); }
-            if (t.target.closest('#handbrake')) { window.inputs.handbrake = false; dispatchKey(' ', 'keyup'); }
+            if (t.target.closest('#gas')) { window.inputs.fwd = false; dispatchKey('w', 'keyup'); }
+            if (t.target.closest('#rev-btn')) { window.inputs.bwd = false; dispatchKey('s', 'keyup'); }
+            if (t.target.closest('#handbrake')) { window.inputs.handbrake = false; window.inputs.brake = false; dispatchKey('b', 'keyup'); }
             if (t.target.closest('#steer-left')) window.inputs.left = false;
             if (t.target.closest('#steer-right')) window.inputs.right = false;
             if (t.identifier === window.activeTouchId) window.activeTouchId = null;
