@@ -28,4 +28,9 @@ function loadSettings() {
     }
 }
 
+// Native Hardware Orientation Lock (Standard Gaming Experience)
+if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock('landscape').catch(() => { });
+}
+
 document.addEventListener('DOMContentLoaded', loadSettings);
