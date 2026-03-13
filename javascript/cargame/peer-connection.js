@@ -51,18 +51,8 @@ window.setupRemote = () => {
 
     window.peer.on('connection', (c) => {
         window.conn = c;
-        if (remoteBox) {
-            remoteBox.innerText = "CONTROLLER CONNECTED";
-            remoteBox.onclick = () => { window.toggleSettings && window.toggleSettings(); };
-        }
+        window.updateControllerUI(true);
 
-        const statusBtn = document.getElementById('settings-remote-status');
-        if (statusBtn) {
-            statusBtn.innerText = "CONTROLLER CONNECTED";
-            statusBtn.style.color = "#00ffff";
-            statusBtn.style.borderColor = "#00ffff";
-            statusBtn.style.background = "rgba(0,255,255,0.05)";
-        }
         window.conn.on('open', () => {
             window.conn.send({ type: 'config', config: window.gameSettings });
             const qrOverlay = document.getElementById('qr-overlay');
@@ -105,85 +95,66 @@ window.setupRemote = () => {
         });
         window.conn.on('close', () => {
             window.showGameNotification("REMOTE DISCONNECTED ❌", "#ff0055");
-            const statusBtn = document.getElementById('settings-remote-status');
-            if (statusBtn) {
-                statusBtn.innerText = "CONTROLLER DISCONNECTED";
-                statusBtn.style.color = "gray";
-                statusBtn.style.borderColor = "gray";
-            }
+            window.updateControllerUI(false);
         });
     });
 };
 
-window.showGameNotification = (text, color = "#0ffffa") => {
-    let notify = document.getElementById('game-notify');
-    if (!notify) {
-        notify = document.createElement('div');
-        notify.id = 'game-notify';
-        notify.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 20px 40px;
-            background: rgba(10, 0, 30, 0.9);
-            border: 2px solid ${color};
-            border-radius: 15px;
-            color: #fff;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-            font-size: 24px;
-            z-index: 10000;
-            box-shadow: 0 0 30px ${color};
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s;
-        `;
-        document.body.appendChild(notify);
-    }
-    notify.innerText = text;
-    notify.style.borderColor = color;
-    notify.style.boxShadow = `0 0 30px ${color}`;
-    notify.style.opacity = "1";
+window.updateControllerUI = (isConnected) => {
+    const statusRow = document.getElementById('settings-remote-status');
+    const remoteBox = document.getElementById('remote-box');
 
-    if (window.notifyTimeout) clearTimeout(window.notifyTimeout);
-    window.notifyTimeout = setTimeout(() => {
-        notify.style.opacity = "0";
-    }, 3000);
+    if (statusRow) {
+        if (isConnected) {
+            statusRow.innerHTML = `
+                <span style="color: #00ffff">CONTROLLER CONNECTED</span>
+                <button class="hud-btn" onclick="window.toggleControllerConnection()" 
+                    style="padding: 5px 15px; font-size: 10px; border-color: #ff0055; color: #ff0055; margin-left: 15px;">
+                    DISCONNECT
+                </button>
+            `;
+            statusRow.style.borderColor = "#00ffff";
+            statusRow.style.background = "rgba(0,255,255,0.05)";
+        } else {
+            statusRow.innerHTML = `
+                <span style="color: gray">CONTROLLER DISCONNECTED</span>
+                <button class="hud-btn" onclick="window.toggleControllerConnection()" 
+                    style="padding: 5px 15px; font-size: 10px; border-color: #0ffffa; color: #0ffffa; margin-left: 15px;">
+                    CONNECT
+                </button>
+            `;
+            statusRow.style.borderColor = "gray";
+            statusRow.style.background = "rgba(255,255,255,0.05)";
+        }
+    }
+
+    if (remoteBox) {
+        if (isConnected) {
+            remoteBox.innerText = "CONTROLLER CONNECTED";
+            remoteBox.style.color = "#0ffffa";
+            remoteBox.onclick = () => { window.toggleSettings && window.toggleSettings(); };
+        } else {
+            remoteBox.innerText = "🤳 SYNC PHONE";
+            remoteBox.style.color = "white";
+            remoteBox.onclick = () => { window.initAudio(); window.setupRemote(); };
+        }
+    }
 };
 
 window.toggleControllerConnection = () => {
     if (window.initAudio) window.initAudio();
-    const statusBtn = document.getElementById('settings-remote-status');
-    const remoteBox = document.getElementById('remote-box');
 
-    if (window.peer && !window.peer.disconnected) {
+    if (window.conn && window.conn.open) {
         if (confirm("Disconnect the current phone controller?")) {
-            window.peer.destroy();
-            window.peer = null;
-            window.conn = null;
-
-            if (statusBtn) {
-                statusBtn.innerText = "CONTROLLER DISCONNECTED";
-                statusBtn.style.color = "gray";
-                statusBtn.style.borderColor = "gray";
-                statusBtn.style.background = "rgba(255,255,255,0.05)";
-            }
-
-            if (remoteBox) {
-                remoteBox.innerText = "🤳 SYNC PHONE";
-                remoteBox.style.background = "rgba(0, 0, 0, 0.4)";
-                remoteBox.style.color = "white";
-                remoteBox.onclick = () => { window.initAudio(); window.setupRemote(); };
-            }
+            window.conn.close();
+            window.updateControllerUI(false);
         }
     } else {
         window.setupRemote();
-        if (window.peer) {
-            const qrOverlay = document.getElementById('qr-overlay');
-            const settingsModal = document.getElementById('settings-modal');
-            if (qrOverlay) qrOverlay.style.display = 'flex';
-            if (settingsModal) settingsModal.style.display = 'none';
-        }
+        const qrOverlay = document.getElementById('qr-overlay');
+        const settingsModal = document.getElementById('settings-modal');
+        if (qrOverlay) qrOverlay.style.display = 'flex';
+        // Keep settings open or close it? User might want to see the ID. Let's close modal to show QR.
+        if (settingsModal) settingsModal.style.display = 'none';
     }
 };
