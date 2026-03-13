@@ -2,19 +2,27 @@
     display: none;
     /* Toggled to flex by JS */
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    background: #000;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
     z-index: 9999;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
     padding: 20px;
+}
+
+#reader-modal {
+    background: #1a0030;
+    border: 2px solid #0ffffa;
+    padding: 25px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 0 40px rgba(15, 255, 250, 0.3);
+    max-width: 90%;
 }
 
 #reader {
