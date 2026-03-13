@@ -2,10 +2,10 @@
 window.peer = null;
 window.conn = null;
 
-window.setupRemote = () => {
+window.setupRemote = (showQR = false) => {
     const remoteBox = document.getElementById('remote-box');
     if (window.peer) {
-        document.getElementById('qr-overlay').style.display = 'flex';
+        if (showQR) document.getElementById('qr-overlay').style.display = 'flex';
         return;
     }
     if (window.location.protocol === 'file:') {
@@ -179,7 +179,7 @@ window.updateControllerUI = (isConnected) => {
         } else {
             remoteBox.innerText = "🤳 SYNC PHONE";
             remoteBox.style.color = "white";
-            remoteBox.onclick = () => { window.initAudio(); window.setupRemote(); };
+            remoteBox.onclick = () => { window.initAudio(); window.setupRemote(true); };
         }
     }
 };
@@ -187,13 +187,16 @@ window.updateControllerUI = (isConnected) => {
 window.toggleControllerConnection = () => {
     if (window.initAudio) window.initAudio();
 
-    if (window.conn && window.conn.open) {
+    const isConnected = window.conn && window.conn.open;
+
+    if (isConnected) {
         if (confirm("Disconnect the current phone controller?")) {
             window.conn.close();
-            // Closing trigger cleanup in the 'close' event automatically
+            // The 'close' event handler will call updateControllerUI(false)
         }
     } else {
-        window.setupRemote();
+        // We are connecting
+        window.setupRemote(true); // Passing true here shows the QR modal
         const qrOverlay = document.getElementById('qr-overlay');
         const settingsModal = document.getElementById('settings-modal');
         if (qrOverlay) qrOverlay.style.display = 'flex';
