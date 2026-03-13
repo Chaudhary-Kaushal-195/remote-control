@@ -1,0 +1,14 @@
+{
+    "name": "dr-vice-game-hub",
+    "version": "1.0.0",
+    "description": "Remote control car game racing hub",
+    "scripts": {
+        "start": "npx serve .",
+        "dev-audio": "cd typescript/audio-engine && npm run dev",
+        "build-audio": "cd typescript/audio-engine && npm install && npm run build"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "serve": "^14.2.4"
+    }
+}

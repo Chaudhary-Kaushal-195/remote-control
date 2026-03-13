@@ -177,24 +177,92 @@ button:active {
 .modal-content {
     background: #1a0030;
     border: 2px solid var(--neon-blue);
-    padding: 30px;
+    padding: 20px;
     border-radius: 20px;
-    width: 320px;
+    width: 85%;
+    max-width: 450px;
+    max-height: 85vh;
+    overflow-y: auto;
     text-align: center;
+    box-shadow: 0 0 30px rgba(0, 255, 250, 0.2);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Hide scrollbar but keep functionality */
+.modal-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: var(--neon-blue);
+    border-radius: 10px;
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+@media (orientation: landscape) and (min-height: 250px) {
+    .modal-content {
+        max-width: 600px;
+    }
+
+    .settings-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
 }
 
 .setting-row {
-    margin: 20px 0;
+    margin: 10px 0;
     display: flex;
     flex-direction: column;
     gap: 5px;
     text-align: left;
+    box-sizing: border-box;
 }
 
 .setting-row label {
     font-size: 10px;
     color: #f092ff;
     letter-spacing: 1px;
+}
+
+/* Custom Range Styling */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    height: 6px;
+    border-radius: 5px;
+    outline: none;
+    margin: 15px 0;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--neon-blue);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--neon-blue);
+    border: 2px solid #fff;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: var(--neon-blue);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--neon-blue);
+    border: 2px solid #fff;
 }
 
 select {
@@ -205,6 +273,21 @@ select {
     border-radius: 8px;
     font-family: inherit;
     outline: none;
+}
+
+.modal-close-btn {
+    background: transparent !important;
+    border: 1px solid var(--neon-pink) !important;
+    color: var(--neon-pink) !important;
+    text-shadow: 0 0 10px var(--neon-pink);
+    box-shadow: 0 0 15px rgba(240, 146, 255, 0.2) !important;
+    transition: all 0.2s ease;
+}
+
+.modal-close-btn:active {
+    background: var(--neon-pink) !important;
+    color: #000 !important;
+    transform: scale(0.98);
 }
 
 :root {

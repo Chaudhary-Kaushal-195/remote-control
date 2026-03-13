@@ -91,36 +91,39 @@
         <div class="modal-content">
             <h2 style="color:var(--neon-blue); margin-bottom: 20px;">REMOTE SETTINGS</h2>
 
-            <div class="setting-row">
-                <label>STEERING</label>
-                <select id="remote-setting-steering" onchange="window.syncSettingsToHost()">
-                    <option value="wheel">STEERING WHEEL</option>
-                    <option value="gyro" selected>GYROSCOPE (TILT)</option>
-                    <option value="buttons">ON-SCREEN BUTTONS</option>
-                </select>
+            <div class="settings-grid">
+                <div class="setting-row">
+                    <label>STEERING</label>
+                    <select id="remote-setting-steering" onchange="window.syncSettingsToHost()">
+                        <option value="wheel">STEERING WHEEL</option>
+                        <option value="gyro" selected>GYROSCOPE (TILT)</option>
+                        <option value="buttons">ON-SCREEN BUTTONS</option>
+                    </select>
+                </div>
+
+                <div class="setting-row">
+                    <label>TRNMSN</label>
+                    <select id="remote-setting-transmission" onchange="window.syncSettingsToHost()">
+                        <option value="automatic">AUTOMATIC</option>
+                        <option value="manual">MANUAL</option>
+                    </select>
+                </div>
+
+                <div class="setting-row">
+                    <label>ENGINE VOL</label>
+                    <input type="range" id="remote-setting-engine-vol" min="0" max="100" value="80"
+                        oninput="window.syncSettingsToHost()">
+                </div>
+
+                <div class="setting-row">
+                    <label>MUSIC VOL</label>
+                    <input type="range" id="remote-setting-music-vol" min="0" max="100" value="50"
+                        oninput="window.syncSettingsToHost()">
+                </div>
             </div>
 
-            <div class="setting-row">
-                <label>TRNMSN</label>
-                <select id="remote-setting-transmission" onchange="window.syncSettingsToHost()">
-                    <option value="automatic">AUTOMATIC</option>
-                    <option value="manual">MANUAL</option>
-                </select>
-            </div>
-
-            <div class="setting-row">
-                <label>ENGINE VOL</label>
-                <input type="range" id="remote-setting-engine-vol" min="0" max="100" value="80"
-                    oninput="window.syncSettingsToHost()">
-            </div>
-
-            <div class="setting-row">
-                <label>MUSIC VOL</label>
-                <input type="range" id="remote-setting-music-vol" min="0" max="100" value="50"
-                    oninput="window.syncSettingsToHost()">
-            </div>
-
-            <button onclick="window.toggleRemoteSettings()" style="margin-top: 20px; width: 100%;">BACK TO
+            <button class="modal-close-btn" onclick="window.toggleRemoteSettings()"
+                style="margin-top: 20px; width: 100%;">BACK TO
                 REMOTE</button>
         </div>
     </div>
