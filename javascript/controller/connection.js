@@ -65,6 +65,7 @@ window.connectToHost = async () => {
 
         window.conn.on('open', () => {
             document.getElementById('overlay').style.display = 'none';
+            document.getElementById('ui-container').style.display = 'block';
             document.getElementById('fix-sensors').style.display = 'block';
             status.innerText = "STATUS: CONNECTED (ACTIVE)";
             if (window.vibrate) window.vibrate([50, 50, 50]);
@@ -114,6 +115,7 @@ window.startScanning = () => {
         screen.orientation.lock('landscape').catch(() => { });
     }
 
+    document.getElementById('ui-container').style.display = 'none';
     document.getElementById('reader-container').style.display = 'flex';
     html5QrCode = new Html5Qrcode("reader");
     const config = { fps: 20, qrbox: { width: 280, height: 280 }, aspectRatio: 1.0 };
@@ -133,6 +135,7 @@ window.startScanning = () => {
 }
 
 window.stopScanning = () => {
+    document.getElementById('ui-container').style.display = 'block';
     if (html5QrCode) {
         html5QrCode.stop().then(() => {
             document.getElementById('reader-container').style.display = 'none';

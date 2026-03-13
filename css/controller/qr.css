@@ -16,22 +16,40 @@
 #reader-modal {
     background: #1a0030;
     border: 2px solid #0ffffa;
-    padding: 25px;
+    padding: 15px;
     border-radius: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     box-shadow: 0 0 40px rgba(15, 255, 250, 0.3);
-    max-width: 90%;
+    width: 90%;
+    max-width: 400px;
+    max-height: 95vh;
+    box-sizing: border-box;
 }
 
 #reader {
-    width: 300px;
-    height: 300px;
+    width: 100%;
+    max-width: 280px;
+    aspect-ratio: 1 / 1;
+    height: auto;
+    max-height: 45vh;
     border: 2px solid #0ffffa;
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 0 20px rgba(15, 255, 250, 0.4);
+    background: #000;
+}
+
+@media (max-height: 400px) {
+    #reader-modal {
+        padding: 10px;
+    }
+
+    #reader-modal h2 {
+        font-size: 16px;
+        margin: 5px 0;
+    }
 }
 
 .scan-btn {
