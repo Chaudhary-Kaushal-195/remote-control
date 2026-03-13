@@ -9,7 +9,7 @@
     border: 2px solid #f092ff;
     border-radius: 20px;
     box-shadow: 0 0 50px rgba(240, 146, 255, 0.5);
-    z-index: 1000;
+    z-index: 9000;
     display: none;
     flex-direction: column;
     align-items: center;

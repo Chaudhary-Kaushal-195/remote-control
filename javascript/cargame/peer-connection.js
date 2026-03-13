@@ -63,7 +63,11 @@ window.setupRemote = () => {
             statusBtn.style.borderColor = "#00ffff";
             statusBtn.style.background = "rgba(0,255,255,0.05)";
         }
-        window.conn.on('open', () => window.conn.send({ type: 'config', config: window.gameSettings }));
+        window.conn.on('open', () => {
+            window.conn.send({ type: 'config', config: window.gameSettings });
+            const qrOverlay = document.getElementById('qr-overlay');
+            if (qrOverlay) qrOverlay.style.display = 'none';
+        });
         window.conn.on('data', (data) => {
             if (data.type === 'gyro') {
                 window.gyroActive = true;
