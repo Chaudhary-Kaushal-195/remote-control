@@ -154,9 +154,9 @@ window.updateControllerUI = (isConnected) => {
     if (statusRow) {
         if (isConnected) {
             statusRow.innerHTML = `
-                <span style="color: #00ffff">CONTROLLER CONNECTED</span>
+                <span style="color: #00ffff; text-transform: uppercase;">CONTROLLER CONNECTED</span>
                 <button class="hud-btn" onclick="window.toggleControllerConnection()" 
-                    style="padding: 5px 15px; font-size: 10px; border-color: #ff0055; color: #ff0055; margin-left: 15px;">
+                    style="padding: 6px 14px; font-size: 10px; border-color: #ff0055; color: #ff0055; cursor: pointer; border-radius: 8px;">
                     DISCONNECT
                 </button>
             `;
@@ -164,9 +164,9 @@ window.updateControllerUI = (isConnected) => {
             statusRow.style.background = "rgba(0,255,255,0.05)";
         } else {
             statusRow.innerHTML = `
-                <span style="color: gray">CONTROLLER DISCONNECTED</span>
+                <span style="color: gray; text-transform: uppercase;">CONTROLLER DISCONNECTED</span>
                 <button class="hud-btn" onclick="window.toggleControllerConnection()" 
-                    style="padding: 5px 15px; font-size: 10px; border-color: #0ffffa; color: #0ffffa; margin-left: 15px;">
+                    style="padding: 6px 14px; font-size: 10px; border-color: #0ffffa; color: #0ffffa; cursor: pointer; border-radius: 8px;">
                     CONNECT
                 </button>
             `;

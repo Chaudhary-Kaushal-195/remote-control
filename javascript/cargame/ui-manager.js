@@ -116,6 +116,12 @@ window.loadSettingsToModal = function () {
         }
         window.gameSettings = Object.assign(window.gameSettings, s);
     }
+
+    // Sync connection UI every time modal is loaded
+    if (window.updateControllerUI) {
+        const isConnected = !!(window.conn && window.conn.open);
+        window.updateControllerUI(isConnected);
+    }
 };
 
 window.toggleSettings = () => {
