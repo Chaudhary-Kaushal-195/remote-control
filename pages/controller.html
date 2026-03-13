@@ -58,7 +58,8 @@
 
     <div id="ui-container" style="display: none;">
         <!-- TOP CONTROLS -->
-        <div style="position: absolute; top: 30px; right: 30px; display: flex; gap: 15px; z-index: 100;">
+        <div
+            style="position: absolute; top: calc(env(safe-area-inset-top, 0px) + 20px); right: calc(env(safe-area-inset-right, 0px) + 20px); display: flex; gap: 15px; z-index: 100;">
             <button id="remote-trans-btn" class="ctrl-hub-btn" onclick="window.toggleTransmissionFromRemote()"
                 style="font-size: 10px; font-weight: bold; width: 66px !important; height: 66px !important;">AUTO</button>
             <button id="remote-cam-btn" class="ctrl-hub-btn" onclick="window.cycleCameraFromRemote()">📷</button>
