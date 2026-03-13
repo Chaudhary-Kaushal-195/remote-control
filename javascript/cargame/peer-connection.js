@@ -51,12 +51,15 @@ window.setupRemote = (showQR = false) => {
 
     window.peer.on('connection', (c) => {
         window.conn = c;
-        window.updateControllerUI(true);
+        // Don't update UI to connected yet, wait for 'open' event
 
         window.conn.on('open', () => {
             window.conn.send({ type: 'config', config: window.gameSettings });
             const qrOverlay = document.getElementById('qr-overlay');
             if (qrOverlay) qrOverlay.style.display = 'none';
+
+            // Now update UI to connected
+            window.updateControllerUI(true);
 
             // Show connection toast
             window.showGameNotification("REMOTE CONNECTED ✅");
@@ -96,6 +99,7 @@ window.setupRemote = (showQR = false) => {
         window.conn.on('close', () => {
             window.showGameNotification("REMOTE DISCONNECTED ❌", "#ff0055");
             window.updateControllerUI(false);
+            window.conn = null;
         });
     });
 };
@@ -138,7 +142,7 @@ window.showGameNotification = (text, color = "#0ffffa") => {
     if (window.notifyTimeout) clearTimeout(window.notifyTimeout);
     window.notifyTimeout = setTimeout(() => {
         notify.style.opacity = "0";
-        notify.style.top = "5%";
+        notify.style.top = "2%"; // Move it even higher as it fades
         notify.style.transform = "translate(-50%, -50%) scale(0.9)";
     }, 3000);
 };
@@ -187,19 +191,19 @@ window.updateControllerUI = (isConnected) => {
 window.toggleControllerConnection = () => {
     if (window.initAudio) window.initAudio();
 
-    const isConnected = window.conn && window.conn.open;
+    // Be very strict: Only connected if conn exists and is open
+    const isConnected = !!(window.conn && window.conn.open);
 
     if (isConnected) {
         if (confirm("Disconnect the current phone controller?")) {
             window.conn.close();
-            // The 'close' event handler will call updateControllerUI(false)
+            // The 'close' event will trigger updateControllerUI(false)
         }
     } else {
-        // We are connecting
-        window.setupRemote(true); // Passing true here shows the QR modal
-        const qrOverlay = document.getElementById('qr-overlay');
+        // We are connecting, so we hide settings to see the QR
         const settingsModal = document.getElementById('settings-modal');
-        if (qrOverlay) qrOverlay.style.display = 'flex';
         if (settingsModal) settingsModal.style.display = 'none';
+
+        window.setupRemote(true);
     }
 };
