@@ -3,12 +3,22 @@ window.conn = null;
 window.remoteInputs = { fwd: false, bwd: false, handbrake: false, brake: false, left: false, right: false };
 window.localInputs = { fwd: false, bwd: false, handbrake: false, brake: false, left: false, right: false };
 
-// Keep window.inputs in sync via combinations
+// Keep window.inputs in sync via combinations (Exclusive Mode)
 window.syncMergedInputs = () => {
     if (!window.inputs) window.inputs = {};
     const keys = ['fwd', 'bwd', 'handbrake', 'brake', 'left', 'right'];
+
+    // Only use remote inputs if a phone is actively connected
+    const isConnected = !!(window.conn && window.conn.open);
+
     keys.forEach(k => {
-        window.inputs[k] = (window.localInputs[k] || false) || (window.remoteInputs[k] || false);
+        if (isConnected) {
+            // ONLY phone inputs work when connected
+            window.inputs[k] = window.remoteInputs[k] || false;
+        } else {
+            // ONLY laptop inputs work when disconnected
+            window.inputs[k] = window.localInputs[k] || false;
+        }
     });
 };
 
@@ -70,6 +80,7 @@ window.setupRemote = (showQR = false) => {
 
             // Now update UI to connected
             window.updateControllerUI(true);
+            window.syncMergedInputs();
 
             // Show connection toast
             window.showGameNotification("REMOTE CONNECTED ✅");
@@ -111,7 +122,7 @@ window.setupRemote = (showQR = false) => {
             window.showGameNotification("REMOTE DISCONNECTED ❌", "#ff0055");
             window.updateControllerUI(false);
             window.conn = null;
-            // Clear remote inputs on disconnect
+            // Clear remote inputs and restore laptop inputs
             window.remoteInputs = { fwd: false, bwd: false, handbrake: false, brake: false, left: false, right: false };
             window.syncMergedInputs();
         });
