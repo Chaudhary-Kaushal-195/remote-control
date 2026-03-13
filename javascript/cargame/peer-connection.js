@@ -107,22 +107,22 @@ window.showGameNotification = (text, color = "#0ffffa") => {
         notify.id = 'game-notify';
         notify.style.cssText = `
             position: fixed;
-            top: 50%;
+            top: 10%;
             left: 50%;
             transform: translate(-50%, -50%);
-            padding: 24px 48px;
+            padding: 16px 32px;
             background: rgba(10, 0, 30, 0.95);
             border: 2px solid ${color};
             border-radius: 20px;
             color: #fff;
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
-            font-size: 28px;
+            font-size: 20px;
             z-index: 10000;
-            box-shadow: 0 0 50px ${color};
+            box-shadow: 0 0 30px ${color};
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.3s, transform 0.3s;
+            transition: opacity 0.3s, transform 0.3s, top 0.3s;
             text-align: center;
             letter-spacing: 2px;
         `;
@@ -130,13 +130,15 @@ window.showGameNotification = (text, color = "#0ffffa") => {
     }
     notify.innerText = text;
     notify.style.borderColor = color;
-    notify.style.boxShadow = `0 0 50px ${color}`;
+    notify.style.boxShadow = `0 0 30px ${color}`;
     notify.style.opacity = "1";
+    notify.style.top = "10%";
     notify.style.transform = "translate(-50%, -50%) scale(1)";
 
     if (window.notifyTimeout) clearTimeout(window.notifyTimeout);
     window.notifyTimeout = setTimeout(() => {
         notify.style.opacity = "0";
+        notify.style.top = "5%";
         notify.style.transform = "translate(-50%, -50%) scale(0.9)";
     }, 3000);
 };
