@@ -67,6 +67,9 @@ window.setupRemote = () => {
             window.conn.send({ type: 'config', config: window.gameSettings });
             const qrOverlay = document.getElementById('qr-overlay');
             if (qrOverlay) qrOverlay.style.display = 'none';
+
+            // Show connection toast
+            window.showGameNotification("REMOTE CONNECTED ✅");
         });
         window.conn.on('data', (data) => {
             if (data.type === 'gyro') {
@@ -100,7 +103,53 @@ window.setupRemote = () => {
                 document.dispatchEvent(ev);
             }
         });
+        window.conn.on('close', () => {
+            window.showGameNotification("REMOTE DISCONNECTED ❌", "#ff0055");
+            const statusBtn = document.getElementById('settings-remote-status');
+            if (statusBtn) {
+                statusBtn.innerText = "CONTROLLER DISCONNECTED";
+                statusBtn.style.color = "gray";
+                statusBtn.style.borderColor = "gray";
+            }
+        });
     });
+};
+
+window.showGameNotification = (text, color = "#0ffffa") => {
+    let notify = document.getElementById('game-notify');
+    if (!notify) {
+        notify = document.createElement('div');
+        notify.id = 'game-notify';
+        notify.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 40px;
+            background: rgba(10, 0, 30, 0.9);
+            border: 2px solid ${color};
+            border-radius: 15px;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 24px;
+            z-index: 10000;
+            box-shadow: 0 0 30px ${color};
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        `;
+        document.body.appendChild(notify);
+    }
+    notify.innerText = text;
+    notify.style.borderColor = color;
+    notify.style.boxShadow = `0 0 30px ${color}`;
+    notify.style.opacity = "1";
+
+    if (window.notifyTimeout) clearTimeout(window.notifyTimeout);
+    window.notifyTimeout = setTimeout(() => {
+        notify.style.opacity = "0";
+    }, 3000);
 };
 
 window.toggleControllerConnection = () => {

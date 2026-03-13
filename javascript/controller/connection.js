@@ -68,10 +68,19 @@ window.connectToHost = async () => {
             document.getElementById('ui-container').style.display = 'block';
             document.getElementById('fix-sensors').style.display = 'block';
             status.innerText = "STATUS: CONNECTED (ACTIVE)";
+            // Push state for back button interception
+            history.pushState({ connected: true }, "");
+            window.addEventListener('popstate', window.handleBackPress);
+
             if (window.vibrate) window.vibrate([50, 50, 50]);
             if (window.setupPedals) window.setupPedals();
             if (window.setupSteeringListeners) window.setupSteeringListeners();
             if (window.setupRemoteWheel) window.setupRemoteWheel();
+        });
+
+        window.conn.on('close', () => {
+            alert("Disconnected from laptop.");
+            window.location.reload();
         });
 
         window.conn.on('data', (data) => {
@@ -148,6 +157,25 @@ window.stopScanning = () => {
         document.getElementById('reader-container').style.display = 'none';
     }
 }
+
+window.handleBackPress = (e) => {
+    if (window.conn && window.conn.open) {
+        document.getElementById('disconnect-modal').style.display = 'flex';
+        // Re-push so we catch next try too
+        history.pushState({ connected: true }, "");
+    } else {
+        window.location.href = 'index.html';
+    }
+};
+
+window.confirmDisconnect = (yes) => {
+    document.getElementById('disconnect-modal').style.display = 'none';
+    if (yes) {
+        if (window.conn) window.conn.close();
+        if (window.peer) window.peer.destroy();
+        window.location.href = 'index.html';
+    }
+};
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('../sw.js');
