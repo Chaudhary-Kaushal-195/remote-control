@@ -131,12 +131,17 @@ function animate() {
         const useGyroOrRemoteWheel = window.gameSettings && (window.gameSettings.steering === 'gyro' || window.gameSettings.steering === 'wheel');
 
         if (useGyroOrRemoteWheel && window.gyroActive) {
+            // Apply gyro/remote tilt as the base
             window.wheelAngle = window.wheelAngle * 0.9 + window.gyroTilt * 0.1;
-        } else if (window.inputs && window.inputs.left) {
+        }
+
+        // SUPPLEMENT with keyboard even if gyro is active
+        if (window.inputs && window.inputs.left) {
             window.wheelAngle = Math.max(-180, window.wheelAngle - 5);
         } else if (window.inputs && window.inputs.right) {
             window.wheelAngle = Math.min(180, window.wheelAngle + 5);
-        } else {
+        } else if (!useGyroOrRemoteWheel || !window.gyroActive) {
+            // Only auto-center if there's no gyro/remote holding it
             window.wheelAngle *= 0.88;
         }
         const visual = document.getElementById('wheel-visual');

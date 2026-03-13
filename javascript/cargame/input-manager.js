@@ -1,5 +1,6 @@
-// Inputs Manager
-window.inputs = { fwd: false, bwd: false, left: false, right: false, handbrake: false, brake: false };
+// Inputs Manager init
+if (!window.localInputs) window.localInputs = { fwd: false, bwd: false, left: false, right: false, handbrake: false, brake: false };
+if (!window.inputs) window.inputs = { ...window.localInputs };
 window.gyroActive = false;
 window.gyroTilt = 0;
 window.manualGearIndex = 1;
@@ -50,13 +51,15 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
         }
         if (['w', 'W', ' '].includes(e.key)) {
-            window.inputs.fwd = true;
+            window.localInputs.fwd = true;
             if (e.key === ' ') e.preventDefault();
         }
-        if (['s', 'S'].includes(e.key)) window.inputs.bwd = true;
-        if (['ArrowLeft', 'a', 'A'].includes(e.key)) window.inputs.left = true;
-        if (['ArrowRight', 'd', 'D'].includes(e.key)) window.inputs.right = true;
-        if (['b', 'B'].includes(e.key)) window.inputs.brake = true;
+        if (['s', 'S'].includes(e.key)) window.localInputs.bwd = true;
+        if (['ArrowLeft', 'a', 'A'].includes(e.key)) window.localInputs.left = true;
+        if (['ArrowRight', 'd', 'D'].includes(e.key)) window.localInputs.right = true;
+        if (['b', 'B'].includes(e.key)) window.localInputs.brake = true;
+
+        if (window.syncMergedInputs) window.syncMergedInputs();
 
         if (e.key === 'ArrowUp') {
             if (window.manualGearIndex < 6) window.manualGearIndex++;
@@ -69,13 +72,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('keyup', (e) => {
         if (['w', 'W', ' '].includes(e.key)) {
-            window.inputs.fwd = false;
+            window.localInputs.fwd = false;
             if (e.key === ' ') e.preventDefault();
         }
-        if (['s', 'S'].includes(e.key)) window.inputs.bwd = false;
-        if (['ArrowLeft', 'a', 'A'].includes(e.key)) window.inputs.left = false;
-        if (['ArrowRight', 'd', 'D'].includes(e.key)) window.inputs.right = false;
-        if (['b', 'B'].includes(e.key)) window.inputs.brake = false;
+        if (['s', 'S'].includes(e.key)) window.localInputs.bwd = false;
+        if (['ArrowLeft', 'a', 'A'].includes(e.key)) window.localInputs.left = false;
+        if (['ArrowRight', 'd', 'D'].includes(e.key)) window.localInputs.right = false;
+        if (['b', 'B'].includes(e.key)) window.localInputs.brake = false;
+
+        if (window.syncMergedInputs) window.syncMergedInputs();
     });
 
     const dispatchKey = (key, type) => {
@@ -83,11 +88,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const resetInputs = (target) => {
-        if (target.closest('#gas')) { window.inputs.fwd = false; dispatchKey('w', 'keyup'); }
-        if (target.closest('#rev-btn')) { window.inputs.bwd = false; dispatchKey('s', 'keyup'); }
-        if (target.closest('#handbrake')) { window.inputs.handbrake = false; window.inputs.brake = false; dispatchKey('b', 'keyup'); }
-        if (target.closest('#steer-left')) window.inputs.left = false;
-        if (target.closest('#steer-right')) window.inputs.right = false;
+        if (target.closest('#gas')) { window.localInputs.fwd = false; dispatchKey('w', 'keyup'); }
+        if (target.closest('#rev-btn')) { window.localInputs.bwd = false; dispatchKey('s', 'keyup'); }
+        if (target.closest('#handbrake')) { window.localInputs.handbrake = false; window.localInputs.brake = false; dispatchKey('b', 'keyup'); }
+        if (target.closest('#steer-left')) window.localInputs.left = false;
+        if (target.closest('#steer-right')) window.localInputs.right = false;
+
+        if (window.syncMergedInputs) window.syncMergedInputs();
     };
 
     let activeId = null, lastAngle = 0;
@@ -101,11 +108,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === orbitZone && window.startOrbit) {
             window.startOrbit(e.clientX, e.clientY, 999);
         }
-        if (e.target.closest('#gas')) { window.inputs.fwd = true; dispatchKey('w', 'keydown'); }
-        if (e.target.closest('#rev-btn')) { window.inputs.bwd = true; dispatchKey('s', 'keydown'); }
-        if (e.target.closest('#handbrake')) { window.inputs.brake = true; window.inputs.handbrake = true; dispatchKey('b', 'keydown'); }
-        if (e.target.closest('#steer-left')) window.inputs.left = true;
-        if (e.target.closest('#steer-right')) window.inputs.right = true;
+        if (e.target.closest('#gas')) { window.localInputs.fwd = true; dispatchKey('w', 'keydown'); }
+        if (e.target.closest('#rev-btn')) { window.localInputs.bwd = true; dispatchKey('s', 'keydown'); }
+        if (e.target.closest('#handbrake')) { window.localInputs.brake = true; window.localInputs.handbrake = true; dispatchKey('b', 'keydown'); }
+        if (e.target.closest('#steer-left')) window.localInputs.left = true;
+        if (e.target.closest('#steer-right')) window.localInputs.right = true;
+
+        if (window.syncMergedInputs) window.syncMergedInputs();
     });
 
     window.addEventListener('mousemove', (e) => {
@@ -126,11 +135,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 continue;
             }
 
-            if (t.target.closest('#gas')) { window.inputs.fwd = true; dispatchKey('w', 'keydown'); }
-            if (t.target.closest('#rev-btn')) { window.inputs.bwd = true; dispatchKey('s', 'keydown'); }
-            if (t.target.closest('#handbrake')) { window.inputs.brake = true; window.inputs.handbrake = true; dispatchKey('b', 'keydown'); }
-            if (t.target.closest('#steer-left')) window.inputs.left = true;
-            if (t.target.closest('#steer-right')) window.inputs.right = true;
+            if (t.target.closest('#gas')) { window.localInputs.fwd = true; dispatchKey('w', 'keydown'); }
+            if (t.target.closest('#rev-btn')) { window.localInputs.bwd = true; dispatchKey('s', 'keydown'); }
+            if (t.target.closest('#handbrake')) { window.localInputs.brake = true; window.localInputs.handbrake = true; dispatchKey('b', 'keydown'); }
+            if (t.target.closest('#steer-left')) window.localInputs.left = true;
+            if (t.target.closest('#steer-right')) window.localInputs.right = true;
+
+            if (window.syncMergedInputs) window.syncMergedInputs();
 
             if (wheelZone) {
                 const r = wheelZone.getBoundingClientRect();

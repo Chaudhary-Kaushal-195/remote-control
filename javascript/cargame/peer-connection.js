@@ -1,6 +1,16 @@
-// Peer JS Connection Manager
 window.peer = null;
 window.conn = null;
+window.remoteInputs = { fwd: false, bwd: false, handbrake: false, brake: false, left: false, right: false };
+window.localInputs = { fwd: false, bwd: false, handbrake: false, brake: false, left: false, right: false };
+
+// Keep window.inputs in sync via combinations
+window.syncMergedInputs = () => {
+    if (!window.inputs) window.inputs = {};
+    const keys = ['fwd', 'bwd', 'handbrake', 'brake', 'left', 'right'];
+    keys.forEach(k => {
+        window.inputs[k] = (window.localInputs[k] || false) || (window.remoteInputs[k] || false);
+    });
+};
 
 window.setupRemote = (showQR = false) => {
     const remoteBox = document.getElementById('remote-box');
@@ -70,7 +80,8 @@ window.setupRemote = (showQR = false) => {
                 window.gyroTilt = (data.tilt || 0);
             }
             if (data.type === 'pedal') {
-                window.inputs[data.pedal] = data.active;
+                window.remoteInputs[data.pedal] = data.active;
+                window.syncMergedInputs();
             }
             if (data.type === 'updateSettings') {
                 // Sync settings from remote
@@ -87,19 +98,22 @@ window.setupRemote = (showQR = false) => {
                 const keyMap = { 'ArrowUp': 38, 'ArrowDown': 40, 'w': 87, 's': 83, 'a': 65, 'd': 68, 'b': 66, ' ': 32, 'c': 67 };
                 const kc = keyMap[data.key] || 0;
                 const ev = new KeyboardEvent('keydown', { key: data.key, code: data.key, keyCode: kc, which: kc, bubbles: true, cancelable: true });
-                document.dispatchEvent(ev);
+                window.dispatchEvent(ev);
             }
             if (data.type === 'keyup') {
                 const keyMap = { 'ArrowUp': 38, 'ArrowDown': 40, 'w': 87, 's': 83, 'a': 65, 'd': 68, 'b': 66, ' ': 32, 'c': 67 };
                 const kc = keyMap[data.key] || 0;
                 const ev = new KeyboardEvent('keyup', { key: data.key, code: data.key, keyCode: kc, which: kc, bubbles: true, cancelable: true });
-                document.dispatchEvent(ev);
+                window.dispatchEvent(ev);
             }
         });
         window.conn.on('close', () => {
             window.showGameNotification("REMOTE DISCONNECTED ❌", "#ff0055");
             window.updateControllerUI(false);
             window.conn = null;
+            // Clear remote inputs on disconnect
+            window.remoteInputs = { fwd: false, bwd: false, handbrake: false, brake: false, left: false, right: false };
+            window.syncMergedInputs();
         });
     });
 };
