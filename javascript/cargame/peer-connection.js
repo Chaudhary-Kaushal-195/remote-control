@@ -100,6 +100,47 @@ window.setupRemote = () => {
     });
 };
 
+window.showGameNotification = (text, color = "#0ffffa") => {
+    let notify = document.getElementById('game-notify');
+    if (!notify) {
+        notify = document.createElement('div');
+        notify.id = 'game-notify';
+        notify.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 24px 48px;
+            background: rgba(10, 0, 30, 0.95);
+            border: 2px solid ${color};
+            border-radius: 20px;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 28px;
+            z-index: 10000;
+            box-shadow: 0 0 50px ${color};
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            text-align: center;
+            letter-spacing: 2px;
+        `;
+        document.body.appendChild(notify);
+    }
+    notify.innerText = text;
+    notify.style.borderColor = color;
+    notify.style.boxShadow = `0 0 50px ${color}`;
+    notify.style.opacity = "1";
+    notify.style.transform = "translate(-50%, -50%) scale(1)";
+
+    if (window.notifyTimeout) clearTimeout(window.notifyTimeout);
+    window.notifyTimeout = setTimeout(() => {
+        notify.style.opacity = "0";
+        notify.style.transform = "translate(-50%, -50%) scale(0.9)";
+    }, 3000);
+};
+
 window.updateControllerUI = (isConnected) => {
     const statusRow = document.getElementById('settings-remote-status');
     const remoteBox = document.getElementById('remote-box');
@@ -147,14 +188,13 @@ window.toggleControllerConnection = () => {
     if (window.conn && window.conn.open) {
         if (confirm("Disconnect the current phone controller?")) {
             window.conn.close();
-            window.updateControllerUI(false);
+            // Closing trigger cleanup in the 'close' event automatically
         }
     } else {
         window.setupRemote();
         const qrOverlay = document.getElementById('qr-overlay');
         const settingsModal = document.getElementById('settings-modal');
         if (qrOverlay) qrOverlay.style.display = 'flex';
-        // Keep settings open or close it? User might want to see the ID. Let's close modal to show QR.
         if (settingsModal) settingsModal.style.display = 'none';
     }
 };
