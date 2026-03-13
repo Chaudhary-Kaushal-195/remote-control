@@ -210,11 +210,18 @@ button:active {
 @media (orientation: landscape) and (min-height: 250px) {
     .modal-content {
         max-width: 600px;
+        overflow-x: hidden;
     }
 
     .settings-grid {
         grid-template-columns: 1fr 1fr;
         gap: 20px;
+    }
+
+    /* Force volume sliders to take full width in landscape */
+    .settings-grid .setting-row:nth-child(3),
+    .settings-grid .setting-row:nth-child(4) {
+        grid-column: span 2;
     }
 }
 
