@@ -75,6 +75,15 @@ window.setupPedals = () => {
 };
 
 // ─── BUTTON STEERING SETUP ───
+// ─── GEAR SHIFT (onclick — simple tap action) ───
+window.shiftGear = (direction) => {
+    if (!window.conn) return;
+    const key = direction === 'up' ? 'ArrowUp' : 'ArrowDown';
+    window.conn.send({ type: 'keydown', key });
+    setTimeout(() => window.conn.send({ type: 'keyup', key }), 80);
+    window.vibrate(50);
+};
+
 window.setupSteeringListeners = () => {
     const btnConfig = [
         { id: 'steer-left',  pedal: 'left'  },
@@ -112,49 +121,6 @@ window.setupSteeringListeners = () => {
                 if (e.changedTouches[i].identifier === ownTouchId) {
                     ownTouchId = null;
                     if (window.conn) window.conn.send({ type: 'pedal', pedal, active: false });
-                    break;
-                }
-            }
-        }, { passive: true });
-    });
-
-    // Gear shifters (manual mode)
-    const gearConfig = [
-        { id: 'gear-up',   key: 'ArrowUp'   },
-        { id: 'gear-down', key: 'ArrowDown' },
-    ];
-
-    gearConfig.forEach(({ id, key }) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-
-        let ownTouchId = null;
-
-        el.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (ownTouchId === null) {
-                ownTouchId = e.changedTouches[0].identifier;
-                if (window.conn) window.conn.send({ type: 'keydown', key });
-                window.vibrate(50);
-            }
-        }, { passive: false });
-
-        el.addEventListener('touchend', (e) => {
-            for (let i = 0; i < e.changedTouches.length; i++) {
-                if (e.changedTouches[i].identifier === ownTouchId) {
-                    ownTouchId = null;
-                    if (window.conn) window.conn.send({ type: 'keyup', key });
-                    break;
-                }
-            }
-        }, { passive: true });
-
-        el.addEventListener('touchcancel', (e) => {
-            for (let i = 0; i < e.changedTouches.length; i++) {
-                if (e.changedTouches[i].identifier === ownTouchId) {
-                    ownTouchId = null;
-                    if (window.conn) window.conn.send({ type: 'keyup', key });
                     break;
                 }
             }
