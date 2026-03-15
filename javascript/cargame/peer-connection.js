@@ -94,6 +94,13 @@ window.setupRemote = (showQR = false) => {
                 window.remoteInputs[data.pedal] = data.active;
                 window.syncMergedInputs();
             }
+            if (data.type === 'gearShift') {
+                if (data.direction === 'up') {
+                    if (window.manualGearIndex < 6) window.manualGearIndex++;
+                } else if (data.direction === 'down') {
+                    if (window.manualGearIndex > -1) window.manualGearIndex--;
+                }
+            }
             if (data.type === 'updateSettings') {
                 // Sync settings from remote
                 window.gameSettings = Object.assign(window.gameSettings, data.settings);

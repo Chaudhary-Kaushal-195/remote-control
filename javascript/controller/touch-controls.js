@@ -78,9 +78,7 @@ window.setupPedals = () => {
 // ─── GEAR SHIFT (onclick — simple tap action) ───
 window.shiftGear = (direction) => {
     if (!window.conn) return;
-    const key = direction === 'up' ? 'ArrowUp' : 'ArrowDown';
-    window.conn.send({ type: 'keydown', key });
-    setTimeout(() => window.conn.send({ type: 'keyup', key }), 80);
+    window.conn.send({ type: 'gearShift', direction });
     window.vibrate(50);
 };
 
