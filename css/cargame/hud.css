@@ -51,7 +51,7 @@
 .dg.ac {
     left: 0px !important;
     right: auto !important;
-    z-index: 50 !important;
+    z-index: 6000 !important;
 }
 
 /* HIDE NATIVE DAT.GUI CLOSE BUTTON SINCE WE HAVE A CUSTOM TOGGLE */
