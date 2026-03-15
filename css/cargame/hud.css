@@ -71,7 +71,7 @@
     overflow: hidden !important;
     box-shadow: -10px 10px 40px rgba(0, 0, 0, 0.8) !important;
     padding-bottom: 10px !important;
-    width: 300px !important;
+    width: 260px !important;
 }
 
 .dg li.title {
@@ -82,7 +82,7 @@
     text-transform: uppercase !important;
     letter-spacing: 2px !important;
     font-size: 10px !important;
-    padding: 8px 15px !important;
+    padding: 6px 15px !important;
     line-height: normal !important;
     text-shadow: 0 0 10px rgba(15, 255, 250, 0.3) !important;
 }
@@ -97,6 +97,8 @@
 .dg li.cr {
     background: transparent !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+    height: 30px !important;
+    line-height: 30px !important;
     padding: 2px 10px !important;
     overflow: hidden !important;
 }
@@ -107,8 +109,8 @@
     color: rgba(255, 255, 255, 0.6) !important;
     font-weight: 600 !important;
     float: left !important;
-    padding-top: 6px !important;
-    width: 35% !important;
+    padding-top: 5px !important;
+    width: 25% !important;
 }
 
 .dg .c {
