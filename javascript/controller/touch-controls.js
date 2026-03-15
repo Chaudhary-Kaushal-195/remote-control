@@ -74,8 +74,7 @@ window.setupPedals = () => {
     });
 };
 
-// ─── BUTTON STEERING SETUP ───
-// ─── GEAR SHIFT (onclick — simple tap action) ───
+// ─── GEAR SHIFT ───
 window.shiftGear = (direction) => {
     if (!window.conn) return;
     window.conn.send({ type: 'gearShift', direction });
@@ -83,6 +82,7 @@ window.shiftGear = (direction) => {
 };
 
 window.setupSteeringListeners = () => {
+    // Steer buttons (hold-type, same as pedals)
     const btnConfig = [
         { id: 'steer-left',  pedal: 'left'  },
         { id: 'steer-right', pedal: 'right' },
@@ -123,6 +123,42 @@ window.setupSteeringListeners = () => {
                 }
             }
         }, { passive: true });
+    });
+
+    // Gear shift buttons (tap-type — touchstart fires the action immediately)
+    const gearConfig = [
+        { id: 'gear-up',   direction: 'up'   },
+        { id: 'gear-down', direction: 'down' },
+    ];
+
+    gearConfig.forEach(({ id, direction }) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        el.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            window.shiftGear(direction);
+        }, { passive: false });
+    });
+
+    // Hub buttons (tap-type — must use touchstart for multitouch compatibility)
+    // onclick in HTML is kept as fallback for desktop/non-touch
+    const hubConfig = [
+        { id: 'remote-trans-btn',     fn: () => window.toggleTransmissionFromRemote() },
+        { id: 'remote-cam-btn',       fn: () => window.cycleCameraFromRemote() },
+        { id: 'remote-settings-btn',  fn: () => window.toggleRemoteSettings() },
+    ];
+
+    hubConfig.forEach(({ id, fn }) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        el.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            fn();
+        }, { passive: false });
     });
 };
 
