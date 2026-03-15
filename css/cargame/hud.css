@@ -126,16 +126,29 @@
 }
 
 .dg .c .slider {
-    background: rgba(255, 255, 255, 0.1) !important;
-    height: 6px !important;
-    margin-top: 13px !important;
-    border-radius: 10px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    height: 20px !important;
+    margin-top: 6px !important;
+    border-radius: 4px !important;
+    border: 1px solid rgba(15, 255, 250, 0.1) !important;
+    overflow: hidden !important;
 }
 
 .dg .c .slider-fg {
-    background: var(--neon-blue) !important;
-    box-shadow: 0 0 15px rgba(15, 255, 250, 0.5) !important;
-    border-radius: 10px !important;
+    background: linear-gradient(90deg, var(--neon-blue), #55ffff) !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    height: 100% !important;
+}
+
+.dg .c .slider-fg::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent, rgba(0,0,0,0.2)) !important;
 }
 
 .dg .cr.number input[type=text] {
