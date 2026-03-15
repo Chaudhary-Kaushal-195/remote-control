@@ -71,6 +71,7 @@
     overflow: hidden !important;
     box-shadow: -10px 10px 40px rgba(0, 0, 0, 0.8) !important;
     padding-bottom: 10px !important;
+    width: 300px !important;
 }
 
 .dg li.title {
@@ -96,9 +97,9 @@
 .dg li.cr {
     background: transparent !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
-    height: 35px !important;
-    line-height: 35px !important;
-    padding: 0 10px !important;
+    height: 38px !important;
+    line-height: 38px !important;
+    padding: 0 12px !important;
 }
 
 .dg .property-name {
@@ -106,11 +107,11 @@
     font-size: 11px !important;
     color: rgba(255, 255, 255, 0.6) !important;
     font-weight: 600 !important;
-    width: 35% !important;
+    width: 30% !important;
 }
 
 .dg .c {
-    width: 65% !important;
+    width: 70% !important;
 }
 
 .dg .c input[type=text], .dg .c select {
@@ -119,7 +120,7 @@
     border-radius: 6px !important;
     color: #fff !important;
     padding: 3px 8px !important;
-    margin-top: 6px !important;
+    margin-top: 8px !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 11px !important;
     outline: none !important;
@@ -132,17 +133,18 @@
 
 .dg .c .slider {
     background: rgba(255, 255, 255, 0.05) !important;
-    height: 20px !important;
-    margin-top: 7px !important;
+    height: 14px !important;
+    margin-top: 12px !important;
     border-radius: 4px !important;
     border: 1px solid rgba(15, 255, 250, 0.2) !important;
     overflow: hidden !important;
+    width: 100% !important;
 }
 
 .dg .slider-fg {
     background: #0ffffa !important;
     height: 100% !important;
-    box-shadow: 0 0 15px rgba(15, 255, 250, 0.5) !important;
+    box-shadow: 0 0 20px rgba(15, 255, 250, 0.6) !important;
 }
 
 .dg .c input[type=text] {
