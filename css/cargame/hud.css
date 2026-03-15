@@ -71,7 +71,7 @@
     overflow: hidden !important;
     box-shadow: -10px 10px 40px rgba(0, 0, 0, 0.8) !important;
     padding-bottom: 10px !important;
-    width: 260px !important;
+    width: 250px !important;
 }
 
 .dg li.title {
@@ -98,9 +98,10 @@
     background: transparent !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
     height: 30px !important;
-    line-height: 30px !important;
-    padding: 2px 10px !important;
+    padding: 0 10px !important;
     overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
 }
 
 .dg .property-name {
@@ -108,15 +109,18 @@
     font-size: 11px !important;
     color: rgba(255, 255, 255, 0.6) !important;
     font-weight: 600 !important;
-    float: left !important;
-    padding-top: 5px !important;
     width: 25% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
 }
 
 .dg .c {
-    float: left !important;
-    width: 65% !important;
-    position: relative !important;
+    width: 75% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    padding-right: 5px !important;
 }
 
 .dg .c input[type=text], .dg .c select {
@@ -124,23 +128,24 @@
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius: 6px !important;
     color: #fff !important;
-    padding: 3px 8px !important;
-    margin-top: 2px !important;
+    padding: 2px 6px !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 11px !important;
     outline: none !important;
-    float: right !important;
+    height: 20px !important;
+    width: 45px !important;
+    margin-left: 10px !important;
+    box-sizing: border-box !important;
 }
 
 .dg .c .slider {
     background: rgba(255, 255, 255, 0.05) !important;
-    height: 16px !important;
-    margin-top: 5px !important;
+    height: 14px !important;
     border-radius: 4px !important;
     border: 1px solid rgba(15, 255, 250, 0.2) !important;
     overflow: hidden !important;
-    float: left !important;
-    width: 60% !important;
+    flex-grow: 1 !important;
+    margin: 0 !important;
 }
 
 .dg .slider-fg {
