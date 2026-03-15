@@ -147,6 +147,7 @@ window.setupSteeringListeners = () => {
     const hubConfig = [
         { id: 'remote-trans-btn',     fn: () => window.toggleTransmissionFromRemote() },
         { id: 'remote-cam-btn',       fn: () => window.cycleCameraFromRemote() },
+        { id: 'remote-pause-btn',     fn: () => window.togglePauseFromRemote() },
         { id: 'remote-settings-btn',  fn: () => window.toggleRemoteSettings() },
     ];
 
@@ -283,6 +284,18 @@ window.cycleCameraFromRemote = () => {
     window.conn.send({ type: 'keydown', key: 'c' });
     setTimeout(() => window.conn.send({ type: 'keyup', key: 'c' }), 50);
     window.vibrate(30);
+};
+
+window.togglePauseFromRemote = () => {
+    if (!window.conn) return;
+    window.conn.send({ type: 'pause' });
+    window.vibrate(40);
+    // Toggle button icon
+    const btn = document.getElementById('remote-pause-btn');
+    if (btn) {
+        const isPaused = btn.innerText.includes('▶');
+        btn.innerText = isPaused ? '⏸' : '▶';
+    }
 };
 
 // ─── APPLY GAME CONFIG FROM HOST ───

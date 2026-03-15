@@ -113,6 +113,9 @@ window.setupRemote = (showQR = false) => {
                     if (window.manualGearIndex > -1) window.manualGearIndex--;
                 }
             }
+            if (data.type === 'pause') {
+                if (window.togglePause) window.togglePause();
+            }
             if (data.type === 'updateSettings') {
                 // Sync settings from remote
                 window.gameSettings = Object.assign(window.gameSettings, data.settings);
