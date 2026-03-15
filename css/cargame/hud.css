@@ -82,7 +82,7 @@
     text-transform: uppercase !important;
     letter-spacing: 2px !important;
     font-size: 10px !important;
-    padding: 8px 15px !important;
+    padding: 4px 15px !important;
     line-height: normal !important;
     text-shadow: 0 0 10px rgba(15, 255, 250, 0.3) !important;
 }
@@ -97,8 +97,8 @@
 .dg li.cr {
     background: transparent !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
-    height: 32px !important;
-    line-height: 32px !important;
+    height: 28px !important;
+    line-height: 28px !important;
     padding: 0 10px !important;
     overflow: hidden !important;
 }
@@ -112,6 +112,7 @@
     width: 30% !important;
     padding: 0 !important;
     margin: 0 !important;
+    padding-top: 2px !important;
 }
 
 .dg .c {
@@ -125,8 +126,8 @@
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius: 6px !important;
     color: #fff !important;
-    padding: 3px 8px !important;
-    margin-top: 5px !important;
+    padding: 2px 8px !important;
+    margin-top: 3px !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 11px !important;
     outline: none !important;
@@ -137,8 +138,8 @@
 
 .dg .c .slider {
     background: rgba(255, 255, 255, 0.05) !important;
-    height: 16px !important;
-    margin-top: 8px !important;
+    height: 14px !important;
+    margin-top: 6px !important;
     border-radius: 4px !important;
     border: 1px solid rgba(15, 255, 250, 0.2) !important;
     overflow: hidden !important;
