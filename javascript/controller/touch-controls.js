@@ -153,6 +153,8 @@ window.setupRemoteWheel = () => {
 
     // ─── GLOBAL TOUCHSTART ───
     document.addEventListener('touchstart', (e) => {
+        let hasGameControl = false;
+
         for (let i = 0; i < e.changedTouches.length; i++) {
             const t = e.changedTouches[i];
 
@@ -171,15 +173,19 @@ window.setupRemoteWheel = () => {
                     window.activeWheelTouchId = t.identifier;
                     window.lastWheelAngle = getAngle(t.clientX, t.clientY);
                 }
+                hasGameControl = true;
             } else if (target.zone === 'hub-btn') {
-                // Hub buttons handle themselves via onclick, just mark as claimed
+                // Hub buttons use onclick — fire click() manually so they work on touch
+                target.element.click();
             } else {
                 pressControl(target.zone);
+                hasGameControl = true;
             }
         }
 
-        // Prevent default to stop browser gestures (scroll, zoom) but only for game controls
-        if (e.cancelable) e.preventDefault();
+        // Only preventDefault on game controls (wheel, pedals, gear, steer)
+        // Do NOT preventDefault on hub buttons or other UI — it kills their onclick
+        if (hasGameControl && e.cancelable) e.preventDefault();
     }, { passive: false });
 
     // ─── GLOBAL TOUCHMOVE ───
