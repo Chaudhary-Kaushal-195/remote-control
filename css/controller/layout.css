@@ -208,7 +208,9 @@ input[type="text"]:focus {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    z-index: 210;
+    z-index: 230;
+    touch-action: none;
+    pointer-events: auto;
 }
 
 .gear-btn {
