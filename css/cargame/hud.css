@@ -67,7 +67,7 @@
     border: 1px solid rgba(15, 255, 250, 0.2) !important;
     border-bottom: none !important;
     border-right: none !important;
-    border-radius: 0 0 0 16px !important;
+    border-radius: 10px !important;
     overflow: hidden !important;
     box-shadow: -10px 10px 40px rgba(0, 0, 0, 0.8) !important;
     padding-bottom: 10px !important;
@@ -121,10 +121,10 @@
     position: relative !important;
 }
 
-.dg .c input[type=text], .dg .c select {
+.dg .c input[type=text] {
     background: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 6px !important;
+    border-radius: 10px !important;
     color: #fff !important;
     padding: 2px 8px !important;
     margin-top: 3px !important;
@@ -133,6 +133,21 @@
     outline: none !important;
     float: right !important;
     width: 45px !important;
+    margin-left: 10px !important;
+}
+
+.dg .c select {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 10px !important;
+    color: #fff !important;
+    padding: 2px 8px !important;
+    margin-top: 3px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 11px !important;
+    outline: none !important;
+    float: right !important;
+    width: 100px !important;
     margin-left: 10px !important;
 }
 
