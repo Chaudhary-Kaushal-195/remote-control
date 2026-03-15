@@ -297,6 +297,20 @@
     <script type="module" src="../javascript/cargame/environment.js"></script>
     <script type="module" src="../javascript/cargame/car-physics.js"></script>
 
+    <!-- Fix: dat.gui config dropdown needs to trigger engine reload -->
+    <script>
+        // The audio engine uses document.querySelector('select') which finds
+        // the settings modal select instead of the dat.gui select.
+        // This event delegation catches changes on dat.gui selects properly.
+        document.addEventListener('change', (e) => {
+            if (e.target.closest('.dg') && e.target.tagName === 'SELECT') {
+                if (window.startTypeScriptEngineAudio) {
+                    window.startTypeScriptEngineAudio();
+                }
+            }
+        });
+    </script>
+
 </body>
 
 </html>
