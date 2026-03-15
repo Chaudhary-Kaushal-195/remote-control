@@ -12,6 +12,7 @@
     backdrop-filter: blur(10px);
     -webkit-user-select: none;
     user-select: none;
+    touch-action: none;
     position: absolute;
     bottom: 30px;
     left: 30px;

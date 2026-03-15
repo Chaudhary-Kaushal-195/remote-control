@@ -24,6 +24,7 @@
     backdrop-filter: blur(5px);
     -webkit-user-select: none;
     user-select: none;
+    touch-action: none;
 }
 
 #reverse {
