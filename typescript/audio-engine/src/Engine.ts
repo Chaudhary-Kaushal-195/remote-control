@@ -23,6 +23,7 @@ export class Engine {
     engine_braking = 200;
     throttle = 0;
     lastTorque = 0; //Nm
+    peakTorque = 0; //Nm Peak value achieved
 
     /* Integration state */
     theta: number = 0;
@@ -86,6 +87,9 @@ export class Engine {
         const t2 = Math.pow(1 - this.throttle, 1.2) * this.engine_braking;
         const torque = t1 - t2 + idleTorque;
         this.lastTorque = torque;
+        if (torque > this.peakTorque) {
+            this.peakTorque = Math.floor(torque);
+        }
 
         /* Integrate */
         const I = load_inertia + this.inertia;

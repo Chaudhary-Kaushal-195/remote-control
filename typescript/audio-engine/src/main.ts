@@ -29,6 +29,7 @@ guiMain.add(settings, 'activeConfig', Object.keys(configurations)).name('Select 
 
 guiEngine.add(engine, 'throttle', 0, 1).name('Throttle').listen();
 guiEngine.add(engine, 'rpm', 0, engine.limiter).name('RPM').listen();
+guiEngine.add(engine, 'peakTorque').name('Peak Torque (Nm)').listen();
 guiEngine.add(engine, 'theta', 0, 1000).name('Theta').listen();
 guiEngine.add(engine, 'omega', -100, 100).name('Omega').listen();
 
@@ -76,6 +77,7 @@ window.startTypeScriptEngineAudio = async function () {
     await vehicle.init(configurations[settings.activeConfig]);
 
     drivetrain.hp = 0; // Reset peak HP for new config
+    engine.peakTorque = 0; // Reset peak torque for new config
 
     loaded = true;
 
