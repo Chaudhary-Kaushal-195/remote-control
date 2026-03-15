@@ -33,9 +33,7 @@ guiEngine.add(engine, 'theta', 0, 1000).name('Theta').listen();
 guiEngine.add(engine, 'omega', -100, 100).name('Omega').listen();
 
 guiDrivetrain.add(drivetrain, 'gear').name('Gear').listen();
-guiDrivetrain.add(drivetrain, 'speed').name('Speed (KPH)').listen();
-guiDrivetrain.add(drivetrain, 'torque').name('Torque (Nm)').listen();
-guiDrivetrain.add(drivetrain, 'hp').name('Horsepower (HP)').listen();
+guiDrivetrain.add(drivetrain, 'hp').name('Peak HP').listen();
 guiDrivetrain.add(drivetrain, 'theta', 0, 1000).name('Theta').listen();
 guiDrivetrain.add(drivetrain, 'omega', -100, 100).name('Omega').listen();
 
@@ -76,6 +74,8 @@ const controls = document.getElementById('controls');
 window.startTypeScriptEngineAudio = async function () {
     // @ts-ignore
     await vehicle.init(configurations[settings.activeConfig]);
+
+    drivetrain.hp = 0; // Reset peak HP for new config
 
     loaded = true;
 
@@ -162,12 +162,10 @@ function update(time: DOMHighResTimeStamp): void {
     vehicle.update(time, dt);
 
     /* Update extra debug data */
-    const ratio = Math.abs(drivetrain.getTotalGearRatio());
-    drivetrain.speed = Math.floor(Math.abs((drivetrain.omega / Math.max(0.1, ratio)) * 0.25 * 3.6));
-    drivetrain.torque = Math.floor(engine.lastTorque * ratio);
-    
-    // Horsepower formula: (Torque(Nm) * RPM) / 7127 (using 7127 for Nm conversion from 5252 ft-lbs)
-    drivetrain.hp = Math.floor((engine.lastTorque * engine.rpm) / 7127);
+    const currentHP = (engine.lastTorque * engine.rpm) / 7127;
+    if (currentHP > drivetrain.hp) {
+        drivetrain.hp = Math.floor(currentHP);
+    }
 }
 
 update(10);
