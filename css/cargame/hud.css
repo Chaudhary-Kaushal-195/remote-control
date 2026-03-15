@@ -71,7 +71,7 @@
     overflow: hidden !important;
     box-shadow: -10px 10px 40px rgba(0, 0, 0, 0.8) !important;
     padding-bottom: 10px !important;
-    width: 250px !important;
+    width: 280px !important;
 }
 
 .dg li.title {
@@ -82,7 +82,7 @@
     text-transform: uppercase !important;
     letter-spacing: 2px !important;
     font-size: 10px !important;
-    padding: 6px 15px !important;
+    padding: 8px 15px !important;
     line-height: normal !important;
     text-shadow: 0 0 10px rgba(15, 255, 250, 0.3) !important;
 }
@@ -97,11 +97,10 @@
 .dg li.cr {
     background: transparent !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
-    height: 30px !important;
+    height: 32px !important;
+    line-height: 32px !important;
     padding: 0 10px !important;
     overflow: hidden !important;
-    display: flex !important;
-    align-items: center !important;
 }
 
 .dg .property-name {
@@ -109,18 +108,16 @@
     font-size: 11px !important;
     color: rgba(255, 255, 255, 0.6) !important;
     font-weight: 600 !important;
-    width: 25% !important;
+    float: left !important;
+    width: 30% !important;
     padding: 0 !important;
     margin: 0 !important;
-    white-space: nowrap !important;
 }
 
 .dg .c {
-    width: 75% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    padding-right: 5px !important;
+    float: left !important;
+    width: 70% !important;
+    position: relative !important;
 }
 
 .dg .c input[type=text], .dg .c select {
@@ -128,24 +125,25 @@
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius: 6px !important;
     color: #fff !important;
-    padding: 2px 6px !important;
+    padding: 3px 8px !important;
+    margin-top: 5px !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 11px !important;
     outline: none !important;
-    height: 20px !important;
+    float: right !important;
     width: 45px !important;
     margin-left: 10px !important;
-    box-sizing: border-box !important;
 }
 
 .dg .c .slider {
     background: rgba(255, 255, 255, 0.05) !important;
-    height: 14px !important;
+    height: 16px !important;
+    margin-top: 8px !important;
     border-radius: 4px !important;
     border: 1px solid rgba(15, 255, 250, 0.2) !important;
     overflow: hidden !important;
-    flex-grow: 1 !important;
-    margin: 0 !important;
+    float: left !important;
+    width: 60% !important;
 }
 
 .dg .slider-fg {
