@@ -49,8 +49,8 @@
 
 /* OVERRIDE NATIVE DAT.GUI POSITIONING */
 .dg.ac {
-    left: 0px !important;
-    right: auto !important;
+    left: auto !important;
+    right: 0px !important;
     z-index: 50 !important;
 }
 
