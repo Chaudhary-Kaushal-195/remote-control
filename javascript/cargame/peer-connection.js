@@ -95,9 +95,21 @@ window.setupRemote = (showQR = false) => {
                 window.syncMergedInputs();
             }
             if (data.type === 'gearShift') {
+                // The audio engine listens on `document` for keyup with event.code
+                const code = data.direction === 'up' ? 'ArrowUp' : 'ArrowDown';
+                const ev = new KeyboardEvent('keyup', {
+                    code: code,
+                    key: code,
+                    keyCode: code === 'ArrowUp' ? 38 : 40,
+                    which: code === 'ArrowUp' ? 38 : 40,
+                    bubbles: true,
+                    cancelable: true
+                });
+                document.dispatchEvent(ev);
+                // Also update manualGearIndex for the HUD
                 if (data.direction === 'up') {
                     if (window.manualGearIndex < 6) window.manualGearIndex++;
-                } else if (data.direction === 'down') {
+                } else {
                     if (window.manualGearIndex > -1) window.manualGearIndex--;
                 }
             }
