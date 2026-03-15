@@ -297,13 +297,34 @@
     <script type="module" src="../javascript/cargame/environment.js"></script>
     <script type="module" src="../javascript/cargame/car-physics.js"></script>
 
-    <!-- Fix: dat.gui config dropdown needs to trigger engine reload -->
+    <!-- Fix: dat.gui config dropdown needs to trigger engine reload only when stationary -->
     <script>
+        let lastKnownConfig = null;
+        
+        // Capture the current value before they change it
+        document.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.dg') && e.target.tagName === 'SELECT') {
+                lastKnownConfig = e.target.value;
+            }
+        });
+
         // The audio engine uses document.querySelector('select') which finds
         // the settings modal select instead of the dat.gui select.
         // This event delegation catches changes on dat.gui selects properly.
         document.addEventListener('change', (e) => {
             if (e.target.closest('.dg') && e.target.tagName === 'SELECT') {
+                const speedText = document.getElementById('speed-box')?.innerText || '0';
+                const currentSpeed = parseInt(speedText);
+                
+                if (currentSpeed > 0) {
+                    alert('⚠️ Please stop the car completely (0 KPH) before changing the engine sound!');
+                    if (lastKnownConfig) {
+                        e.target.value = lastKnownConfig;
+                    }
+                    return;
+                }
+
+                lastKnownConfig = e.target.value;
                 if (window.startTypeScriptEngineAudio) {
                     window.startTypeScriptEngineAudio();
                 }
