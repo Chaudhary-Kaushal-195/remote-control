@@ -1,66 +1,90 @@
+/* ─── QR SCANNER OVERLAY ─── */
 #reader-container {
     display: none;
-    /* Toggled to flex by JS */
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     z-index: 9999;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
-    padding: 20px;
+    padding: 16px;
 }
 
 #reader-modal {
-    background: #1a0030;
-    border: 2px solid #0ffffa;
-    padding: 15px;
-    border-radius: 20px;
+    background: linear-gradient(145deg, #1a0030, #0d0020);
+    border: 2px solid var(--neon-blue);
+    padding: 16px;
+    border-radius: var(--radius-lg);
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-shadow: 0 0 40px rgba(15, 255, 250, 0.3);
+    box-shadow: 0 0 40px rgba(15, 255, 250, 0.2);
     width: 90%;
-    max-width: 400px;
+    max-width: 380px;
     max-height: 95vh;
     box-sizing: border-box;
 }
 
+#reader-modal h2 {
+    color: var(--neon-blue);
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    letter-spacing: 2px;
+}
+
 #reader {
     width: 100%;
-    max-width: 280px;
+    max-width: 260px;
     aspect-ratio: 1 / 1;
     height: auto;
-    max-height: 45vh;
-    border: 2px solid #0ffffa;
+    max-height: 42vh;
+    border: 2px solid var(--neon-blue);
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 0 20px rgba(15, 255, 250, 0.4);
+    box-shadow: 0 0 20px rgba(15, 255, 250, 0.3);
     background: #000;
 }
 
-@media (max-height: 400px) {
+@media (max-height: 380px) {
     #reader-modal {
-        padding: 10px;
+        flex-direction: row;
+        gap: 16px;
+        max-width: 95%;
+        padding: 12px;
     }
 
     #reader-modal h2 {
-        font-size: 16px;
-        margin: 5px 0;
+        font-size: 14px;
+        margin: 4px 0;
+    }
+
+    #reader {
+        max-width: 180px;
+        max-height: 80vh;
     }
 }
 
+/* ─── SCAN BUTTON (Connection Overlay) ─── */
 .scan-btn {
-    background: rgba(255, 255, 255, 0.9) !important;
+    background: rgba(255, 255, 255, 0.92) !important;
     color: #000 !important;
     font-weight: 900 !important;
     font-family: inherit;
-    border-radius: 12px !important;
-    padding: 15px 40px !important;
-    margin-bottom: 20px;
-    margin-top: 10px;
+    border-radius: var(--radius-md) !important;
+    padding: 14px 36px !important;
+    margin-bottom: 16px;
+    margin-top: 8px;
     border: none !important;
-    font-size: 18px !important;
+    font-size: 17px !important;
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.scan-btn:active {
+    transform: scale(0.95) !important;
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.4) !important;
 }

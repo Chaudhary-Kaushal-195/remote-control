@@ -7,13 +7,9 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <!-- SW path updated since we moved into pages/ -->
     <link rel="manifest" href="../manifest.json">
     <title>Dr. Control - Universal Remote</title>
-
-    <!-- Link to isolated CSS -->
     <link rel="stylesheet" href="../css/controller.css">
-
     <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 
@@ -23,6 +19,7 @@
     <div id="debug-tilt">Steer: DISCONNECTED</div>
     <button id="fix-sensors" onclick="startGyro()">ENABLE STEERING SENSORS</button>
 
+    <!-- ═══════════ CONNECTION OVERLAY ═══════════ -->
     <div id="overlay">
         <h1 style="color:#0ffffa; margin-bottom:10px;">DR. CONTROL</h1>
         <p style="font-size:12px; margin-bottom:20px; opacity:0.8;">SCAN OR ENTER LAPTOP ID</p>
@@ -35,17 +32,18 @@
         <button onclick="connectToHost()">CONNECT MANUALLY</button>
         <p style="font-size:10px; margin-top:40px; color:#f092ff;">TIP: Make sure Bluetooth or WiFi is on.</p>
 
-        <!-- QR Scanner nested properly so z-index stacks over overlay correctly -->
+        <!-- QR Scanner Modal -->
         <div id="reader-container">
             <div id="reader-modal">
                 <h2 style="color:#0ffffa; margin-top: 0;">POINT AT LAPTOP</h2>
                 <div id="reader"></div>
                 <button class="modal-close-btn" onclick="stopScanning()"
-                    style="margin-top:20px; width: 100%;">CANCEL</button>
+                    style="margin-top:16px; width: 100%;">CANCEL</button>
             </div>
         </div>
     </div>
 
+    <!-- ═══════════ DESKTOP BLOCKER ═══════════ -->
     <div id="desktop-blocker">
         <h1>⚠️ INCOMPATIBLE DEVICE</h1>
         <p>This Remote App requires <b>Gyroscope Sensors</b> and <b>Touch Controls</b> found only on mobile phones and
@@ -56,43 +54,50 @@
             HUB</button>
     </div>
 
+    <!-- ═══════════ GAME UI CONTAINER ═══════════ -->
     <div id="ui-container" style="display: none;">
-        <!-- TOP CONTROLS -->
-        <div
-            style="position: absolute; top: calc(env(safe-area-inset-top, 0px) + 20px); right: calc(env(safe-area-inset-right, 0px) + 20px); display: flex; gap: 15px; z-index: 100;">
-            <button id="remote-trans-btn" class="ctrl-hub-btn" onclick="window.toggleTransmissionFromRemote()"
-                style="font-size: 10px; font-weight: bold; width: 66px !important; height: 66px !important;">AUTO</button>
-            <button id="remote-cam-btn" class="ctrl-hub-btn" onclick="window.cycleCameraFromRemote()">📷</button>
-            <button id="remote-settings-btn" class="ctrl-hub-btn" onclick="window.toggleRemoteSettings()">⚙️</button>
+
+        <!-- TOP HUB BUTTONS (regular onclick — no touch override) -->
+        <div class="top-hub">
+            <button id="remote-trans-btn" class="ctrl-hub-btn ctrl-hub-btn--text"
+                onclick="window.toggleTransmissionFromRemote()">AUTO</button>
+            <button id="remote-cam-btn" class="ctrl-hub-btn"
+                onclick="window.cycleCameraFromRemote()">📷</button>
+            <button id="remote-settings-btn" class="ctrl-hub-btn"
+                onclick="window.toggleRemoteSettings()">⚙️</button>
         </div>
 
+        <!-- STEERING WHEEL (touch handled via JS on this element only) -->
         <div id="wheel-zone">
             <div id="wheel-inner"></div>
         </div>
 
+        <!-- BUTTON STEERING (touch handled via JS on these elements only) -->
         <div id="button-steering">
             <div class="steer-btn" id="steer-left">⬅️</div>
             <div class="steer-btn" id="steer-right">➡️</div>
         </div>
 
-        <!-- GEAR SHIFTERS (Visible in Manual Mode) -->
+        <!-- GEAR SHIFTERS (Manual mode only — touch handled via JS) -->
         <div id="gear-shifters" style="display: none;">
             <div class="gear-btn" id="gear-up">SHIFT UP</div>
             <div class="gear-btn" id="gear-down">SHIFT DOWN</div>
         </div>
 
+        <!-- PEDALS (touch handled via JS on each pedal individually) -->
         <div id="pedal-zone" class="pedal-group">
-            <div id="reverse" class="pedal" style="background: linear-gradient(to bottom, #444, #111); color: #aaa;">REV
-            </div>
+            <div id="reverse" class="pedal"
+                style="background: linear-gradient(to bottom, #333, #111); color: #aaa;">REV</div>
             <div id="brake" class="pedal">STOP</div>
             <div id="gas" class="pedal">GAS</div>
         </div>
     </div>
 
-    <!-- SETTINGS MODAL FOR REMOTE -->
+    <!-- ═══════════ SETTINGS MODAL ═══════════ -->
     <div id="remote-settings-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
-            <h2 style="color:var(--neon-blue); margin-bottom: 20px;">REMOTE SETTINGS</h2>
+            <h2 style="color:var(--neon-blue); margin-bottom: 16px; margin-top: 0; letter-spacing: 2px;">REMOTE
+                SETTINGS</h2>
 
             <div class="settings-grid">
                 <div class="setting-row">
@@ -126,29 +131,26 @@
             </div>
 
             <button class="modal-close-btn" onclick="window.toggleRemoteSettings()"
-                style="margin-top: 20px; width: 100%;">BACK TO
-                REMOTE</button>
+                style="margin-top: 16px; width: 100%;">BACK TO REMOTE</button>
         </div>
     </div>
 
-    <!-- DISCONNECT CONFIRMATION MODAL -->
+    <!-- ═══════════ DISCONNECT MODAL ═══════════ -->
     <div id="disconnect-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content" style="border-color: var(--neon-pink); max-width: 300px;">
-            <h2 style="color:var(--neon-pink); margin-bottom: 10px;">DISCONNECT?</h2>
-            <p style="font-size: 12px; margin-bottom: 25px; opacity: 0.8;">Do you want to stop controlling the game and
+            <h2 style="color:var(--neon-pink); margin-bottom: 10px; margin-top: 0;">DISCONNECT?</h2>
+            <p style="font-size: 12px; margin-bottom: 20px; opacity: 0.8;">Do you want to stop controlling the game and
                 disconnect?</p>
-            <div style="display: flex; gap: 15px;">
+            <div style="display: flex; gap: 12px;">
                 <button class="modal-close-btn" onclick="window.confirmDisconnect(true)"
                     style="flex: 1; margin: 0;">YES</button>
                 <button onclick="window.confirmDisconnect(false)"
-                    style="flex: 1; margin: 0; background: rgba(255,255,255,0.1); border: 1px solid #fff; color: #fff; border-radius: 12px; font-weight: bold; cursor: pointer;">NO</button>
+                    style="flex: 1; margin: 0; background: rgba(255,255,255,0.08); border: 1px solid #fff; color: #fff; border-radius: 14px; font-weight: bold; cursor: pointer;">NO</button>
             </div>
         </div>
     </div>
 
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-
-    <!-- Link to isolated custom Javascript -->
     <script src="../javascript/controller/connection.js"></script>
     <script src="../javascript/controller/sensors.js"></script>
     <script src="../javascript/controller/touch-controls.js"></script>
