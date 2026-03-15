@@ -20,6 +20,11 @@ export class Drivetrain {
     theta_wheel: number = 0;
     omega_wheel: number = 0;
 
+    /* Extra debug data */
+    speed: number = 0;
+    torque: number = 0;
+    hp: number = 0;
+
     /* Inertia of geartrain + drive shaft [kg m2] */
     inertia = 0.1 + 0.05; /* 0.5 * MR^2 */
     damping = 12;

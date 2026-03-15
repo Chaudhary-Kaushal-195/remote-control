@@ -22,6 +22,7 @@ export class Engine {
     torque = 400; // Nm
     engine_braking = 200;
     throttle = 0;
+    lastTorque = 0; //Nm
 
     /* Integration state */
     theta: number = 0;
@@ -84,6 +85,7 @@ export class Engine {
         const t1 = Math.pow(this.throttle, 1.2) * this.torque;
         const t2 = Math.pow(1 - this.throttle, 1.2) * this.engine_braking;
         const torque = t1 - t2 + idleTorque;
+        this.lastTorque = torque;
 
         /* Integrate */
         const I = load_inertia + this.inertia;
