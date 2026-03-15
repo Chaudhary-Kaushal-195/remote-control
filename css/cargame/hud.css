@@ -98,8 +98,9 @@
     background: transparent !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
     height: 38px !important;
-    line-height: 38px !important;
     padding: 0 12px !important;
+    display: flex !important;
+    align-items: center !important;
 }
 
 .dg .property-name {
@@ -107,6 +108,15 @@
     font-size: 11px !important;
     color: rgba(255, 255, 255, 0.6) !important;
     font-weight: 600 !important;
+    white-space: nowrap !important;
+    margin-right: 10px !important;
+}
+
+.dg .c {
+    flex-grow: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
 }
 
 .dg .c input[type=text], .dg .c select {
@@ -127,11 +137,11 @@
 
 .dg .c .slider {
     background: rgba(255, 255, 255, 0.05) !important;
-    height: 16px !important;
-    margin-top: 6px !important;
+    height: 18px !important;
     border-radius: 4px !important;
     border: 1px solid rgba(15, 255, 250, 0.2) !important;
     overflow: hidden !important;
+    flex-grow: 1 !important;
 }
 
 .dg .slider-fg {
