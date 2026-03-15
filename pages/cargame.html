@@ -317,7 +317,11 @@
                 const currentSpeed = parseInt(speedText);
                 
                 if (currentSpeed > 0) {
-                    alert('⚠️ Please stop the car completely (0 KPH) before changing the engine sound!');
+                    if (window.showGameNotification) {
+                        window.showGameNotification('⚠️ PLEASE STOP THE CAR COMPLETELY (0 KPH) !', '#ff0055');
+                    } else {
+                        alert('⚠️ Please stop the car completely (0 KPH) before changing the engine sound!');
+                    }
                     if (lastKnownConfig) {
                         e.target.value = lastKnownConfig;
                     }
