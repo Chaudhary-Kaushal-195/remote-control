@@ -155,16 +155,16 @@ window.updateControllerUI = (isConnected) => {
     const remoteBox = document.getElementById('remote-box');
 
     if (statusRow) {
-        const isUsingGyro = isConnected && window.gameSettings.steering === 'gyro';
+        const isUsingPhone = isConnected && window.activeInputSource === 'phone';
         if (isConnected) {
             statusRow.innerHTML = `
                 <span style="color: #00ffff; text-transform: uppercase;">PHONE CONNECTED</span>
-                ${isUsingGyro ? 
-                    `<button class="hud-btn" onclick="window.activateSteering('wheel')" 
+                ${isUsingPhone ? 
+                    `<button class="hud-btn" onclick="window.activateInputSource('keyboard')" 
                         style="padding: 6px 14px; font-size: 10px; border-color: #ff0055; color: #ff0055; cursor: pointer; border-radius: 8px;">
                         EXIT
                     </button>` :
-                    `<button class="hud-btn" onclick="window.activateSteering('gyro')" 
+                    `<button class="hud-btn" onclick="window.activateInputSource('phone')" 
                         style="padding: 6px 14px; font-size: 10px; border-color: #00ffff; color: #00ffff; cursor: pointer; border-radius: 8px;">
                         USE
                     </button>`
@@ -210,16 +210,16 @@ window.gamepadIndex = null;
 window.updateGamepadUI = (isConnected) => {
     const statusRow = document.getElementById('settings-gamepad-status');
     if (statusRow) {
-        const isUsingPads = isConnected && window.gameSettings.steering === 'gamepad';
+        const isUsingGamepad = isConnected && window.activeInputSource === 'gamepad';
         if (isConnected) {
             statusRow.innerHTML = `
                 <span style="color: var(--neon-pink); text-transform: uppercase;">GAMEPAD CONNECTED</span>
-                ${isUsingPads ? 
-                    `<button class="hud-btn" onclick="window.activateSteering('wheel')" 
+                ${isUsingGamepad ? 
+                    `<button class="hud-btn" onclick="window.activateInputSource('keyboard')" 
                         style="padding: 6px 14px; font-size: 10px; border-color: #ff0055; color: #ff0055; cursor: pointer; border-radius: 8px;">
                         EXIT
                     </button>` :
-                    `<button class="hud-btn" onclick="window.activateSteering('gamepad')" 
+                    `<button class="hud-btn" onclick="window.activateInputSource('gamepad')" 
                         style="padding: 6px 14px; font-size: 10px; border-color: var(--neon-pink); color: var(--neon-pink); cursor: pointer; border-radius: 8px;">
                         USE
                     </button>`
@@ -245,20 +245,35 @@ window.updateGamepadUI = (isConnected) => {
     }
 };
 
-window.activateSteering = (mode) => {
-    const sel = document.getElementById('setting-steering');
-    if (sel) {
-        sel.value = mode;
-        window.saveSettings();
-        if (window.showGameNotification) {
-            const label = mode === 'wheel' ? 'LAPTOP 💻' : mode.toUpperCase();
-            const color = mode === 'gamepad' ? 'var(--neon-pink)' : (mode === 'gyro' ? '#00ffff' : 'white');
-            window.showGameNotification(`STEERING SET TO ${label} 🏎️`, color);
+window.activateInputSource = (source) => {
+    window.activeInputSource = source;
+    
+    // Auto-set the steering mode for better defaults
+    if (source === 'phone') {
+        // If phone connects, try to use gyro but allow other modes
+        if (window.gameSettings.steering !== 'gyro' && window.gameSettings.steering !== 'buttons' && window.gameSettings.steering !== 'wheel') {
+            window.gameSettings.steering = 'gyro';
         }
-        // Force UI refresh after mode change
-        window.updateControllerUI(!!(window.conn && window.conn.open));
-        window.updateGamepadUI(!!window.gamepadConnected);
+    } else if (source === 'gamepad') {
+        window.gameSettings.steering = 'gamepad';
+    } else {
+        // Keyboard/Laptop
+        if (window.gameSettings.steering === 'gamepad' || window.gameSettings.steering === 'gyro') {
+            window.gameSettings.steering = 'wheel';
+        }
     }
+
+    if (window.saveSettings) window.saveSettings();
+    
+    if (window.showGameNotification) {
+        const label = source === 'keyboard' ? 'LAPTOP 💻' : source.toUpperCase();
+        const color = source === 'gamepad' ? 'var(--neon-pink)' : (source === 'phone' ? '#00ffff' : 'white');
+        window.showGameNotification(`INPUT SOURCE: ${label} 🏎️`, color);
+    }
+
+    // Force UI refresh
+    window.updateControllerUI(!!(window.conn && window.conn.open));
+    if (window.updateGamepadUI) window.updateGamepadUI(!!window.gamepadConnected);
 };
 
 window.manualGamepadDisconnect = () => {

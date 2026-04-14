@@ -2,6 +2,7 @@ window.peer = null;
 window.conn = null;
 window.remoteInputs = { fwd: false, bwd: false, handbrake: false, brake: false, left: false, right: false };
 window.localInputs = { fwd: false, bwd: false, handbrake: false, brake: false, left: false, right: false };
+window.activeInputSource = 'keyboard'; // 'keyboard', 'phone', or 'gamepad'
 
 // Keep window.inputs in sync via STRICT combinations (Exclusive Mode)
 window.syncMergedInputs = () => {
@@ -10,17 +11,17 @@ window.syncMergedInputs = () => {
 
     const isPhoneConnected = !!(window.conn && window.conn.open);
     const isGamepadConnected = !!window.gamepadConnected;
-    const steeringMode = window.gameSettings ? window.gameSettings.steering : 'wheel';
+    const source = window.activeInputSource || 'keyboard';
 
     keys.forEach(k => {
-        if (steeringMode === 'gyro' && isPhoneConnected) {
-            // STRICTLY Phone - ignore laptop and gamepad
+        if (source === 'phone' && isPhoneConnected) {
+            // STRICTLY Phone - captures all remote inputs (buttons + gyro-processed-left/right)
             window.inputs[k] = window.remoteInputs[k] || false;
-        } else if (steeringMode === 'gamepad' && isGamepadConnected) {
-            // STRICTLY Gamepad - ignore laptop and phone
+        } else if (source === 'gamepad' && isGamepadConnected) {
+            // STRICTLY Gamepad - captures all gamepad buttons
             window.inputs[k] = (window.gamepadInputs && window.gamepadInputs[k]) || false;
         } else {
-            // DEFAULT to Laptop/Touch - ignore phone and gamepad
+            // DEFAULT to Laptop/Keyboard
             window.inputs[k] = window.localInputs[k] || false;
         }
     });
