@@ -154,16 +154,23 @@ window.updateControllerUI = (isConnected) => {
     const remoteBox = document.getElementById('remote-box');
 
     if (statusRow) {
+        const isUsingGyro = isConnected && window.gameSettings.steering === 'gyro';
         if (isConnected) {
             statusRow.innerHTML = `
                 <span style="color: #00ffff; text-transform: uppercase;">PHONE CONNECTED</span>
-                <button class="hud-btn" onclick="window.activateSteering('gyro')" 
-                    style="padding: 6px 14px; font-size: 10px; border-color: #00ffff; color: #00ffff; cursor: pointer; border-radius: 8px;">
-                    USE GYRO
-                </button>
+                ${isUsingGyro ? 
+                    `<button class="hud-btn" onclick="window.activateSteering('wheel')" 
+                        style="padding: 6px 14px; font-size: 10px; border-color: #ff0055; color: #ff0055; cursor: pointer; border-radius: 8px;">
+                        EXIT GYRO
+                    </button>` :
+                    `<button class="hud-btn" onclick="window.activateSteering('gyro')" 
+                        style="padding: 6px 14px; font-size: 10px; border-color: #00ffff; color: #00ffff; cursor: pointer; border-radius: 8px;">
+                        USE GYRO
+                    </button>`
+                }
                 <button class="hud-btn" onclick="window.toggleControllerConnection()" 
-                    style="padding: 6px 14px; font-size: 10px; border-color: #ff0055; color: #ff0055; cursor: pointer; border-radius: 8px; margin-left: 5px;">
-                    EXIT
+                    style="padding: 6px 14px; font-size: 10px; border-color: #fff; color: #fff; opacity: 0.5; cursor: pointer; border-radius: 8px; margin-left: 5px;">
+                    DISCONNECT
                 </button>
             `;
             statusRow.style.borderColor = "#00ffff";
@@ -202,13 +209,20 @@ window.gamepadIndex = null;
 window.updateGamepadUI = (isConnected) => {
     const statusRow = document.getElementById('settings-gamepad-status');
     if (statusRow) {
+        const isUsingPads = isConnected && window.gameSettings.steering === 'gamepad';
         if (isConnected) {
             statusRow.innerHTML = `
                 <span style="color: var(--neon-pink); text-transform: uppercase;">GAMEPAD CONNECTED</span>
-                <button class="hud-btn" onclick="window.activateSteering('gamepad')" 
-                    style="padding: 6px 14px; font-size: 10px; border-color: var(--neon-pink); color: var(--neon-pink); cursor: pointer; border-radius: 8px;">
-                    USE PADS
-                </button>
+                ${isUsingPads ? 
+                    `<button class="hud-btn" onclick="window.activateSteering('wheel')" 
+                        style="padding: 6px 14px; font-size: 10px; border-color: #ff0055; color: #ff0055; cursor: pointer; border-radius: 8px;">
+                        EXIT PADS
+                    </button>` :
+                    `<button class="hud-btn" onclick="window.activateSteering('gamepad')" 
+                        style="padding: 6px 14px; font-size: 10px; border-color: var(--neon-pink); color: var(--neon-pink); cursor: pointer; border-radius: 8px;">
+                        USE PADS
+                    </button>`
+                }
             `;
             statusRow.style.borderColor = "var(--neon-pink)";
             statusRow.style.background = "rgba(240, 146, 255, 0.05)";
@@ -232,8 +246,12 @@ window.activateSteering = (mode) => {
         sel.value = mode;
         window.saveSettings();
         if (window.showGameNotification) {
-            window.showGameNotification(`STEERING SET TO ${mode.toUpperCase()} 🏎️`, mode === 'gamepad' ? 'var(--neon-pink)' : '#00ffff');
+            const label = mode === 'wheel' ? 'LAPTOP 💻' : mode.toUpperCase();
+            const color = mode === 'gamepad' ? 'var(--neon-pink)' : (mode === 'gyro' ? '#00ffff' : 'white');
+            window.showGameNotification(`STEERING SET TO ${label} 🏎️`, color);
         }
+        // Force UI refresh after mode change
+        window.updateControllerUI(!!(window.conn && window.conn.open));
     }
 };
 
