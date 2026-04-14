@@ -60,17 +60,19 @@ function _gamepadLoop() {
             if (window.toggleSettings) window.toggleSettings();
         }
 
-        // R1 / R2 (buttons 5 and 7): Paddle Shifters
+        // L1 / R1 (buttons 4 and 5): Paddle Shifters
         if (btnJustPressed(5)) { // R1: Gear Up
             const ev = new KeyboardEvent('keydown', { key: 'ArrowUp', code: 'ArrowUp', bubbles: true });
             document.dispatchEvent(ev);
             if (window.manualGearIndex < 6) window.manualGearIndex++;
         }
-        if (btnJustPressed(7)) { // R2: Gear Down
+        if (btnJustPressed(4)) { // L1: Gear Down
             const ev = new KeyboardEvent('keydown', { key: 'ArrowDown', code: 'ArrowDown', bubbles: true });
             document.dispatchEvent(ev);
             if (window.manualGearIndex > -1) window.manualGearIndex--;
         }
+
+        // Note: Home / Guide (button 16) is handled above. R2 is currently unmapped for actions.
 
         // Store button states for next frame
         window.prevGamepadButtons = gp.buttons.map(b => b.pressed);
