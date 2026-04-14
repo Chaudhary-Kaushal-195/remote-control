@@ -118,20 +118,33 @@ function update(time: DOMHighResTimeStamp): void {
     }
 
     const isAuto = (window as any).gameSettings?.transmission !== 'manual';
-    const isFwd = keys['Space'] || keys['KeyW'] || (window as any).inputs?.fwd;
-    const isRevOnly = keys['KeyR'] || (window as any).inputs?.bwd; // Specifically the REV button and R key
+    const fwdInput = (window as any).inputs?.fwd;
+    const isFwd = keys['Space'] || keys['KeyW'] || !!fwdInput;
+    const isRevOnly = keys['KeyR'] || (window as any).inputs?.bwd; 
 
     if (drivetrain.downShift) {
         engine.throttle = 0.8; // Rev matching
     } else {
         if (isFwd) {
-            engine.throttle = clamp(engine.throttle += 0.2, 0, 1);
+            const targetThrottle = typeof fwdInput === 'number' ? fwdInput : 1.0;
+            // Approach target throttle smoothly
+            if (engine.throttle < targetThrottle) {
+                engine.throttle = clamp(engine.throttle + 0.15, 0, targetThrottle);
+            } else {
+                engine.throttle = clamp(engine.throttle - 0.15, targetThrottle, 1.0);
+            }
             if (isAuto && drivetrain.gear < 1 && !drivetrain.isShifting) drivetrain.changeGear(1);
         } else if (isAuto && isRevOnly) {
-            engine.throttle = clamp(engine.throttle += 0.2, 0, 1);
+            const revInput = (window as any).inputs?.bwd;
+            const targetThrottle = typeof revInput === 'number' ? revInput : 1.0;
+            if (engine.throttle < targetThrottle) {
+                engine.throttle = clamp(engine.throttle + 0.15, 0, targetThrottle);
+            } else {
+                engine.throttle = clamp(engine.throttle - 0.15, targetThrottle, 1.0);
+            }
             if (drivetrain.gear > -1 && !drivetrain.isShifting) drivetrain.changeGear(-1);
         } else {
-            engine.throttle = clamp(engine.throttle -= 0.2, 0, 1);
+            engine.throttle = clamp(engine.throttle - 0.15, 0, 1);
         }
     }
 
@@ -143,12 +156,16 @@ function update(time: DOMHighResTimeStamp): void {
         }
     }
 
-    const isBrake = keys['KeyB'] || (window as any).inputs?.brake;
+    const brakeInput = (window as any).inputs?.brake;
+    const isBrake = keys['KeyB'] || !!brakeInput;
     if (isBrake) {
+        const brakeIntensity = typeof brakeInput === 'number' ? brakeInput : 1.0;
+        const brakeForce = 0.3 * brakeIntensity; 
+        
         if (drivetrain.omega > 0) {
-            drivetrain.omega = Math.max(0, drivetrain.omega - 0.3); // Brake going forward
+            drivetrain.omega = Math.max(0, drivetrain.omega - brakeForce); // Brake going forward
         } else if (drivetrain.omega < 0) {
-            drivetrain.omega = Math.min(0, drivetrain.omega + 0.3); // Brake going backward
+            drivetrain.omega = Math.min(0, drivetrain.omega + brakeForce); // Brake going backward
         }
     }
 

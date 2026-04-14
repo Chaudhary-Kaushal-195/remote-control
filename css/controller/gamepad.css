@@ -1,0 +1,170 @@
+/* ─── GAMEPAD DASHBOARD ─── */
+#gamepad-dashboard {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 0, 30, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: none; /* Shown via JS when gamepad connected */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+#gamepad-dashboard .header {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+#gamepad-dashboard h2 {
+    color: var(--neon-blue);
+    text-shadow: 0 0 20px var(--neon-blue);
+    margin: 0;
+    font-size: 24px;
+    letter-spacing: 2px;
+}
+
+#gamepad-dashboard .controller-name {
+    font-size: 10px;
+    opacity: 0.6;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 5px;
+}
+
+/* ─── TELEMETRY GRID ─── */
+.telemetry-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 40px;
+    width: 90%;
+    max-width: 800px;
+    align-items: center;
+}
+
+/* Trigger Meters (Pressure Sensitivity) */
+.trigger-meter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.meter-track {
+    width: 14px;
+    height: 180px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.meter-fill {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 0%;
+    transition: height 0.05s linear;
+}
+
+.brake-fill {
+    background: linear-gradient(to top, #ff0055, #f092ff);
+    box-shadow: 0 0 15px rgba(255, 0, 85, 0.5);
+}
+
+.gas-fill {
+    background: linear-gradient(to top, #00ffff, #00ffaa);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
+
+.trigger-label {
+    font-size: 10px;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 1px;
+}
+
+/* ─── CENTER VISUALIZER (Stick & Status) ─── */
+.center-visuals {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.stick-visualizer {
+    width: 140px;
+    height: 140px;
+    background: var(--bg-glass);
+    border: 1.5px solid var(--border-dim);
+    border-radius: 50%;
+    position: relative;
+    box-shadow: inset 0 0 30px rgba(15, 255, 250, 0.05);
+}
+
+.stick-dot {
+    position: absolute;
+    width: 34px;
+    height: 34px;
+    background: #fff;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+    transition: transform 0.05s linear;
+}
+
+.stick-visualizer::before,
+.stick-visualizer::after {
+    content: '';
+    position: absolute;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.stick-visualizer::before { width: 100%; height: 1px; top: 50%; left: 0; }
+.stick-visualizer::after { width: 1px; height: 100%; left: 50%; top: 0; }
+
+/* ─── BUTTONS HUD ─── */
+.buttons-hud {
+    margin-top: 40px;
+    display: flex;
+    gap: 15px;
+}
+
+.btn-indicator {
+    padding: 8px 16px;
+    border: 1px solid var(--border-dim);
+    border-radius: var(--radius-sm);
+    font-size: 10px;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.3);
+    transition: all 0.1s;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.btn-indicator.active {
+    color: #fff;
+    border-color: var(--neon-pink);
+    background: rgba(240, 146, 255, 0.15);
+    box-shadow: 0 0 15px rgba(240, 146, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.btn-indicator.gas-active {
+    border-color: var(--neon-blue);
+    background: rgba(15, 255, 250, 0.15);
+    box-shadow: 0 0 15px rgba(15, 255, 250, 0.3);
+}
+
+/* ─── EXIT BUTTON ─── */
+.gamepad-exit-hint {
+    position: absolute;
+    bottom: 30px;
+    font-size: 11px;
+    opacity: 0.5;
+    letter-spacing: 1px;
+}

@@ -152,10 +152,57 @@
         </div>
     </div>
 
+    <!-- ═══════════ GAMEPAD DASHBOARD (Premium UI) ═══════════ -->
+    <div id="gamepad-dashboard">
+        <div class="header">
+            <h2>PRO CONTROLLER ACTIVE</h2>
+            <div class="controller-name">DETECTOR INITIALIZING...</div>
+        </div>
+
+        <div class="telemetry-container">
+            <!-- Left Trigger: BRAKE -->
+            <div class="trigger-meter">
+                <div class="trigger-label">BRAKE</div>
+                <div class="meter-track">
+                    <div class="meter-fill brake-fill"></div>
+                </div>
+                <div class="trigger-label">LT / B6</div>
+            </div>
+
+            <!-- Center Visualizer -->
+            <div class="center-visuals">
+                <div class="stick-visualizer">
+                    <div class="stick-dot"></div>
+                </div>
+                <div class="trigger-label">STEERING (L-STICK)</div>
+            </div>
+
+            <!-- Right Trigger: GAS -->
+            <div class="trigger-meter">
+                <div class="trigger-label">THRTL</div>
+                <div class="meter-track">
+                    <div class="meter-fill gas-fill"></div>
+                </div>
+                <div class="trigger-label">RT / B7</div>
+            </div>
+        </div>
+
+        <div class="buttons-hud">
+            <div class="btn-indicator btn-lb">LB (GEAR -)</div>
+            <div class="btn-indicator btn-b">B (BRAKE)</div>
+            <div class="btn-indicator btn-a">A (GAS)</div>
+            <div class="btn-indicator btn-rb">RB (GEAR +)</div>
+        </div>
+
+        <div class="gamepad-exit-hint">Disconnect controller to return to touch mode</div>
+    </div>
+
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="../javascript/controller/connection.js"></script>
     <script src="../javascript/controller/sensors.js"></script>
     <script src="../javascript/controller/touch-controls.js"></script>
+    <script src="../javascript/controller/gamepad.js"></script>
+    <link rel="stylesheet" href="../css/controller/gamepad.css">
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

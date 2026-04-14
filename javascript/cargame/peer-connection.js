@@ -93,7 +93,8 @@ window.setupRemote = (showQR = false) => {
                 window.gyroTilt = (data.tilt || 0);
             }
             if (data.type === 'pedal') {
-                window.remoteInputs[data.pedal] = data.active;
+                const val = data.intensity !== undefined ? data.intensity : (data.active ? 1.0 : 0.0);
+                window.remoteInputs[data.pedal] = val;
                 window.syncMergedInputs();
             }
             if (data.type === 'gearShift') {
