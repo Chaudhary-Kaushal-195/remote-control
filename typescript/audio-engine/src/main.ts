@@ -13,6 +13,7 @@ const settings = {
 const vehicle = new Vehicle();
 const engine = vehicle.engine;
 const drivetrain = vehicle.drivetrain;
+(engine as any).brake = 0; // Debug state for GUI
 (window as any).drivetrain = drivetrain;
 
 /* GUI */
@@ -29,6 +30,7 @@ guiDrivetrain.open();
 guiMain.add(settings, 'activeConfig', Object.keys(configurations)).name('Select config');
 
 guiEngine.add(engine, 'throttle', 0, 1).step(0.01).name('Throttle').listen();
+guiEngine.add(engine, 'brake', 0, 1).step(0.01).name('Brake').listen();
 guiEngine.add(engine, 'rpm', 0, engine.limiter).name('RPM').listen();
 guiEngine.add(engine, 'peakTorque').name('Peak Torque (Nm)').listen();
 guiEngine.add(engine, 'theta', 0, 1000).name('Theta').listen();
@@ -93,7 +95,8 @@ document.querySelector('select')?.addEventListener('change', (window as any).sta
 let
     lastTime = (new Date()).getTime(),
     currentTime = 0,
-    dt = 0;
+    dt = 0,
+    brakePedal = 0;
 
 function update(time: DOMHighResTimeStamp): void {
 
@@ -168,13 +171,29 @@ function update(time: DOMHighResTimeStamp): void {
 
     const brakeInput = (window as any).inputs?.brake;
     const isBrake = keys['KeyB'] || !!brakeInput;
-    if (isBrake) {
-        const brakeIntensity = typeof brakeInput === 'number' ? brakeInput : 1.0;
-        let brakeForce = 0.3 * brakeIntensity; 
+    const targetBrake = isBrake ? (typeof brakeInput === 'number' ? brakeInput : 1.0) : 0.0;
+
+    if (isAnalog) {
+        brakePedal = clamp(targetBrake, 0, 1);
+    } else {
+        // Binary (Keyboard/Phone): Smooth pedal travel
+        const step = (window as any).inputs?.brake ? 0.08 : 0.15; 
+        if (brakePedal < targetBrake) {
+            brakePedal = clamp(brakePedal + step, 0, targetBrake);
+        } else {
+            brakePedal = clamp(brakePedal - step, targetBrake, 1.0);
+        }
+    }
+
+    // Sync debug property
+    (engine as any).brake = brakePedal;
+
+    if (brakePedal > 0) {
+        let brakeForce = 0.3 * brakePedal; 
         
-        // Analog vs Binary Braking feel
+        // Analog vs Binary Braking feel override (already handled by brakePedal ramp-up, 
+        // but we keep the force scaling for consistency with physics)
         if (!isAnalog) {
-            // Smoothly apply brakes if binary
             brakeForce *= 0.8;
         }
 

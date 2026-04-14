@@ -253,14 +253,16 @@ function animate() {
             targetSpeed = -targetSpeed;
         }
 
-        let isBraking = window.inputs && window.inputs.brake;
-        if (isBraking) {
+        let brakeInput = (window.inputs && window.inputs.brake) || 0;
+        let brakeIntensity = typeof brakeInput === 'number' ? brakeInput : (brakeInput ? 1.0 : 0.0);
+
+        if (brakeIntensity > 0) {
             targetSpeed = 0;
         }
 
         if (engineData.gear === 0) {
-            if (isBraking) {
-                let brakeForce = 0.5 * (dt * 60.0);
+            if (brakeIntensity > 0) {
+                let brakeForce = 0.5 * brakeIntensity * (dt * 60.0);
                 if (speed > 0) speed = Math.max(0, speed - brakeForce);
                 if (speed < 0) speed = Math.min(0, speed + brakeForce);
             } else {
@@ -274,8 +276,9 @@ function animate() {
             // Limit maximum jump so putting reverse at 90kph acts like brakes 
             // instead of teleporting the car backwards instantly
             let isBrakingOrReversing = (speed > 0 && targetSpeed <= 0) || (speed < 0 && targetSpeed >= 0);
-            let limit = isBrakingOrReversing ? (dt * 30.0) : (dt * 12.0); // Braking force is stronger than acceleration
-            if (isBraking) limit = dt * 50.0;
+            let baseLimit = isBrakingOrReversing ? (dt * 30.0) : (dt * 12.0); // Braking force is stronger than acceleration
+            let fullBrakeLimit = dt * 50.0;
+            let limit = baseLimit + (fullBrakeLimit - baseLimit) * brakeIntensity;
 
             if (smoothedDiff > limit) smoothedDiff = limit;
             if (smoothedDiff < -limit) smoothedDiff = -limit;
@@ -288,8 +291,11 @@ function animate() {
         if (window.inputs && window.inputs.fwd) speed += 0.025;
         else if (window.inputs && window.inputs.bwd) speed -= 0.015;
 
-        if (window.inputs && (window.inputs.handbrake || window.inputs.brake)) {
-            let brakeForce = 0.08;
+        let handbrakeIntensity = (window.inputs && window.inputs.handbrake) ? 1.0 : 0.0;
+        let combinedBrake = Math.max(brakeIntensity, handbrakeIntensity);
+
+        if (combinedBrake > 0) {
+            let brakeForce = 0.08 * combinedBrake;
             if (speed > 0) speed = Math.max(0, speed - brakeForce);
             if (speed < 0) speed = Math.min(0, speed + brakeForce);
         }
