@@ -171,6 +171,21 @@ function animate() {
         }
     }
 
+    // Handle Gamepad vibration for Redlining
+    if (rpm > 9000 && window.gamepadConnected && window.gamepadIndex !== null) {
+        const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+        const gp = gamepads[window.gamepadIndex];
+        if (gp && gp.vibrationActuator) {
+            // Very subtle vibration for redlining
+            gp.vibrationActuator.playEffect("dual-rumble", {
+                startDelay: 0,
+                duration: 50,
+                strongMagnitude: 0,
+                weakMagnitude: 0.1
+            });
+        }
+    }
+
     const now = performance.now();
     const dt = Math.min((now - lastTime) / 1000, 0.1);
     lastTime = now;
