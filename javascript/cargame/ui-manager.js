@@ -190,18 +190,32 @@ window.updateControllerUI = (isConnected) => {
     }
 
     if (remoteBox) {
-        if (isConnected) {
-            remoteBox.innerText = "PHONE CONNECTED";
-            remoteBox.style.color = "#0ffffa";
+        let phoneText = "";
+        let gamepadText = "";
+        
+        const isPhoneInUse = isPhoneConnected && window.activeInputSource === 'phone';
+        const isGamepadInUse = window.gamepadConnected && window.activeInputSource === 'gamepad';
+
+        if (isPhoneConnected) {
+            phoneText = `<div style="color: #0ffffa;">PHONE CONNECTED${isPhoneInUse ? ' <span style="font-size:8px; vertical-align:middle; opacity:0.8;">(IN USE)</span>' : ''}</div>`;
+        }
+        if (window.gamepadConnected) {
+            gamepadText = `<div style="color: var(--neon-pink);">GAMEPAD CONNECTED${isGamepadInUse ? ' <span style="font-size:8px; vertical-align:middle; opacity:0.8;">(IN USE)</span>' : ''}</div>`;
+        }
+
+        if (phoneText || gamepadText) {
+            remoteBox.innerHTML = (phoneText + gamepadText).trim();
+            remoteBox.style.background = "rgba(0,0,0,0.6)";
             remoteBox.onclick = () => { window.toggleSettings && window.toggleSettings(); };
         } else {
-            remoteBox.innerText = "🤳 SYNC PHONE";
+            remoteBox.innerHTML = "🤳 SYNC PHONE / PADS";
             remoteBox.style.color = "white";
+            remoteBox.style.background = "rgba(0,0,0,0.4)";
             remoteBox.onclick = () => { window.initAudio(); window.setupRemote(true); };
         }
     }
 
-    if (window.updateGamepadUI) window.updateGamepadUI(window.gamepadConnected);
+    if (window.updateGamepadUI) window.updateGamepadUI(!!window.gamepadConnected);
 };
 
 window.gamepadConnected = false;
