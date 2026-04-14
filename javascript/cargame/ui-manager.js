@@ -132,6 +132,7 @@ window.toggleSettings = () => {
     } else {
         modal.style.display = 'flex';
         window.loadSettingsToModal();
+        if (window.refreshGyroOptionState) window.refreshGyroOptionState();
     }
 };
 
@@ -257,6 +258,47 @@ window.activateSteering = (mode) => {
 
 window.toggleGamepadConnection = () => {
     alert('Press any button on your gamepad to connect it.');
+};
+
+// --- GYRO HARDWARE DETECTION ---
+window.laptopHasGyro = false;
+if (window.DeviceOrientationEvent) {
+    const checkGyro = (event) => {
+        if (event.alpha !== null || event.beta !== null || event.gamma !== null) {
+            window.laptopHasGyro = true;
+            if (window.refreshGyroOptionState) window.refreshGyroOptionState();
+            window.removeEventListener('deviceorientation', checkGyro);
+        }
+    };
+    window.addEventListener('deviceorientation', checkGyro);
+    // Timeout after 2 seconds if no data received
+    setTimeout(() => window.removeEventListener('deviceorientation', checkGyro), 2000);
+}
+
+window.refreshGyroOptionState = () => {
+    const opt = document.getElementById('opt-gyro');
+    if (!opt) return;
+
+    const isPhoneConnected = !!(window.conn && window.conn.open);
+    const hasGamepad = !!window.gamepadConnected;
+    // For gamepad, we assume it has gyro if it's a modern one (simplification for UI)
+    // but the user said "gyro senser" specifically.
+    // For now, let's stick to explicitly detected laptop gyro or connected phone.
+    
+    const anyGyroActive = window.laptopHasGyro || isPhoneConnected;
+
+    if (anyGyroActive) {
+        opt.disabled = false;
+        opt.style.opacity = "1";
+        opt.style.display = "block"; // Ensure it shows if it was hidden
+    } else {
+        opt.disabled = true;
+        opt.style.opacity = "0.3";
+        // If current steering is gyro but no gyro exists anymore, revert to wheel
+        if (window.gameSettings.steering === 'gyro') {
+            window.activateSteering('wheel');
+        }
+    }
 };
 
 window.addEventListener("gamepadconnected", (e) => {
