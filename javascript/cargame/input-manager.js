@@ -24,36 +24,36 @@ function _gamepadLoop() {
     const gp = gamepads[window.gamepadIndex];
     if (gp) {
         let fwd = false, bwd = false, brake = false, handbrake = false, left = false, right = false;
-        
+
         // Left stick X
         if (gp.axes && gp.axes[0] < -0.2) left = true;
         if (gp.axes && gp.axes[0] > 0.2) right = true;
-        
+
         // D-pad (usually buttons 14 and 15)
         if (gp.buttons && gp.buttons[14] && gp.buttons[14].pressed) left = true;
         if (gp.buttons && gp.buttons[15] && gp.buttons[15].pressed) right = true;
-        
+
         // Triggers (L2, R2)
         if (gp.buttons && gp.buttons[6] && gp.buttons[6].pressed) brake = true;
         if (gp.buttons && gp.buttons[7] && gp.buttons[7].pressed) fwd = true;
-        
+
         // Face buttons (0=A, 1=B, 2=X, 3=Y/Triangle)
         if (gp.buttons && gp.buttons[0] && gp.buttons[0].pressed) fwd = true;
         if (gp.buttons && gp.buttons[1] && gp.buttons[1].pressed) handbrake = true;
         if (gp.buttons && gp.buttons[2] && gp.buttons[2].pressed) brake = true;
         if (gp.buttons && gp.buttons[3] && gp.buttons[3].pressed) bwd = true;
-        
+
         // Also map right/left bumpers to gear shift? (Maybe later)
-        
+
         window.gamepadInputs.fwd = fwd;
         window.gamepadInputs.bwd = bwd;
         window.gamepadInputs.brake = brake;
         window.gamepadInputs.handbrake = handbrake;
         window.gamepadInputs.left = left;
         window.gamepadInputs.right = right;
-        
+
         if (window.syncMergedInputs) window.syncMergedInputs();
-        
+
         if ((left || right) && window.gameSettings && window.gameSettings.steering === 'gamepad') {
             let val = gp.axes && gp.axes.length > 0 ? gp.axes[0] : 0;
             if (Math.abs(val) < 0.2) {

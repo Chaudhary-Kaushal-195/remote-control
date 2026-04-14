@@ -128,24 +128,47 @@ function animate() {
     }
 
     if (!window.activeTouchId) {
-        const useGyroOrRemoteWheel = window.gameSettings && (window.gameSettings.steering === 'gyro' || window.gameSettings.steering === 'wheel');
+        const steeringMode = window.gameSettings ? window.gameSettings.steering : 'wheel';
+        const useGyro = steeringMode === 'gyro' && window.gyroActive;
+        const useGamepad = steeringMode === 'gamepad' && window.gamepadConnected;
 
-        if (useGyroOrRemoteWheel && window.gyroActive) {
-            // Apply gyro/remote tilt as the base
+        if (useGyro) {
             window.wheelAngle = window.wheelAngle * 0.9 + window.gyroTilt * 0.1;
+        } else if (useGamepad) {
+            // Analog gamepad steering
+            const target = (window.gamepadSteerAxis || 0) * 120; // range -120 to 120
+            window.wheelAngle = window.wheelAngle * 0.8 + target * 0.2;
         }
 
-        // SUPPLEMENT with keyboard even if gyro is active
+        // SUPPLEMENT with keyboard even if analog is active
         if (window.inputs && window.inputs.left) {
             window.wheelAngle = Math.max(-180, window.wheelAngle - 5);
         } else if (window.inputs && window.inputs.right) {
             window.wheelAngle = Math.min(180, window.wheelAngle + 5);
-        } else if (!useGyroOrRemoteWheel || !window.gyroActive) {
-            // Only auto-center if there's no gyro/remote holding it
+        } else if (!useGyro && !useGamepad && steeringMode !== 'wheel') {
+            // Only auto-center if there's no analog device holding it
             window.wheelAngle *= 0.88;
         }
+        
         const visual = document.getElementById('wheel-visual');
         if (visual) visual.style.transform = `rotate(${window.wheelAngle}deg)`;
+    }
+
+    // Handle Gamepad Vibration for Backfires
+    if (backfireTick > 0 && window.gamepadConnected && window.gamepadIndex !== null) {
+        const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+        const gp = gamepads[window.gamepadIndex];
+        if (gp && gp.vibrationActuator) {
+            // Only trigger at start of backfire
+            if (backfireTick === (isBigBackfire ? 19 : 7)) {
+                gp.vibrationActuator.playEffect("dual-rumble", {
+                    startDelay: 0,
+                    duration: isBigBackfire ? 150 : 80,
+                    strongMagnitude: isBigBackfire ? 0.8 : 0.4,
+                    weakMagnitude: isBigBackfire ? 1.0 : 0.6
+                });
+            }
+        }
     }
 
     const now = performance.now();
