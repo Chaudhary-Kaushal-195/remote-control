@@ -205,21 +205,21 @@ function animate() {
             const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
             const gp = gamepads[window.gamepadIndex];
             if (gp && gp.vibrationActuator) {
-                // High-intensity buzz to signal redline
+                // Smoother, less jarring haptic hint
                 gp.vibrationActuator.playEffect("dual-rumble", {
                     startDelay: 0,
-                    duration: 48,
-                    strongMagnitude: 0.2,
-                    weakMagnitude: 0.7
+                    duration: 40,
+                    strongMagnitude: 0.05,
+                    weakMagnitude: 0.35
                 });
             }
         }
 
         // Remote Phone Haptics (PeerJS Bridge)
         if (window.conn && window.conn.open) {
-            // Throttle network messages to ~120ms to prevent PeerJS buffer congestion
-            if (!window.lastRedlineVibrate || (Date.now() - window.lastRedlineVibrate) > 120) {
-                window.conn.send({ type: 'vibrate', pattern: 35 });
+            // Shorter, smoother pulse for phone
+            if (!window.lastRedlineVibrate || (Date.now() - window.lastRedlineVibrate) > 150) {
+                window.conn.send({ type: 'vibrate', pattern: 20 });
                 window.lastRedlineVibrate = Date.now();
             }
         }
