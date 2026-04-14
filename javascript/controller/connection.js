@@ -106,6 +106,9 @@ window.connectToHost = async () => {
             if (data.type === 'config' && window.applyGameConfig) {
                 window.applyGameConfig(data.config);
             }
+            if (data.type === 'vibrate' && window.vibrate) {
+                window.vibrate(data.pattern || 50);
+            }
         });
 
         window.conn.on('error', (err) => {

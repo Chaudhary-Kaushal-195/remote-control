@@ -198,18 +198,30 @@ function animate() {
         }
     }
 
-    // Handle Gamepad vibration for Redlining
-    if (rpm > 9000 && window.gamepadConnected && window.gamepadIndex !== null) {
-        const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
-        const gp = gamepads[window.gamepadIndex];
-        if (gp && gp.vibrationActuator) {
-            // Very subtle vibration for redlining
-            gp.vibrationActuator.playEffect("dual-rumble", {
-                startDelay: 0,
-                duration: 50,
-                strongMagnitude: 0,
-                weakMagnitude: 0.1
-            });
+    // Handle Controller Haptics for Redlining / Optimal Shift Point (approx. Omega 95)
+    if (rpm > 8850) {
+        // Physical Gamepad Haptics
+        if (window.gamepadConnected && window.gamepadIndex !== null) {
+            const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+            const gp = gamepads[window.gamepadIndex];
+            if (gp && gp.vibrationActuator) {
+                // High-intensity buzz to signal redline
+                gp.vibrationActuator.playEffect("dual-rumble", {
+                    startDelay: 0,
+                    duration: 48,
+                    strongMagnitude: 0.2,
+                    weakMagnitude: 0.7
+                });
+            }
+        }
+
+        // Remote Phone Haptics (PeerJS Bridge)
+        if (window.conn && window.conn.open) {
+            // Throttle network messages to ~120ms to prevent PeerJS buffer congestion
+            if (!window.lastRedlineVibrate || (Date.now() - window.lastRedlineVibrate) > 120) {
+                window.conn.send({ type: 'vibrate', pattern: 35 });
+                window.lastRedlineVibrate = Date.now();
+            }
         }
     }
 
