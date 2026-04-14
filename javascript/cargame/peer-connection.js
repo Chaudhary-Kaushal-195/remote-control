@@ -52,7 +52,7 @@ window.setupRemote = (showQR = false) => {
         if (qrContainer) {
             qrContainer.innerHTML = "";
             new QRCode(qrContainer, {
-                text: id,
+                text: url,
                 width: 200,
                 height: 200,
                 colorDark: "#000000",

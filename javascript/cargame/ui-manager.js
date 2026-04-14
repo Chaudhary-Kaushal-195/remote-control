@@ -199,28 +199,28 @@ window.updateControllerUI = (isConnected) => {
         const isGamepadInUse = window.gamepadConnected && window.activeInputSource === 'gamepad';
 
         if (phoneConnectedActual) {
-            // IF CONNECTED: Only show the connection status, hide the ID
             phoneRow = `<div style="color: #0ffffa;">PHONE CONNECTED${isPhoneInUse ? ' <span style="font-size:8px; opacity:0.8;">(IN USE)</span>' : ''}</div>`;
         } else if (window.lastPeerId) {
-            // IF NOT CONNECTED: Show the ID
             phoneRow = `<div style="color: #0ffffa; opacity: 0.8;">ID: ${window.lastPeerId} (CLICK FOR QR)</div>`;
-        } else {
-            phoneRow = `<div style="color: white; opacity: 0.6;">🤳 SYNC PHONE</div>`;
         }
 
         if (window.gamepadConnected) {
             gamepadRow = `<div style="color: var(--neon-pink);">GAMEPAD CONNECTED${isGamepadInUse ? ' <span style="font-size:8px; opacity:0.8;">(IN USE)</span>' : ''}</div>`;
         }
 
-        remoteBox.innerHTML = (phoneRow + gamepadRow).trim();
-        remoteBox.style.background = "rgba(0,0,0,0.6)";
+        const combinedHtml = (phoneRow + gamepadRow).trim();
+        if (combinedHtml) {
+            remoteBox.innerHTML = combinedHtml;
+            remoteBox.style.display = "block";
+            remoteBox.style.background = "rgba(0,0,0,0.6)";
 
-        if (!phoneConnectedActual && window.lastPeerId) {
-            remoteBox.onclick = () => { document.getElementById('qr-overlay').style.display = 'flex'; };
-        } else if (phoneConnectedActual || window.gamepadConnected) {
-            remoteBox.onclick = () => { window.toggleSettings && window.toggleSettings(); };
+            if (!phoneConnectedActual && window.lastPeerId) {
+                remoteBox.onclick = () => { document.getElementById('qr-overlay').style.display = 'flex'; };
+            } else {
+                remoteBox.onclick = () => { window.toggleSettings && window.toggleSettings(); };
+            }
         } else {
-            remoteBox.onclick = () => { window.initAudio(); window.setupRemote(true); };
+            remoteBox.style.display = "none";
         }
     }
 
