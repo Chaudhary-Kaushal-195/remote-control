@@ -48,7 +48,7 @@ window.gyroActive = false;
 window.connectToHost = async () => {
     const status = document.getElementById('status');
     const hostIdInput = document.getElementById('hostIdInput');
-    const hostId = hostIdInput.value.trim().toLowerCase();
+    const hostId = hostIdInput.value.trim();
     if (!hostId) return alert("Please enter the ID seen on your laptop!");
 
     // Enforce orientation lock on user interaction
@@ -132,7 +132,7 @@ window.startScanning = () => {
         { facingMode: "environment" },
         config,
         (decodedText) => {
-            document.getElementById('hostIdInput').value = decodedText.trim().toLowerCase();
+            document.getElementById('hostIdInput').value = decodedText.trim();
             window.stopScanning();
             window.connectToHost();
         },

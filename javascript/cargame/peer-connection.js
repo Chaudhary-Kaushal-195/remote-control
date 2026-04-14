@@ -29,7 +29,13 @@ window.syncMergedInputs = () => {
 
 window.setupRemote = (showQR = false) => {
     const remoteBox = document.getElementById('remote-box');
-    if (window.peer) {
+    
+    // If peer exists, check if it's still alive and connected to signaling server
+    if (window.peer && !window.peer.destroyed) {
+        if (window.peer.disconnected) {
+            // Reconnect if just disconnected from signaling server
+            window.peer.reconnect();
+        }
         if (showQR) document.getElementById('qr-overlay').style.display = 'flex';
         return;
     }
@@ -63,11 +69,24 @@ window.setupRemote = (showQR = false) => {
     });
 
     window.peer.on('error', (err) => {
+        console.error('Peer Error:', err.type, err);
         if (remoteBox) {
             remoteBox.innerText = "REMOTE ERROR: " + err.type;
             remoteBox.style.background = "rgba(255, 0, 0, 0.2)";
         }
-        alert("Connection Error. Check your internet.");
+        // If critical error, destroy and allow setupRemote to remake it next time
+        if (err.type === 'peer-unavailable' || err.type === 'network' || err.type === 'server-error') {
+            window.lastPeerId = null;
+            if (window.peer) window.peer.destroy();
+            window.peer = null;
+        }
+    });
+
+    window.peer.on('disconnected', () => {
+        console.warn('Peer disconnected from signaling server. Attempting reconnect...');
+        if (window.peer && !window.peer.destroyed) {
+            window.peer.reconnect();
+        }
     });
 
     window.peer.on('connection', (c) => {
