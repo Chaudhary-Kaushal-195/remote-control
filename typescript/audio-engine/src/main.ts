@@ -93,8 +93,7 @@ document.querySelector('select')?.addEventListener('change', (window as any).sta
 let
     lastTime = (new Date()).getTime(),
     currentTime = 0,
-    dt = 0,
-    brakePedal = 0;
+    dt = 0;
 
 function update(time: DOMHighResTimeStamp): void {
 
@@ -169,26 +168,13 @@ function update(time: DOMHighResTimeStamp): void {
 
     const brakeInput = (window as any).inputs?.brake;
     const isBrake = keys['KeyB'] || !!brakeInput;
-    const targetBrake = isBrake ? (typeof brakeInput === 'number' ? brakeInput : 1.0) : 0.0;
-
-    if (isAnalog) {
-        brakePedal = clamp(targetBrake, 0, 1);
-    } else {
-        // Binary (Keyboard/Phone): Smooth pedal travel
-        const step = (window as any).inputs?.brake ? 0.08 : 0.15; 
-        if (brakePedal < targetBrake) {
-            brakePedal = clamp(brakePedal + step, 0, targetBrake);
-        } else {
-            brakePedal = clamp(brakePedal - step, targetBrake, 1.0);
-        }
-    }
-
-    if (brakePedal > 0) {
-        let brakeForce = 0.3 * brakePedal; 
+    if (isBrake) {
+        const brakeIntensity = typeof brakeInput === 'number' ? brakeInput : 1.0;
+        let brakeForce = 0.3 * brakeIntensity; 
         
-        // Analog vs Binary Braking feel override (already handled by brakePedal ramp-up, 
-        // but we keep the force scaling for consistency with physics)
+        // Analog vs Binary Braking feel
         if (!isAnalog) {
+            // Smoothly apply brakes if binary
             brakeForce *= 0.8;
         }
 
