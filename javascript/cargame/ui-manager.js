@@ -194,7 +194,7 @@ window.updateControllerUI = (isConnected) => {
         let gamepadRow = "";
         
         // Use the argument OR check window.conn state directly for truth
-        const phoneConnectedActual = (isConnectedArg === true) || !!(window.conn && window.conn.open);
+        const phoneConnectedActual = (isConnected === true) || !!(window.conn && window.conn.open);
         const isPhoneInUse = phoneConnectedActual && window.activeInputSource === 'phone';
         const isGamepadInUse = window.gamepadConnected && window.activeInputSource === 'gamepad';
 
