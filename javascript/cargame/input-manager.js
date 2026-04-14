@@ -53,9 +53,15 @@ function _gamepadLoop() {
         window.gamepadLoopActive = false;
         return;
     }
-    const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
-    const gp = gamepads[window.gamepadIndex];
-    if (gp) {
+
+    try {
+        const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+        const gp = gamepads[window.gamepadIndex];
+        if (!gp) {
+            requestAnimationFrame(_gamepadLoop);
+            return;
+        }
+
         let fwd = false, bwd = false, brake = false, handbrake = false, left = false, right = false;
 
         // --- CONTINUOUS INPUTS ---
@@ -93,6 +99,13 @@ function _gamepadLoop() {
         const btnPressed = (i) => gp.buttons[i] && gp.buttons[i].pressed;
         const btnJustPressed = (i) => btnPressed(i) && (!window.prevGamepadButtons[i]);
 
+        // LOGGING: Diagnostic pulse to confirm hardware sync in console (F12)
+        for (let i = 0; i < gp.buttons.length; i++) {
+            if (btnJustPressed(i)) {
+                console.log(`[Gamepad] Button Just Pressed: Index ${i}`);
+            }
+        }
+
         if (btnJustPressed(2)) { if (window.cycleCamera) window.cycleCamera(); }
         if (btnJustPressed(16) || btnJustPressed(10)) { if (window.toggleSettings) window.toggleSettings(); }
 
@@ -100,9 +113,17 @@ function _gamepadLoop() {
         if (btnJustPressed(5)) window.requestGearShift('up');
         if (btnJustPressed(4)) window.requestGearShift('down');
 
-        window.prevGamepadButtons = gp.buttons.map(b => b.pressed);
+        // BUG FIX: Use Array.from. GamepadButtonList is an object, not an array.
+        // Calling .map on it directly throws "TypeError" in many browsers, 
+        // which kills the input loop instantly.
+        window.prevGamepadButtons = Array.from(gp.buttons).map(b => b.pressed);
+        
         if (window.syncMergedInputs) window.syncMergedInputs();
+
+    } catch (e) {
+        console.error("Critical error in Gamepad Loop:", e);
     }
+    
     requestAnimationFrame(_gamepadLoop);
 }
 
