@@ -253,8 +253,7 @@ function animate() {
             targetSpeed = -targetSpeed;
         }
 
-        let brakeInput = (window.inputs && window.inputs.brake) || 0;
-        let brakeIntensity = typeof brakeInput === 'number' ? brakeInput : (brakeInput ? 1.0 : 0.0);
+        let brakeIntensity = engineData.brake || 0;
 
         if (brakeIntensity > 0) {
             targetSpeed = 0;

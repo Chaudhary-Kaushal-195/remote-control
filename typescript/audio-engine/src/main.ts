@@ -229,7 +229,9 @@ window.getEngineData = function () {
     return {
         rpm: engine.rpm,
         omega: vehicle.drivetrain.omega,
-        gear: vehicle.drivetrain.gear
+        gear: vehicle.drivetrain.gear,
+        throttle: engine.throttle,
+        brake: brakePedal
     };
 };
 
