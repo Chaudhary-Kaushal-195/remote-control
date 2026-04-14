@@ -121,13 +121,16 @@ export class Drivetrain {
     }
 
     changeGear(gear: number) {
+        console.log(`[Drivetrain] changeGear requested: ${gear} (Current: ${this.gear}, IsShifting: ${this.isShifting})`);
 
         const prevRatio = this.getGearRatio(this.gear);
         const nextRatio = this.getGearRatio(gear);
         const ratioRatio = prevRatio !== 0 ? Math.abs(nextRatio / prevRatio) : 0;
 
-        if (gear === this.gear)
+        if (gear === this.gear) {
+            console.log(`[Drivetrain] Rejected: Already in gear ${gear}`);
             return;
+        }
 
         /* Neutral */
         this.gear = 0;
@@ -138,6 +141,7 @@ export class Drivetrain {
 
         /* Engage next gear */
         setTimeout(() => {
+            console.log(`[Drivetrain] Shift Timer Expired. Engaging Gear ${gear}`);
             this.omega = this.omega * ratioRatio;
 
             this.gear = gear;
@@ -145,8 +149,7 @@ export class Drivetrain {
             this.downShift = false;
             this.isShifting = false;
 
-            console.log('Changed', this.gear);
-
+            console.log(`[Drivetrain] Shift COMPLETE. Current Gear: ${this.gear}`);
         }, this.shiftTime)
     }
 

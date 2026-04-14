@@ -11,12 +11,13 @@ window.prevGamepadButtons = [];
 window.prevGamepadAxes = [];
 
 window.requestGearShift = (direction) => {
+    console.log(`[RequestGearShift] Entered. Dir: ${direction}, Drivetrain: ${!!window.drivetrain}`);
+    
     // BUG FIX: If user shifts manually while in AUTO, we must force MANUAL mode.
-    // Otherwise, the Auto-Shift loop will instantly override the player's choice 
-    // and shift them back based on RPM, making the button feel "broken".
     const currentTrans = window.gameSettings ? window.gameSettings.transmission : 'automatic';
     if (currentTrans === 'automatic') {
         if (window.toggleTransmission) {
+            console.log(`[RequestGearShift] Auto-Toggling Transmission to Manual...`);
             window.toggleTransmission();
             if (window.showGameNotification) {
                 window.showGameNotification("MANUAL TRANSMISSION ACTIVATED ⚙️", "var(--neon-pink)");
@@ -25,6 +26,7 @@ window.requestGearShift = (direction) => {
     }
 
     if (window.drivetrain) {
+        console.log(`[RequestGearShift] Calling drivetrain.${direction === 'up' ? 'nextGear' : 'prevGear'}()`);
         if (direction === 'up') window.drivetrain.nextGear();
         else window.drivetrain.prevGear();
 
@@ -37,6 +39,8 @@ window.requestGearShift = (direction) => {
         if (navigator.vibrate) navigator.vibrate(50);
         
         return true;
+    } else {
+        console.error(`[RequestGearShift] FAILED: window.drivetrain is undefined!`);
     }
     return false;
 };
@@ -110,8 +114,14 @@ function _gamepadLoop() {
         if (btnJustPressed(16) || btnJustPressed(10)) { if (window.toggleSettings) window.toggleSettings(); }
 
         // Gear Shifts (Direct Hook)
-        if (btnJustPressed(5)) window.requestGearShift('up');
-        if (btnJustPressed(4)) window.requestGearShift('down');
+        if (btnJustPressed(5)) {
+            console.log(`[Gamepad] Index 5 Pressed -> Shift UP triggered`);
+            window.requestGearShift('up');
+        }
+        if (btnJustPressed(4)) {
+            console.log(`[Gamepad] Index 4 Pressed -> Shift DOWN triggered`);
+            window.requestGearShift('down');
+        }
 
         // BUG FIX: Use Array.from. GamepadButtonList is an object, not an array.
         // Calling .map on it directly throws "TypeError" in many browsers, 
