@@ -11,6 +11,19 @@ window.prevGamepadButtons = [];
 window.prevGamepadAxes = [];
 
 window.requestGearShift = (direction) => {
+    // BUG FIX: If user shifts manually while in AUTO, we must force MANUAL mode.
+    // Otherwise, the Auto-Shift loop will instantly override the player's choice 
+    // and shift them back based on RPM, making the button feel "broken".
+    const currentTrans = window.gameSettings ? window.gameSettings.transmission : 'automatic';
+    if (currentTrans === 'automatic') {
+        if (window.toggleTransmission) {
+            window.toggleTransmission();
+            if (window.showGameNotification) {
+                window.showGameNotification("MANUAL TRANSMISSION ACTIVATED ⚙️", "var(--neon-pink)");
+            }
+        }
+    }
+
     if (window.drivetrain) {
         if (direction === 'up') window.drivetrain.nextGear();
         else window.drivetrain.prevGear();
