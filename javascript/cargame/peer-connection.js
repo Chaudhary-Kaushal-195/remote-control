@@ -101,6 +101,10 @@ window.setupRemote = (showQR = false) => {
             // Now update UI to connected
             window.updateControllerUI(true);
             if (window.refreshGyroOptionState) window.refreshGyroOptionState();
+            
+            // AUTO-SWITCH TO PHONE INPUT:
+            if (window.activateInputSource) window.activateInputSource('phone');
+            
             window.syncMergedInputs();
 
             // Show connection toast
@@ -154,6 +158,10 @@ window.setupRemote = (showQR = false) => {
             window.updateControllerUI(false);
             if (window.refreshGyroOptionState) window.refreshGyroOptionState();
             window.conn = null;
+            
+            // AUTO-RESTORE TO KEYBOARD INPUT:
+            if (window.activateInputSource) window.activateInputSource('keyboard');
+            
             // Clear remote inputs and restore laptop inputs
             window.remoteInputs = { fwd: false, bwd: false, handbrake: false, brake: false, left: false, right: false };
             window.syncMergedInputs();

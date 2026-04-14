@@ -28,7 +28,7 @@ guiDrivetrain.open();
 
 guiMain.add(settings, 'activeConfig', Object.keys(configurations)).name('Select config');
 
-guiEngine.add(engine, 'throttle', 0, 1).name('Throttle').listen();
+guiEngine.add(engine, 'throttle', 0, 1).step(0.01).name('Throttle').listen();
 guiEngine.add(engine, 'rpm', 0, engine.limiter).name('RPM').listen();
 guiEngine.add(engine, 'peakTorque').name('Peak Torque (Nm)').listen();
 guiEngine.add(engine, 'theta', 0, 1000).name('Theta').listen();
