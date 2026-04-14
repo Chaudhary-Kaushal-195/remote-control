@@ -190,27 +190,36 @@ window.updateControllerUI = (isConnected) => {
     }
 
     if (remoteBox) {
-        let phoneText = "";
-        let gamepadText = "";
+        let phoneRow = "";
+        let gamepadRow = "";
         
         const isPhoneInUse = isPhoneConnected && window.activeInputSource === 'phone';
         const isGamepadInUse = window.gamepadConnected && window.activeInputSource === 'gamepad';
 
         if (isPhoneConnected) {
-            phoneText = `<div style="color: #0ffffa;">PHONE CONNECTED${isPhoneInUse ? ' <span style="font-size:8px; vertical-align:middle; opacity:0.8;">(IN USE)</span>' : ''}</div>`;
-        }
-        if (window.gamepadConnected) {
-            gamepadText = `<div style="color: var(--neon-pink);">GAMEPAD CONNECTED${isGamepadInUse ? ' <span style="font-size:8px; vertical-align:middle; opacity:0.8;">(IN USE)</span>' : ''}</div>`;
+            phoneRow = `<div style="color: #0ffffa;">PHONE CONNECTED${isPhoneInUse ? ' <span style="font-size:8px; opacity:0.8;">(IN USE)</span>' : ''}</div>`;
+        } else if (window.lastPeerId) {
+            phoneRow = `<div style="color: #0ffffa; opacity: 0.8;">ID: ${window.lastPeerId} (CLICK FOR QR)</div>`;
+        } else {
+            phoneRow = `<div style="color: white; opacity: 0.6;">🤳 SYNC PHONE</div>`;
         }
 
-        if (phoneText || gamepadText) {
-            remoteBox.innerHTML = (phoneText + gamepadText).trim();
-            remoteBox.style.background = "rgba(0,0,0,0.6)";
+        if (window.gamepadConnected) {
+            gamepadRow = `<div style="color: var(--neon-pink);">GAMEPAD CONNECTED${isGamepadInUse ? ' <span style="font-size:8px; opacity:0.8;">(IN USE)</span>' : ''}</div>`;
+        }
+
+        remoteBox.innerHTML = (phoneRow + gamepadRow).trim();
+        remoteBox.style.background = "rgba(0,0,0,0.6)";
+
+        // Logic for clicking: 
+        // 1. If phone is NOT connected but we have an ID -> Show QR
+        // 2. If phone IS connected -> Open Settings
+        // 3. Default -> Init Audio and Setup Remote
+        if (!isPhoneConnected && window.lastPeerId) {
+            remoteBox.onclick = () => { document.getElementById('qr-overlay').style.display = 'flex'; };
+        } else if (isPhoneConnected || window.gamepadConnected) {
             remoteBox.onclick = () => { window.toggleSettings && window.toggleSettings(); };
         } else {
-            remoteBox.innerHTML = "🤳 SYNC PHONE / PADS";
-            remoteBox.style.color = "white";
-            remoteBox.style.background = "rgba(0,0,0,0.4)";
             remoteBox.onclick = () => { window.initAudio(); window.setupRemote(true); };
         }
     }

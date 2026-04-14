@@ -39,18 +39,14 @@ window.setupRemote = (showQR = false) => {
     }
     window.peer = new Peer();
     window.peer.on('open', (id) => {
+        window.lastPeerId = id;
         console.log('Laptop Peer ID:', id);
 
         const baseUrl = window.location.href.split('pages/cargame.html')[0] + 'pages/controller.html';
         const url = `${baseUrl}?hostId=${id}`;
-        if (remoteBox) {
-            remoteBox.innerText = `ID: ${id} (CLICK FOR QR)`;
-            remoteBox.style.background = "rgba(0, 255, 255, 0.1)";
-            remoteBox.style.color = "#0ffffa";
-            remoteBox.onclick = () => {
-                document.getElementById('qr-overlay').style.display = 'flex';
-            };
-        }
+        
+        // Let updateControllerUI handle the HUD display consistently
+        if (window.updateControllerUI) window.updateControllerUI(!!(window.conn && window.conn.open));
 
         const qrContainer = document.getElementById('qr-code');
         if (qrContainer) {
