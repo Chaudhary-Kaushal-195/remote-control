@@ -11,13 +11,20 @@ window.prevGamepadButtons = [];
 window.prevGamepadAxes = [];
 
 window.requestGearShift = (direction) => {
-    console.log(`[RequestGearShift] Entered. Dir: ${direction}, Drivetrain: ${!!window.drivetrain}`);
+    // Check if drivetrain exists. If not, try to find it (Race condition fix)
+    if (!window.drivetrain) {
+        // Silent check - if still missing, we just return.
+        // This prevents the console from being flooded with errors if the user 
+        // presses shift buttons before the engine is ready.
+        return false;
+    }
+
+    const drivetrain = window.drivetrain;
     
     // BUG FIX: If user shifts manually while in AUTO, we must force MANUAL mode.
     const currentTrans = window.gameSettings ? window.gameSettings.transmission : 'automatic';
     if (currentTrans === 'automatic') {
         if (window.toggleTransmission) {
-            console.log(`[RequestGearShift] Auto-Toggling Transmission to Manual...`);
             window.toggleTransmission();
             if (window.showGameNotification) {
                 window.showGameNotification("MANUAL TRANSMISSION ACTIVATED ⚙️", "var(--neon-pink)");
@@ -25,10 +32,9 @@ window.requestGearShift = (direction) => {
         }
     }
 
-    if (window.drivetrain) {
-        console.log(`[RequestGearShift] Calling drivetrain.${direction === 'up' ? 'nextGear' : 'prevGear'}()`);
-        if (direction === 'up') window.drivetrain.nextGear();
-        else window.drivetrain.prevGear();
+    if (drivetrain) {
+        if (direction === 'up') drivetrain.nextGear();
+        else drivetrain.prevGear();
 
         // Sync manualGearIndex for HUD
         if (window.getEngineData) {
@@ -39,8 +45,6 @@ window.requestGearShift = (direction) => {
         if (navigator.vibrate) navigator.vibrate(50);
         
         return true;
-    } else {
-        console.error(`[RequestGearShift] FAILED: window.drivetrain is undefined!`);
     }
     return false;
 };
@@ -103,25 +107,12 @@ function _gamepadLoop() {
         const btnPressed = (i) => gp.buttons[i] && gp.buttons[i].pressed;
         const btnJustPressed = (i) => btnPressed(i) && (!window.prevGamepadButtons[i]);
 
-        // LOGGING: Diagnostic pulse to confirm hardware sync in console (F12)
-        for (let i = 0; i < gp.buttons.length; i++) {
-            if (btnJustPressed(i)) {
-                console.log(`[Gamepad] Button Just Pressed: Index ${i}`);
-            }
-        }
-
         if (btnJustPressed(2)) { if (window.cycleCamera) window.cycleCamera(); }
         if (btnJustPressed(16) || btnJustPressed(10)) { if (window.toggleSettings) window.toggleSettings(); }
 
         // Gear Shifts (Direct Hook)
-        if (btnJustPressed(5)) {
-            console.log(`[Gamepad] Index 5 Pressed -> Shift UP triggered`);
-            window.requestGearShift('up');
-        }
-        if (btnJustPressed(4)) {
-            console.log(`[Gamepad] Index 4 Pressed -> Shift DOWN triggered`);
-            window.requestGearShift('down');
-        }
+        if (btnJustPressed(5)) window.requestGearShift('up');
+        if (btnJustPressed(4)) window.requestGearShift('down');
 
         // BUG FIX: Use Array.from. GamepadButtonList is an object, not an array.
         // Calling .map on it directly throws "TypeError" in many browsers, 
