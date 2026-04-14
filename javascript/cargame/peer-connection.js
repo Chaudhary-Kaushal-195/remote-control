@@ -198,46 +198,8 @@ window.showGameNotification = (text, color = "#0ffffa") => {
     }, 3000);
 };
 
-window.updateControllerUI = (isConnected) => {
-    const statusRow = document.getElementById('settings-remote-status');
-    const remoteBox = document.getElementById('remote-box');
-
-    if (statusRow) {
-        if (isConnected) {
-            statusRow.innerHTML = `
-                <span style="color: #00ffff; text-transform: uppercase;">CONTROLLER CONNECTED</span>
-                <button class="hud-btn" onclick="window.toggleControllerConnection()" 
-                    style="padding: 6px 14px; font-size: 10px; border-color: #ff0055; color: #ff0055; cursor: pointer; border-radius: 8px;">
-                    DISCONNECT
-                </button>
-            `;
-            statusRow.style.borderColor = "#00ffff";
-            statusRow.style.background = "rgba(0,255,255,0.05)";
-        } else {
-            statusRow.innerHTML = `
-                <span style="color: gray; text-transform: uppercase;">CONTROLLER DISCONNECTED</span>
-                <button class="hud-btn" onclick="window.toggleControllerConnection()" 
-                    style="padding: 6px 14px; font-size: 10px; border-color: #0ffffa; color: #0ffffa; cursor: pointer; border-radius: 8px;">
-                    CONNECT
-                </button>
-            `;
-            statusRow.style.borderColor = "gray";
-            statusRow.style.background = "rgba(255,255,255,0.05)";
-        }
-    }
-
-    if (remoteBox) {
-        if (isConnected) {
-            remoteBox.innerText = "CONTROLLER CONNECTED";
-            remoteBox.style.color = "#0ffffa";
-            remoteBox.onclick = () => { window.toggleSettings && window.toggleSettings(); };
-        } else {
-            remoteBox.innerText = "🤳 SYNC PHONE";
-            remoteBox.style.color = "white";
-            remoteBox.onclick = () => { window.initAudio(); window.setupRemote(true); };
-        }
-    }
-};
+// Note: window.updateControllerUI has been consolidated into ui-manager.js 
+// to ensure consistency between phone and gamepad connection UI logic.
 
 window.toggleControllerConnection = () => {
     if (window.initAudio) window.initAudio();
