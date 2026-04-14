@@ -91,8 +91,9 @@ window.setupRemote = (showQR = false) => {
             if (data.type === 'gyro') {
                 // Always store gyro/wheel tilt from the remote
                 window.gyroTilt = (data.tilt || 0);
-                // Mark as active only if sending real data (not just initializing)
                 window.gyroActive = true;
+                // Timestamp for stale-detection — auto-center when phone stops sending
+                window.lastGyroTime = Date.now();
             }
             if (data.type === 'pedal') {
                 const val = data.intensity !== undefined ? data.intensity : (data.active ? 1.0 : 0.0);

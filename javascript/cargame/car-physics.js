@@ -129,8 +129,12 @@ function animate() {
 
     const steeringMode = window.gameSettings ? window.gameSettings.steering : 'wheel';
     const isPhoneConnected = !!(window.conn && window.conn.open);
-    // Remote gyro: phone sends tilt data via 'gyro' type regardless of steeringMode
-    const useRemoteGyro = isPhoneConnected && window.gyroActive && window.activeInputSource === 'phone';
+    
+    // BUG FIX: Use a 300ms staleness check.
+    // Once gyroActive is set it was never cleared, causing the wheel to stay locked
+    // to the last tilt value even after the user released the phone wheel.
+    const gyroFresh = window.lastGyroTime && (Date.now() - window.lastGyroTime < 300);
+    const useRemoteGyro = isPhoneConnected && gyroFresh && window.activeInputSource === 'phone';
     const useLocalGyro = steeringMode === 'gyro' && window.gyroActive && !isPhoneConnected;
     const useGyro = useRemoteGyro || useLocalGyro;
     const useGamepad = steeringMode === 'gamepad' && window.gamepadConnected && window.activeInputSource === 'gamepad';
@@ -140,7 +144,10 @@ function animate() {
 
     if (useGyro) {
         window.wheelAngle = window.wheelAngle * 0.9 + window.gyroTilt * 0.1;
-        hasInput = Math.abs(window.gyroTilt) > 1; // Small threshold
+        // BUG FIX: Widened deadzone from 1 to 5 degrees.
+        // Phone gyro sensors drift, so even when level the reading can be 2-4°,
+        // which was making hasInput=true permanently and blocking auto-center.
+        hasInput = Math.abs(window.gyroTilt) > 5;
     } else if (useGamepad) {
         const target = (window.gamepadSteerAxis || 0) * 120;
         window.wheelAngle = window.wheelAngle * 0.8 + target * 0.2;
