@@ -193,12 +193,16 @@ window.updateControllerUI = (isConnected) => {
         let phoneRow = "";
         let gamepadRow = "";
         
-        const isPhoneInUse = isPhoneConnected && window.activeInputSource === 'phone';
+        // Use the argument OR check window.conn state directly for truth
+        const phoneConnectedActual = (isConnectedArg === true) || !!(window.conn && window.conn.open);
+        const isPhoneInUse = phoneConnectedActual && window.activeInputSource === 'phone';
         const isGamepadInUse = window.gamepadConnected && window.activeInputSource === 'gamepad';
 
-        if (isPhoneConnected) {
+        if (phoneConnectedActual) {
+            // IF CONNECTED: Only show the connection status, hide the ID
             phoneRow = `<div style="color: #0ffffa;">PHONE CONNECTED${isPhoneInUse ? ' <span style="font-size:8px; opacity:0.8;">(IN USE)</span>' : ''}</div>`;
         } else if (window.lastPeerId) {
+            // IF NOT CONNECTED: Show the ID
             phoneRow = `<div style="color: #0ffffa; opacity: 0.8;">ID: ${window.lastPeerId} (CLICK FOR QR)</div>`;
         } else {
             phoneRow = `<div style="color: white; opacity: 0.6;">🤳 SYNC PHONE</div>`;
@@ -211,13 +215,9 @@ window.updateControllerUI = (isConnected) => {
         remoteBox.innerHTML = (phoneRow + gamepadRow).trim();
         remoteBox.style.background = "rgba(0,0,0,0.6)";
 
-        // Logic for clicking: 
-        // 1. If phone is NOT connected but we have an ID -> Show QR
-        // 2. If phone IS connected -> Open Settings
-        // 3. Default -> Init Audio and Setup Remote
-        if (!isPhoneConnected && window.lastPeerId) {
+        if (!phoneConnectedActual && window.lastPeerId) {
             remoteBox.onclick = () => { document.getElementById('qr-overlay').style.display = 'flex'; };
-        } else if (isPhoneConnected || window.gamepadConnected) {
+        } else if (phoneConnectedActual || window.gamepadConnected) {
             remoteBox.onclick = () => { window.toggleSettings && window.toggleSettings(); };
         } else {
             remoteBox.onclick = () => { window.initAudio(); window.setupRemote(true); };
