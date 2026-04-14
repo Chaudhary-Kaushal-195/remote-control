@@ -128,8 +128,12 @@ function animate() {
     }
 
     const steeringMode = window.gameSettings ? window.gameSettings.steering : 'wheel';
-    const useGyro = steeringMode === 'gyro' && window.gyroActive;
-    const useGamepad = steeringMode === 'gamepad' && window.gamepadConnected;
+    const isPhoneConnected = !!(window.conn && window.conn.open);
+    // Remote gyro: phone sends tilt data via 'gyro' type regardless of steeringMode
+    const useRemoteGyro = isPhoneConnected && window.gyroActive && window.activeInputSource === 'phone';
+    const useLocalGyro = steeringMode === 'gyro' && window.gyroActive && !isPhoneConnected;
+    const useGyro = useRemoteGyro || useLocalGyro;
+    const useGamepad = steeringMode === 'gamepad' && window.gamepadConnected && window.activeInputSource === 'gamepad';
     const isTouchWheel = steeringMode === 'wheel' && window.activeTouchId !== null;
 
     let hasInput = false;

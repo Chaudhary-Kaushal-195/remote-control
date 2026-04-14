@@ -89,8 +89,10 @@ window.setupRemote = (showQR = false) => {
         });
         window.conn.on('data', (data) => {
             if (data.type === 'gyro') {
-                window.gyroActive = true;
+                // Always store gyro/wheel tilt from the remote
                 window.gyroTilt = (data.tilt || 0);
+                // Mark as active only if sending real data (not just initializing)
+                window.gyroActive = true;
             }
             if (data.type === 'pedal') {
                 const val = data.intensity !== undefined ? data.intensity : (data.active ? 1.0 : 0.0);
@@ -182,25 +184,4 @@ window.showGameNotification = (text, color = "#0ffffa") => {
     }, 3000);
 };
 
-// Note: window.updateControllerUI has been consolidated into ui-manager.js 
-// to ensure consistency between phone and gamepad connection UI logic.
-
-window.toggleControllerConnection = () => {
-    if (window.initAudio) window.initAudio();
-
-    // Be very strict: Only connected if conn exists and is open
-    const isConnected = !!(window.conn && window.conn.open);
-
-    if (isConnected) {
-        if (confirm("Disconnect the current phone controller?")) {
-            window.conn.close();
-            // The 'close' event will trigger updateControllerUI(false)
-        }
-    } else {
-        // We are connecting, so we hide settings to see the QR
-        const settingsModal = document.getElementById('settings-modal');
-        if (settingsModal) settingsModal.style.display = 'none';
-
-        window.setupRemote(true);
-    }
-};
+// Note: window.toggleControllerConnection is defined in ui-manager.js

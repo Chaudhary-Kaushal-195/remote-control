@@ -28,6 +28,13 @@ window.requestGearShift = (direction) => {
     return false;
 };
 
+window.startGamepadLoop = () => {
+    if (!window.gamepadLoopActive) {
+        window.gamepadLoopActive = true;
+        _gamepadLoop();
+    }
+};
+
 function _gamepadLoop() {
     if (!window.gamepadConnected) {
         window.gamepadLoopActive = false;
@@ -143,10 +150,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.syncMergedInputs) window.syncMergedInputs();
 
         if (e.key === 'ArrowUp') {
-            if (window.manualGearIndex < 6) window.manualGearIndex++;
+            window.requestGearShift('up');
         }
         if (e.key === 'ArrowDown') {
-            if (window.manualGearIndex > -1) window.manualGearIndex--;
+            window.requestGearShift('down');
         }
         if (e.key.toLowerCase() === 'c' && window.cycleCamera) window.cycleCamera();
     });

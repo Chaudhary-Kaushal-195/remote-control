@@ -60,10 +60,7 @@ document.addEventListener('keyup', e => {
         drivetrain.changeGear(nextGear);
     }
 
-    if (e.code == 'ArrowUp')
-        drivetrain.nextGear();
-    if (e.code == 'ArrowDown')
-        drivetrain.prevGear();
+    // Note: ArrowUp/ArrowDown gear shifting is handled by window.requestGearShift via input-manager.js
 });
 
 /* Initialization */
