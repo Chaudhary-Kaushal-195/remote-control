@@ -3,23 +3,37 @@ window.conn = null;
 window.remoteInputs = { fwd: false, bwd: false, handbrake: false, brake: false, left: false, right: false };
 window.localInputs = { fwd: false, bwd: false, handbrake: false, brake: false, left: false, right: false };
 
-// Keep window.inputs in sync via combinations (Exclusive Mode)
+// Keep window.inputs in sync via combinations
 window.syncMergedInputs = () => {
     if (!window.inputs) window.inputs = {};
     const keys = ['fwd', 'bwd', 'handbrake', 'brake', 'left', 'right'];
 
-    // Only use remote inputs if a phone is actively connected
     const isConnected = !!(window.conn && window.conn.open);
+    const isGamepad = window.gamepadConnected;
 
     keys.forEach(k => {
         if (isConnected) {
-            // ONLY phone inputs work when connected
+            // Phone inputs override everything when connected
             window.inputs[k] = window.remoteInputs[k] || false;
+        } else if (isGamepad) {
+            // Gamepad and local laptop inputs can be used together
+            window.inputs[k] = (window.gamepadInputs && window.gamepadInputs[k]) || window.localInputs[k] || false;
         } else {
             // ONLY laptop inputs work when disconnected
             window.inputs[k] = window.localInputs[k] || false;
         }
     });
+
+    // Special handling for steering if mode restricts it
+    if (window.gameSettings) {
+        if (window.gameSettings.steering === 'gyro' && isConnected) {
+            // Handled by gyro implementation
+        } else if (window.gameSettings.steering === 'gamepad') {
+           // We already allow left/right from gamepad. The visual is handled in input-manager.
+           // However, let's make sure local keyboard override is possible for fallback, 
+           // which we just did in the loop above.
+        }
+    }
 };
 
 window.setupRemote = (showQR = false) => {

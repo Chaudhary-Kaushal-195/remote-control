@@ -175,8 +175,8 @@
     <div id="gyro-prompt-overlay"
         style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9000; align-items:center; justify-content:center; flex-direction:column; backdrop-filter: blur(8px);">
         <div class="modal-content" style="text-align:center;">
-            <h2 style="color:var(--neon-blue); margin-top:0;">CONNECT REMOTE</h2>
-            <p style="color:#fff; opacity:0.8; margin-bottom:20px;">Connect remote controller to use Gyro steering.</p>
+            <h2 style="color:var(--neon-blue); margin-top:0;">CONNECT PHONE</h2>
+            <p style="color:#fff; opacity:0.8; margin-bottom:20px;">Connect your phone to use Gyro steering.</p>
             <div style="display:flex; gap:10px; justify-content:center;">
                 <button class="hud-btn" style="padding:10px 20px; font-size:14px; flex:1;"
                     onclick="window.handleGyroPrompt('connect')">CONNECT</button>
@@ -192,10 +192,17 @@
         <div class="modal-content">
             <h2 style="margin-top:0; color:var(--neon-blue); letter-spacing:2px;">LIVE SETTINGS</h2>
 
-            <div class="setting-row" style="margin-bottom: 20px;">
-                <div id="settings-remote-status"
+            <div class="setting-row" style="margin-bottom: 10px;">
+                <div id="settings-phone-status"
                     style="flex:1; display:flex; justify-content: space-between; align-items: center; padding:12px 20px; font-size:12px; border: 1px solid gray; color: gray; background: rgba(255,255,255,0.05); border-radius: 12px; font-family: 'Orbitron', sans-serif;">
-                    CONTROLLER DISCONNECTED
+                    PHONE DISCONNECTED
+                </div>
+            </div>
+            
+            <div class="setting-row" style="margin-bottom: 20px;">
+                <div id="settings-gamepad-status"
+                    style="flex:1; display:flex; justify-content: space-between; align-items: center; padding:12px 20px; font-size:12px; border: 1px solid gray; color: gray; background: rgba(255,255,255,0.05); border-radius: 12px; font-family: 'Orbitron', sans-serif;">
+                    GAMEPAD DISCONNECTED
                 </div>
             </div>
 
@@ -204,7 +211,8 @@
                 <select id="setting-steering" onchange="window.checkSteeringChange()">
                     <option value="wheel">Analog Wheel</option>
                     <option value="buttons">Left/Right Buttons</option>
-                    <option value="gyro">Gyro Only (Pro)</option>
+                    <option value="gyro">Gyro Only (Phone Pro)</option>
+                    <option value="gamepad">Gamepad Controller</option>
                 </select>
             </div>
 
