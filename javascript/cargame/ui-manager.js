@@ -157,9 +157,13 @@ window.updateControllerUI = (isConnected) => {
         if (isConnected) {
             statusRow.innerHTML = `
                 <span style="color: #00ffff; text-transform: uppercase;">PHONE CONNECTED</span>
+                <button class="hud-btn" onclick="window.activateSteering('gyro')" 
+                    style="padding: 6px 14px; font-size: 10px; border-color: #00ffff; color: #00ffff; cursor: pointer; border-radius: 8px;">
+                    USE GYRO
+                </button>
                 <button class="hud-btn" onclick="window.toggleControllerConnection()" 
-                    style="padding: 6px 14px; font-size: 10px; border-color: #ff0055; color: #ff0055; cursor: pointer; border-radius: 8px;">
-                    DISCONNECT
+                    style="padding: 6px 14px; font-size: 10px; border-color: #ff0055; color: #ff0055; cursor: pointer; border-radius: 8px; margin-left: 5px;">
+                    EXIT
                 </button>
             `;
             statusRow.style.borderColor = "#00ffff";
@@ -201,21 +205,40 @@ window.updateGamepadUI = (isConnected) => {
         if (isConnected) {
             statusRow.innerHTML = `
                 <span style="color: var(--neon-pink); text-transform: uppercase;">GAMEPAD CONNECTED</span>
+                <button class="hud-btn" onclick="window.activateSteering('gamepad')" 
+                    style="padding: 6px 14px; font-size: 10px; border-color: var(--neon-pink); color: var(--neon-pink); cursor: pointer; border-radius: 8px;">
+                    USE PADS
+                </button>
             `;
             statusRow.style.borderColor = "var(--neon-pink)";
             statusRow.style.background = "rgba(240, 146, 255, 0.05)";
         } else {
             statusRow.innerHTML = `
                 <span style="color: gray; text-transform: uppercase;">GAMEPAD DISCONNECTED</span>
-                <button class="hud-btn" onclick="alert('Press any button on your gamepad to connect it.')" 
+                <button class="hud-btn" onclick="window.toggleGamepadConnection()" 
                     style="padding: 6px 14px; font-size: 10px; border-color: gray; color: gray; cursor: pointer; border-radius: 8px;">
-                    WAITING...
+                    CONNECT
                 </button>
             `;
             statusRow.style.borderColor = "gray";
             statusRow.style.background = "rgba(255,255,255,0.05)";
         }
     }
+};
+
+window.activateSteering = (mode) => {
+    const sel = document.getElementById('setting-steering');
+    if (sel) {
+        sel.value = mode;
+        window.saveSettings();
+        if (window.showGameNotification) {
+            window.showGameNotification(`STEERING SET TO ${mode.toUpperCase()} 🏎️`, mode === 'gamepad' ? 'var(--neon-pink)' : '#00ffff');
+        }
+    }
+};
+
+window.toggleGamepadConnection = () => {
+    alert('Press any button on your gamepad to connect it.');
 };
 
 window.addEventListener("gamepadconnected", (e) => {
