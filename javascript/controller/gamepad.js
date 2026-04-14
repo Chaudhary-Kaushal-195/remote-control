@@ -5,8 +5,12 @@
 
 let gamepadInterval = null;
 let lastGamepadState = {
-    buttons: [],
-    axes: []
+    rb: false,
+    lb: false,
+    start: false,
+    gas: 0,
+    brake: 0,
+    tilt: 0
 };
 
 window.addEventListener("gamepadconnected", (e) => {

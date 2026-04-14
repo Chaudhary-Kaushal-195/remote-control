@@ -115,6 +115,11 @@ window.setupRemote = (showQR = false) => {
                 } else {
                     if (window.manualGearIndex > -1) window.manualGearIndex--;
                 }
+                // Ensure sync with drivetrain
+                if (window.getEngineData) {
+                    const engineData = window.getEngineData();
+                    window.manualGearIndex = engineData.gear;
+                }
             }
             if (data.type === 'pause') {
                 if (window.togglePause) window.togglePause();
