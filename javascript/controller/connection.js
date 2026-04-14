@@ -48,7 +48,26 @@ window.gyroActive = false;
 window.connectToHost = async () => {
     const status = document.getElementById('status');
     const hostIdInput = document.getElementById('hostIdInput');
-    const hostId = hostIdInput.value.trim();
+    let hostId = hostIdInput.value.trim();
+    
+    // SMART URL/ID EXTRACTION:
+    // If the scanner or user pasted a full URL, we extract just the hostId parameter.
+    if (hostId.includes('?') || hostId.includes('http')) {
+        try {
+            // Handle both full URLs and partial path strings
+            const searchPart = hostId.includes('?') ? hostId.split('?')[1] : hostId;
+            const params = new URLSearchParams(searchPart);
+            const idFromUrl = params.get('hostId');
+            
+            if (idFromUrl) {
+                hostId = idFromUrl;
+                hostIdInput.value = hostId; // Update UI to show the clean ID for clarity
+            }
+        } catch (e) {
+            console.warn("Failed to parse hostId as URL, using raw input.");
+        }
+    }
+
     if (!hostId) return alert("Please enter the ID seen on your laptop!");
 
     // Enforce orientation lock on user interaction
