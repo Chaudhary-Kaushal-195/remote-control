@@ -98,24 +98,27 @@ window.setupRemote = (showQR = false) => {
                 window.syncMergedInputs();
             }
             if (data.type === 'gearShift') {
-                // The audio engine listens on `document` for keyup with event.code
-                const code = data.direction === 'up' ? 'ArrowUp' : 'ArrowDown';
-                const ev = new KeyboardEvent('keyup', {
-                    code: code,
-                    key: code,
-                    keyCode: code === 'ArrowUp' ? 38 : 40,
-                    which: code === 'ArrowUp' ? 38 : 40,
-                    bubbles: true,
-                    cancelable: true
-                });
-                document.dispatchEvent(ev);
-                // Also update manualGearIndex for the HUD
-                if (data.direction === 'up') {
-                    if (window.manualGearIndex < 6) window.manualGearIndex++;
+                if (window.drivetrain) {
+                    if (data.direction === 'up') window.drivetrain.nextGear();
+                    else window.drivetrain.prevGear();
+                    
+                    // Physical feedback
+                    if (navigator.vibrate) navigator.vibrate(50);
                 } else {
-                    if (window.manualGearIndex > -1) window.manualGearIndex--;
+                    // Fallback to keyboard event if drivetrain not yet loaded
+                    const code = data.direction === 'up' ? 'ArrowUp' : 'ArrowDown';
+                    const ev = new KeyboardEvent('keyup', {
+                        code: code,
+                        key: code,
+                        keyCode: code === 'ArrowUp' ? 38 : 40,
+                        which: code === 'ArrowUp' ? 38 : 40,
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    document.dispatchEvent(ev);
                 }
-                // Ensure sync with drivetrain
+
+                // Sync manualGearIndex for the HUD
                 if (window.getEngineData) {
                     const engineData = window.getEngineData();
                     window.manualGearIndex = engineData.gear;

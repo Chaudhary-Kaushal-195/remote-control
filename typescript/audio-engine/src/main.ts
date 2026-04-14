@@ -13,6 +13,7 @@ const settings = {
 const vehicle = new Vehicle();
 const engine = vehicle.engine;
 const drivetrain = vehicle.drivetrain;
+(window as any).drivetrain = drivetrain;
 
 /* GUI */
 const gui = new dat.GUI();
