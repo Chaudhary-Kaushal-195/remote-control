@@ -162,18 +162,8 @@ window.updateControllerUI = (isConnected) => {
         if (isConnected) {
             statusRow.innerHTML = `
                 <span style="color: #00ffff; text-transform: uppercase;">PHONE CONNECTED</span>
-                ${isUsingPhone ? 
-                    `<button class="hud-btn" onclick="window.activateInputSource('keyboard')" 
-                        style="padding: 6px 14px; font-size: 10px; border-color: #ff0055; color: #ff0055; cursor: pointer; border-radius: 8px;">
-                        EXIT
-                    </button>` :
-                    `<button class="hud-btn" onclick="window.activateInputSource('phone')" 
-                        style="padding: 6px 14px; font-size: 10px; border-color: #00ffff; color: #00ffff; cursor: pointer; border-radius: 8px;">
-                        USE
-                    </button>`
-                }
                 <button class="hud-btn" onclick="window.toggleControllerConnection()" 
-                    style="padding: 6px 14px; font-size: 10px; border-color: #fff; color: #fff; opacity: 0.5; cursor: pointer; border-radius: 8px; margin-left: 5px;">
+                    style="padding: 6px 14px; font-size: 10px; border-color: #fff; color: #fff; opacity: 0.5; cursor: pointer; border-radius: 8px; margin-left: auto;">
                     DISCONNECT
                 </button>
             `;
@@ -241,18 +231,8 @@ window.updateGamepadUI = (isConnected) => {
         if (isConnected) {
             statusRow.innerHTML = `
                 <span style="color: var(--neon-pink); text-transform: uppercase;">GAMEPAD CONNECTED</span>
-                ${isUsingGamepad ? 
-                    `<button class="hud-btn" onclick="window.activateInputSource('keyboard')" 
-                        style="padding: 6px 14px; font-size: 10px; border-color: #ff0055; color: #ff0055; cursor: pointer; border-radius: 8px;">
-                        EXIT
-                    </button>` :
-                    `<button class="hud-btn" onclick="window.activateInputSource('gamepad')" 
-                        style="padding: 6px 14px; font-size: 10px; border-color: var(--neon-pink); color: var(--neon-pink); cursor: pointer; border-radius: 8px;">
-                        USE
-                    </button>`
-                }
                 <button class="hud-btn" onclick="window.manualGamepadDisconnect()" 
-                    style="padding: 6px 14px; font-size: 10px; border-color: #fff; color: #fff; opacity: 0.5; cursor: pointer; border-radius: 8px; margin-left: 5px;">
+                    style="padding: 6px 14px; font-size: 10px; border-color: #fff; color: #fff; opacity: 0.5; cursor: pointer; border-radius: 8px; margin-left: auto;">
                     DISCONNECT
                 </button>
             `;
