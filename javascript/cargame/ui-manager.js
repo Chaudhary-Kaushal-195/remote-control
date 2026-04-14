@@ -162,11 +162,11 @@ window.updateControllerUI = (isConnected) => {
                 ${isUsingGyro ? 
                     `<button class="hud-btn" onclick="window.activateSteering('wheel')" 
                         style="padding: 6px 14px; font-size: 10px; border-color: #ff0055; color: #ff0055; cursor: pointer; border-radius: 8px;">
-                        EXIT GYRO
+                        EXIT
                     </button>` :
                     `<button class="hud-btn" onclick="window.activateSteering('gyro')" 
                         style="padding: 6px 14px; font-size: 10px; border-color: #00ffff; color: #00ffff; cursor: pointer; border-radius: 8px;">
-                        USE GYRO
+                        USE
                     </button>`
                 }
                 <button class="hud-btn" onclick="window.toggleControllerConnection()" 
@@ -217,13 +217,17 @@ window.updateGamepadUI = (isConnected) => {
                 ${isUsingPads ? 
                     `<button class="hud-btn" onclick="window.activateSteering('wheel')" 
                         style="padding: 6px 14px; font-size: 10px; border-color: #ff0055; color: #ff0055; cursor: pointer; border-radius: 8px;">
-                        EXIT PADS
+                        EXIT
                     </button>` :
                     `<button class="hud-btn" onclick="window.activateSteering('gamepad')" 
                         style="padding: 6px 14px; font-size: 10px; border-color: var(--neon-pink); color: var(--neon-pink); cursor: pointer; border-radius: 8px;">
-                        USE PADS
+                        USE
                     </button>`
                 }
+                <button class="hud-btn" onclick="window.manualGamepadDisconnect()" 
+                    style="padding: 6px 14px; font-size: 10px; border-color: #fff; color: #fff; opacity: 0.5; cursor: pointer; border-radius: 8px; margin-left: 5px;">
+                    DISCONNECT
+                </button>
             `;
             statusRow.style.borderColor = "var(--neon-pink)";
             statusRow.style.background = "rgba(240, 146, 255, 0.05)";
@@ -253,6 +257,19 @@ window.activateSteering = (mode) => {
         }
         // Force UI refresh after mode change
         window.updateControllerUI(!!(window.conn && window.conn.open));
+        window.updateGamepadUI(!!window.gamepadConnected);
+    }
+};
+
+window.manualGamepadDisconnect = () => {
+    if (confirm("Disconnect and forget the current gamepad?")) {
+        window.gamepadConnected = false;
+        window.gamepadIndex = null;
+        if (window.gameSettings.steering === 'gamepad') {
+            window.activateSteering('wheel');
+        }
+        window.updateGamepadUI(false);
+        if (window.showGameNotification) window.showGameNotification("GAMEPAD RESET ❌", "#ff0055");
     }
 };
 
