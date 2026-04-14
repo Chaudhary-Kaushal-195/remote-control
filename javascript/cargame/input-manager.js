@@ -7,6 +7,8 @@ window.gyroActive = false;
 window.gyroTilt = 0;
 window.manualGearIndex = 1;
 window.gamepadLoopActive = false;
+window.prevGamepadButtons = [];
+window.prevGamepadAxes = [];
 
 window.startGamepadLoop = () => {
     if (!window.gamepadLoopActive) {
@@ -25,26 +27,55 @@ function _gamepadLoop() {
     if (gp) {
         let fwd = false, bwd = false, brake = false, handbrake = false, left = false, right = false;
 
-        // Left stick X
-        if (gp.axes && gp.axes[0] < -0.2) left = true;
-        if (gp.axes && gp.axes[0] > 0.2) right = true;
+        // --- CONTINUOUS INPUTS ---
+        
+        // Left stick X (Steering)
+        const steerAxis = gp.axes && (gp.axes[0] !== undefined) ? gp.axes[0] : 0;
+        if (steerAxis < -0.2) left = true;
+        if (steerAxis > 0.2) right = true;
 
-        // D-pad (usually buttons 14 and 15)
-        if (gp.buttons && gp.buttons[14] && gp.buttons[14].pressed) left = true;
-        if (gp.buttons && gp.buttons[15] && gp.buttons[15].pressed) right = true;
+        // Face buttons (Mapping as requested)
+        // A (button 0): Accelerator
+        if (gp.buttons[0] && gp.buttons[0].pressed) fwd = true;
+        // B (button 1): Brake
+        if (gp.buttons[1] && gp.buttons[1].pressed) brake = true;
+        // Y (button 3): Reverse (Mapped as bwd)
+        if (gp.buttons[3] && gp.buttons[3].pressed) bwd = true;
 
-        // Triggers (L2, R2)
-        if (gp.buttons && gp.buttons[6] && gp.buttons[6].pressed) brake = true;
-        if (gp.buttons && gp.buttons[7] && gp.buttons[7].pressed) fwd = true;
+        // D-pad (Fallback for steering)
+        if (gp.buttons[14] && gp.buttons[14].pressed) left = true;
+        if (gp.buttons[15] && gp.buttons[15].pressed) right = true;
 
-        // Face buttons (0=A, 1=B, 2=X, 3=Y/Triangle)
-        if (gp.buttons && gp.buttons[0] && gp.buttons[0].pressed) fwd = true;
-        if (gp.buttons && gp.buttons[1] && gp.buttons[1].pressed) handbrake = true;
-        if (gp.buttons && gp.buttons[2] && gp.buttons[2].pressed) brake = true;
-        if (gp.buttons && gp.buttons[3] && gp.buttons[3].pressed) bwd = true;
+        // --- ONE-SHOT ACTION BUTTONS (State Checking) ---
+        const btnPressed = (i) => gp.buttons[i] && gp.buttons[i].pressed;
+        const btnJustPressed = (i) => btnPressed(i) && (!window.prevGamepadButtons[i]);
 
-        // Also map right/left bumpers to gear shift? (Maybe later)
+        // X (button 2): Change Camera
+        if (btnJustPressed(2)) {
+            if (window.cycleCamera) window.cycleCamera();
+        }
 
+        // Home / Guide (button 16): Open Settings
+        if (btnJustPressed(16) || btnJustPressed(10)) {
+            if (window.toggleSettings) window.toggleSettings();
+        }
+
+        // R1 / R2 (buttons 5 and 7): Paddle Shifters
+        if (btnJustPressed(5)) { // R1: Gear Up
+            const ev = new KeyboardEvent('keydown', { key: 'ArrowUp', code: 'ArrowUp', bubbles: true });
+            document.dispatchEvent(ev);
+            if (window.manualGearIndex < 6) window.manualGearIndex++;
+        }
+        if (btnJustPressed(7)) { // R2: Gear Down
+            const ev = new KeyboardEvent('keydown', { key: 'ArrowDown', code: 'ArrowDown', bubbles: true });
+            document.dispatchEvent(ev);
+            if (window.manualGearIndex > -1) window.manualGearIndex--;
+        }
+
+        // Store button states for next frame
+        window.prevGamepadButtons = gp.buttons.map(b => b.pressed);
+
+        // --- SYNC INPUTS ---
         window.gamepadInputs.fwd = fwd;
         window.gamepadInputs.bwd = bwd;
         window.gamepadInputs.brake = brake;
@@ -52,22 +83,9 @@ function _gamepadLoop() {
         window.gamepadInputs.left = left;
         window.gamepadInputs.right = right;
 
-        if (window.syncMergedInputs) window.syncMergedInputs();
+        window.gamepadSteerAxis = steerAxis;
 
-        if ((left || right) && window.gameSettings && window.gameSettings.steering === 'gamepad') {
-            let val = gp.axes && gp.axes.length > 0 ? gp.axes[0] : 0;
-            if (Math.abs(val) < 0.2) {
-                if (left) val = -1;
-                if (right) val = 1;
-            }
-            window.wheelAngle = val * 90;
-            const visual = document.getElementById('wheel-visual');
-            if (visual) visual.style.transform = `rotate(${window.wheelAngle}deg)`;
-        } else if (!window.localInputs.left && !window.localInputs.right && window.gameSettings && window.gameSettings.steering === 'gamepad') {
-            window.wheelAngle = 0;
-            const visual = document.getElementById('wheel-visual');
-            if (visual) visual.style.transform = `rotate(0deg)`;
-        }
+        if (window.syncMergedInputs) window.syncMergedInputs();
     }
     requestAnimationFrame(_gamepadLoop);
 }
