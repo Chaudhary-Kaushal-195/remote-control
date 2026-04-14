@@ -122,6 +122,9 @@ window.loadSettingsToModal = function () {
         const isConnected = !!(window.conn && window.conn.open);
         window.updateControllerUI(isConnected);
     }
+    if (window.updateInputSourceToggle) {
+        window.updateInputSourceToggle();
+    }
 };
 
 window.toggleSettings = () => {
@@ -225,6 +228,7 @@ window.updateControllerUI = (isConnected) => {
     }
 
     if (window.updateGamepadUI) window.updateGamepadUI(!!window.gamepadConnected);
+    if (window.updateInputSourceToggle) window.updateInputSourceToggle();
 };
 
 window.gamepadConnected = false;
@@ -266,6 +270,7 @@ window.updateGamepadUI = (isConnected) => {
             statusRow.style.background = "rgba(255,255,255,0.05)";
         }
     }
+    if (window.updateInputSourceToggle) window.updateInputSourceToggle();
 };
 
 window.activateInputSource = (source) => {
@@ -297,6 +302,30 @@ window.activateInputSource = (source) => {
     // Force UI refresh
     window.updateControllerUI(!!(window.conn && window.conn.open));
     if (window.updateGamepadUI) window.updateGamepadUI(!!window.gamepadConnected);
+    if (window.updateInputSourceToggle) window.updateInputSourceToggle();
+};
+
+window.updateInputSourceToggle = () => {
+    const container = document.getElementById('input-source-toggle');
+    if (!container) return;
+
+    const isPhoneConnected = !!(window.conn && window.conn.open);
+    const isGamepadConnected = !!window.gamepadConnected;
+    const active = window.activeInputSource || 'keyboard';
+
+    const sources = [
+        { id: 'keyboard', label: 'LAPTOP', connected: true },
+        { id: 'gamepad', label: 'CONTROLLER', connected: isGamepadConnected },
+        { id: 'phone', label: 'PHONE', connected: isPhoneConnected }
+    ];
+
+    container.innerHTML = sources.map(s => `
+        <div class="source-item ${s.id === active ? 'active' : ''} ${!s.connected ? 'disabled' : ''}" 
+             data-source="${s.id}"
+             onclick="${s.connected ? `window.activateInputSource('${s.id}')` : ''}">
+            ${s.label}
+        </div>
+    `).join('');
 };
 
 window.manualGamepadDisconnect = () => {

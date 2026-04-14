@@ -242,3 +242,54 @@ input[type="range"]::-webkit-slider-thumb {
         padding: 15px;
     }
 }
+
+/* Input Source Toggle Bar */
+.source-toggle-bar {
+    display: flex;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 4px;
+    gap: 4px;
+    margin-top: 5px;
+}
+
+.source-item {
+    flex: 1;
+    padding: 10px 5px;
+    text-align: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.4);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid transparent;
+}
+
+.source-item:hover:not(.disabled) {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.source-item.active {
+    color: #000 !important;
+    background: var(--neon-blue);
+    box-shadow: 0 0 15px rgba(15, 255, 250, 0.4);
+    border-color: var(--neon-blue);
+}
+
+.source-item.active[data-source="gamepad"] {
+    background: var(--neon-pink);
+    box-shadow: 0 0 15px rgba(240, 146, 255, 0.4);
+    border-color: var(--neon-pink);
+}
+
+.source-item.disabled {
+    opacity: 0.2;
+    cursor: not-allowed;
+    filter: grayscale(1);
+}
