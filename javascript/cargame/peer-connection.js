@@ -98,31 +98,7 @@ window.setupRemote = (showQR = false) => {
                 window.syncMergedInputs();
             }
             if (data.type === 'gearShift') {
-                if (window.drivetrain) {
-                    if (data.direction === 'up') window.drivetrain.nextGear();
-                    else window.drivetrain.prevGear();
-                    
-                    // Physical feedback
-                    if (navigator.vibrate) navigator.vibrate(50);
-                } else {
-                    // Fallback to keyboard event if drivetrain not yet loaded
-                    const code = data.direction === 'up' ? 'ArrowUp' : 'ArrowDown';
-                    const ev = new KeyboardEvent('keyup', {
-                        code: code,
-                        key: code,
-                        keyCode: code === 'ArrowUp' ? 38 : 40,
-                        which: code === 'ArrowUp' ? 38 : 40,
-                        bubbles: true,
-                        cancelable: true
-                    });
-                    document.dispatchEvent(ev);
-                }
-
-                // Sync manualGearIndex for the HUD
-                if (window.getEngineData) {
-                    const engineData = window.getEngineData();
-                    window.manualGearIndex = engineData.gear;
-                }
+                window.requestGearShift(data.direction);
             }
             if (data.type === 'pause') {
                 if (window.togglePause) window.togglePause();

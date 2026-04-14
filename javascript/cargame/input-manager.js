@@ -10,11 +10,22 @@ window.gamepadLoopActive = false;
 window.prevGamepadButtons = [];
 window.prevGamepadAxes = [];
 
-window.startGamepadLoop = () => {
-    if (!window.gamepadLoopActive) {
-        window.gamepadLoopActive = true;
-        _gamepadLoop();
+window.requestGearShift = (direction) => {
+    if (window.drivetrain) {
+        if (direction === 'up') window.drivetrain.nextGear();
+        else window.drivetrain.prevGear();
+
+        // Sync manualGearIndex for HUD
+        if (window.getEngineData) {
+            window.manualGearIndex = window.getEngineData().gear;
+        }
+        
+        // Haptic feedback for gear change
+        if (navigator.vibrate) navigator.vibrate(50);
+        
+        return true;
     }
+    return false;
 };
 
 function _gamepadLoop() {
@@ -29,64 +40,47 @@ function _gamepadLoop() {
 
         // --- CONTINUOUS INPUTS ---
         
-        // Left stick X (Steering)
+        // Analog steering
         const steerAxis = gp.axes && (gp.axes[0] !== undefined) ? gp.axes[0] : 0;
+        window.gamepadSteerAxis = steerAxis;
+        
+        // Digital steering fallback
         if (steerAxis < -0.2) left = true;
         if (steerAxis > 0.2) right = true;
 
-        // Face buttons (Mapping as requested)
-        // A (button 0): Accelerator
-        if (gp.buttons[0] && gp.buttons[0].pressed) fwd = true;
-        // B (button 1): Brake
-        if (gp.buttons[1] && gp.buttons[1].pressed) brake = true;
-        // Y (button 3): Reverse (Mapped as bwd)
-        if (gp.buttons[3] && gp.buttons[3].pressed) bwd = true;
+        // Pressure Sensitive Triggers (Only for Gamepad Mode)
+        const rt = gp.buttons[7] ? gp.buttons[7].value : 0;
+        const lt = gp.buttons[6] ? gp.buttons[6].value : 0;
 
-        // D-pad (Fallback for steering)
-        if (gp.buttons[14] && gp.buttons[14].pressed) left = true;
-        if (gp.buttons[15] && gp.buttons[15].pressed) right = true;
-
-        // --- ONE-SHOT ACTION BUTTONS (State Checking) ---
-        const btnPressed = (i) => gp.buttons[i] && gp.buttons[i].pressed;
-        const btnJustPressed = (i) => btnPressed(i) && (!window.prevGamepadButtons[i]);
-
-        // X (button 2): Change Camera
-        if (btnJustPressed(2)) {
-            if (window.cycleCamera) window.cycleCamera();
-        }
-
-        // Home / Guide (button 16): Open Settings
-        if (btnJustPressed(16) || btnJustPressed(10)) {
-            if (window.toggleSettings) window.toggleSettings();
-        }
-
-        // L1 / R1 (buttons 4 and 5): Paddle Shifters
-        if (btnJustPressed(5)) { // R1: Gear Up
-            const ev = new KeyboardEvent('keydown', { key: 'ArrowUp', code: 'ArrowUp', bubbles: true });
-            document.dispatchEvent(ev);
-            if (window.manualGearIndex < 6) window.manualGearIndex++;
-        }
-        if (btnJustPressed(4)) { // L1: Gear Down
-            const ev = new KeyboardEvent('keydown', { key: 'ArrowDown', code: 'ArrowDown', bubbles: true });
-            document.dispatchEvent(ev);
-            if (window.manualGearIndex > -1) window.manualGearIndex--;
-        }
-
-        // Note: Home / Guide (button 16) is handled above. R2 is currently unmapped for actions.
-
-        // Store button states for next frame
-        window.prevGamepadButtons = gp.buttons.map(b => b.pressed);
+        // Face Buttons
+        const aBtn = (gp.buttons[0] && gp.buttons[0].pressed);
+        const bBtn = (gp.buttons[1] && gp.buttons[1].pressed);
 
         // --- SYNC INPUTS ---
-        window.gamepadInputs.fwd = fwd;
-        window.gamepadInputs.bwd = bwd;
-        window.gamepadInputs.brake = brake;
-        window.gamepadInputs.handbrake = handbrake;
+        // Accelerator (A or RT)
+        const finalGas = Math.max(rt, aBtn ? 1.0 : 0);
+        window.gamepadInputs.fwd = finalGas; // Store as number for analog engine
+
+        // Brake (B or LT)
+        const finalBrake = Math.max(lt, bBtn ? 1.0 : 0);
+        window.gamepadInputs.brake = finalBrake; // Store as number for analog engine
+
+        window.gamepadInputs.bwd = gp.buttons[3] && gp.buttons[3].pressed; // Y for Reverse
         window.gamepadInputs.left = left;
         window.gamepadInputs.right = right;
 
-        window.gamepadSteerAxis = steerAxis;
+        // --- ONE-SHOT ACTIONS ---
+        const btnPressed = (i) => gp.buttons[i] && gp.buttons[i].pressed;
+        const btnJustPressed = (i) => btnPressed(i) && (!window.prevGamepadButtons[i]);
 
+        if (btnJustPressed(2)) { if (window.cycleCamera) window.cycleCamera(); }
+        if (btnJustPressed(16) || btnJustPressed(10)) { if (window.toggleSettings) window.toggleSettings(); }
+
+        // Gear Shifts (Direct Hook)
+        if (btnJustPressed(5)) window.requestGearShift('up');
+        if (btnJustPressed(4)) window.requestGearShift('down');
+
+        window.prevGamepadButtons = gp.buttons.map(b => b.pressed);
         if (window.syncMergedInputs) window.syncMergedInputs();
     }
     requestAnimationFrame(_gamepadLoop);

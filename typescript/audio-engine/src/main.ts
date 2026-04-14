@@ -117,6 +117,8 @@ function update(time: DOMHighResTimeStamp): void {
     }
 
     const isAuto = (window as any).gameSettings?.transmission !== 'manual';
+    const source = (window as any).activeInputSource;
+    const isAnalog = source === 'gamepad';
     const fwdInput = (window as any).inputs?.fwd;
     const isFwd = keys['Space'] || keys['KeyW'] || !!fwdInput;
     const isRevOnly = keys['KeyR'] || (window as any).inputs?.bwd; 
@@ -125,25 +127,37 @@ function update(time: DOMHighResTimeStamp): void {
         engine.throttle = 0.8; // Rev matching
     } else {
         if (isFwd) {
-            const targetThrottle = typeof fwdInput === 'number' ? fwdInput : 1.0;
-            // Approach target throttle smoothly
-            if (engine.throttle < targetThrottle) {
-                engine.throttle = clamp(engine.throttle + 0.15, 0, targetThrottle);
+            const target = typeof fwdInput === 'number' ? fwdInput : 1.0;
+            
+            if (isAnalog) {
+                // Analog: Fast follow
+                engine.throttle = clamp(target, 0, 1);
             } else {
-                engine.throttle = clamp(engine.throttle - 0.15, targetThrottle, 1.0);
+                // Binary (Keyboard/Phone): Smooth pedal travel
+                const step = (window as any).inputs?.fwd ? 0.08 : 0.15; // Slower from phone touch for control
+                if (engine.throttle < target) {
+                    engine.throttle = clamp(engine.throttle + step, 0, target);
+                } else {
+                    engine.throttle = clamp(engine.throttle - step, target, 1.0);
+                }
             }
             if (isAuto && drivetrain.gear < 1 && !drivetrain.isShifting) drivetrain.changeGear(1);
         } else if (isAuto && isRevOnly) {
             const revInput = (window as any).inputs?.bwd;
-            const targetThrottle = typeof revInput === 'number' ? revInput : 1.0;
-            if (engine.throttle < targetThrottle) {
-                engine.throttle = clamp(engine.throttle + 0.15, 0, targetThrottle);
+            const target = typeof revInput === 'number' ? revInput : 1.0;
+            if (isAnalog) {
+                engine.throttle = clamp(target, 0, 1);
             } else {
-                engine.throttle = clamp(engine.throttle - 0.15, targetThrottle, 1.0);
+                if (engine.throttle < target) {
+                    engine.throttle = clamp(engine.throttle + 0.1, 0, target);
+                } else {
+                    engine.throttle = clamp(engine.throttle - 0.1, target, 1.0);
+                }
             }
             if (drivetrain.gear > -1 && !drivetrain.isShifting) drivetrain.changeGear(-1);
         } else {
-            engine.throttle = clamp(engine.throttle - 0.15, 0, 1);
+            // Natural throttle drop
+            engine.throttle = clamp(engine.throttle - 0.1, 0, 1);
         }
     }
 
@@ -159,12 +173,18 @@ function update(time: DOMHighResTimeStamp): void {
     const isBrake = keys['KeyB'] || !!brakeInput;
     if (isBrake) {
         const brakeIntensity = typeof brakeInput === 'number' ? brakeInput : 1.0;
-        const brakeForce = 0.3 * brakeIntensity; 
+        let brakeForce = 0.3 * brakeIntensity; 
         
+        // Analog vs Binary Braking feel
+        if (!isAnalog) {
+            // Smoothly apply brakes if binary
+            brakeForce *= 0.8;
+        }
+
         if (drivetrain.omega > 0) {
-            drivetrain.omega = Math.max(0, drivetrain.omega - brakeForce); // Brake going forward
+            drivetrain.omega = Math.max(0, drivetrain.omega - brakeForce); 
         } else if (drivetrain.omega < 0) {
-            drivetrain.omega = Math.min(0, drivetrain.omega + brakeForce); // Brake going backward
+            drivetrain.omega = Math.min(0, drivetrain.omega + brakeForce); 
         }
     }
 

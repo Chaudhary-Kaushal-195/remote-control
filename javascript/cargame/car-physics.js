@@ -127,32 +127,48 @@ function animate() {
         return;
     }
 
-    if (!window.activeTouchId) {
-        const steeringMode = window.gameSettings ? window.gameSettings.steering : 'wheel';
-        const useGyro = steeringMode === 'gyro' && window.gyroActive;
-        const useGamepad = steeringMode === 'gamepad' && window.gamepadConnected;
+    const steeringMode = window.gameSettings ? window.gameSettings.steering : 'wheel';
+    const useGyro = steeringMode === 'gyro' && window.gyroActive;
+    const useGamepad = steeringMode === 'gamepad' && window.gamepadConnected;
+    const isTouchWheel = steeringMode === 'wheel' && window.activeTouchId !== null;
 
-        if (useGyro) {
-            window.wheelAngle = window.wheelAngle * 0.9 + window.gyroTilt * 0.1;
-        } else if (useGamepad) {
-            // Analog gamepad steering
-            const target = (window.gamepadSteerAxis || 0) * 120; // range -120 to 120
-            window.wheelAngle = window.wheelAngle * 0.8 + target * 0.2;
-        }
+    let hasInput = false;
 
-        // SUPPLEMENT with keyboard even if analog is active
-        if (window.inputs && window.inputs.left) {
-            window.wheelAngle = Math.max(-180, window.wheelAngle - 5);
-        } else if (window.inputs && window.inputs.right) {
-            window.wheelAngle = Math.min(180, window.wheelAngle + 5);
-        } else if (!useGyro && !useGamepad && steeringMode !== 'wheel') {
-            // Only auto-center if there's no analog device holding it
-            window.wheelAngle *= 0.88;
-        }
-        
-        const visual = document.getElementById('wheel-visual');
-        if (visual) visual.style.transform = `rotate(${window.wheelAngle}deg)`;
+    if (useGyro) {
+        window.wheelAngle = window.wheelAngle * 0.9 + window.gyroTilt * 0.1;
+        hasInput = Math.abs(window.gyroTilt) > 1; // Small threshold
+    } else if (useGamepad) {
+        const target = (window.gamepadSteerAxis || 0) * 120;
+        window.wheelAngle = window.wheelAngle * 0.8 + target * 0.2;
+        hasInput = Math.abs(window.gamepadSteerAxis) > 0.05;
+    } else if (isTouchWheel) {
+        // Touch wheel handles its own wheelAngle updates via touchmove
+        hasInput = true;
     }
+
+    // Keyboard / Binary Buttons Override
+    if (window.inputs && window.inputs.left) {
+        window.wheelAngle = Math.max(-180, window.wheelAngle - 5);
+        hasInput = true;
+    } else if (window.inputs && window.inputs.right) {
+        window.wheelAngle = Math.min(180, window.wheelAngle + 5);
+        hasInput = true;
+    }
+
+    // UNIVERSAL AUTO-CENTER
+    // If no active input is detected from the current hardware, return to center
+    if (!hasInput) {
+        const centerSpeed = 0.88;
+        if (Math.abs(window.wheelAngle) > 0.1) {
+            window.wheelAngle *= centerSpeed;
+        } else {
+            window.wheelAngle = 0;
+        }
+    }
+    
+    // Sync visual wheel if not on phone (laptop HUD)
+    const visual = document.getElementById('wheel-visual');
+    if (visual) visual.style.transform = `rotate(${window.wheelAngle}deg)`;
 
     // Handle Gamepad Vibration for Backfires
     if (backfireTick > 0 && window.gamepadConnected && window.gamepadIndex !== null) {
