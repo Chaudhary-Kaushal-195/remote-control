@@ -5,9 +5,47 @@ if (screen.orientation && screen.orientation.lock) {
     });
 }
 
+// Render gauge tick marks (Major thick lines + 9 minor subdivisions between each major mark)
+window.renderGaugeTicks = function () {
+    const rpmTicksGroup = document.getElementById('rpm-ticks-lines');
+    const speedTicksGroup = document.getElementById('speed-ticks-lines');
+
+    const generateTicksHTML = (isRPM = false) => {
+        let html = '';
+        const totalSubdivisions = 60; // 6 major intervals * 10 subdivisions = 60 steps
+        const startAngle = -135;
+        const totalSweep = 270;
+        const stepAngle = totalSweep / totalSubdivisions; // 4.5 deg per subdivision
+
+        for (let i = 0; i <= totalSubdivisions; i++) {
+            const angle = startAngle + (i * stepAngle);
+            const isMajor = i % 10 === 0;
+            const isMedium = i % 5 === 0 && !isMajor;
+
+            let length = isMajor ? 5.5 : (isMedium ? 3.8 : 2.5);
+            let strokeWidth = isMajor ? 1.6 : (isMedium ? 1.0 : 0.55);
+            let opacity = isMajor ? 0.95 : (isMedium ? 0.65 : 0.4);
+
+            // Redline tick coloring for high RPM (>= 8000 RPM, index >= 40)
+            let strokeColor = (isRPM && i >= 40) ? '#ff2244' : '#ffffff';
+
+            html += `<line x1="50" y1="10" x2="50" y2="${(10 + length).toFixed(2)}" 
+                          stroke="${strokeColor}" 
+                          stroke-width="${strokeWidth}" 
+                          stroke-linecap="round"
+                          opacity="${opacity}" 
+                          transform="rotate(${angle.toFixed(2)}, 50, 50)" />`;
+        }
+        return html;
+    };
+
+    if (rpmTicksGroup) rpmTicksGroup.innerHTML = generateTicksHTML(true);
+    if (speedTicksGroup) speedTicksGroup.innerHTML = generateTicksHTML(false);
+};
+
 // HUD Management
 window.initHUD = function () {
-    // Initial display logic
+    if (window.renderGaugeTicks) window.renderGaugeTicks();
     if (window.applyHUDVisibility) window.applyHUDVisibility();
     setTimeout(() => {
         if (window.applyHUDVisibility) window.applyHUDVisibility();
