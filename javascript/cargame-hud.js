@@ -69,7 +69,9 @@ window.updateHUD = function (rawSpeed, rpm, engineTemp, fuelLevel, engineData, m
     // Speed display
     const units = window.gameSettings.units || 'kph';
     const displaySpeed = units === 'mph' ? Math.round(rawSpeed * 0.62) : Math.round(rawSpeed);
-    speedBox.innerText = `${displaySpeed} ${units.toUpperCase()}`;
+    speedBox.innerText = `${displaySpeed}`;
+    const speedUnitLabel = document.getElementById('speed-unit-label');
+    if (speedUnitLabel) speedUnitLabel.innerText = units.toUpperCase();
     const unitLabel = document.getElementById('unit-label');
     if (unitLabel) unitLabel.innerText = `unit: ${units.toUpperCase()}`;
 

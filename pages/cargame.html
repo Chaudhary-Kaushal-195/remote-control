@@ -37,22 +37,22 @@
     <!-- Dash gauges HTML structure -->
     <div class="dash-cluster">
         <!-- SPEEDOMETER -->
-        <div class="gauge-wrapper" style="margin-right: -10px; margin-bottom: -15px;">
+        <div class="gauge-wrapper">
             <div class="gauge-pod gauge-sub">
-                <svg width="130" height="130" viewBox="0 0 100 100">
+                <svg width="220" height="220" viewBox="0 0 100 100">
                     <!-- Background Arc -->
                     <path d="M 21.7 78.3 A 40 40 0 1 1 78.3 78.3" fill="none" stroke="rgba(255,255,255,0.1)"
                         stroke-width="3" stroke-linecap="round" />
 
                     <!-- Speed Ticks -->
                     <g id="speed-ticks">
-                        <text x="29" y="73" fill="#fff" font-size="4" font-family="Orbitron" text-anchor="middle" opacity="0.3">0</text>
-                        <text x="22" y="52" fill="#fff" font-size="4" font-family="Orbitron" text-anchor="middle" opacity="0.3">100</text>
-                        <text x="29" y="31" fill="#fff" font-size="4" font-family="Orbitron" text-anchor="middle" opacity="0.3">200</text>
-                        <text x="50" y="24" fill="#fff" font-size="4" font-family="Orbitron" text-anchor="middle" opacity="0.3">300</text>
-                        <text x="71" y="31" fill="#fff" font-size="4" font-family="Orbitron" text-anchor="middle" opacity="0.3">400</text>
-                        <text x="78" y="52" fill="#fff" font-size="4" font-family="Orbitron" text-anchor="middle" opacity="0.3">500</text>
-                        <text x="71" y="73" fill="#fff" font-size="4" font-family="Orbitron" text-anchor="middle" opacity="0.3">600</text>
+                        <text x="29" y="73" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">0</text>
+                        <text x="22" y="52" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">100</text>
+                        <text x="29" y="31" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">200</text>
+                        <text x="50" y="24" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">300</text>
+                        <text x="71" y="31" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">400</text>
+                        <text x="78" y="52" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">500</text>
+                        <text x="71" y="73" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">600</text>
                     </g>
 
                     <path id="speed-arc" d="M 21.7 78.3 A 40 40 0 1 1 78.3 78.3" fill="none" stroke="rgba(255,255,255,0.8)"
@@ -62,9 +62,9 @@
                         <rect x="49.5" y="10" width="1" height="40" fill="#fff" style="filter: drop-shadow(0 0 3px rgba(255,255,255,0.9));" />
                     </g>
                 </svg>
-                <div style="position: absolute; bottom: 18%; display: flex; flex-direction: column; align-items: center; width: 100%;">
-                    <div id="speed-box" style="color: #fff; font-size: 22px; font-style: italic; font-weight: 900; line-height: 1; text-shadow: 0 0 8px rgba(255,255,255,0.5);">0</div>
-                    <div style="color: rgba(255,255,255,0.5); font-size: 10px; font-weight: bold; font-family: Orbitron; margin-top: 1px;">KPH</div>
+                <div style="position: absolute; bottom: 20%; display: flex; flex-direction: column; align-items: center; width: 100%;">
+                    <div id="speed-box" style="color: #fff; font-size: 30px; font-style: italic; font-weight: 900; line-height: 1; text-shadow: 0 0 10px rgba(255,255,255,0.5);">0</div>
+                    <div id="speed-unit-label" style="color: rgba(255,255,255,0.5); font-size: 12px; font-weight: bold; font-family: Orbitron; margin-top: 1px;">KPH</div>
                 </div>
             </div>
         </div>
@@ -114,7 +114,7 @@
                 </svg>
 
                 <div style="position: absolute; bottom: 20%; display: flex; flex-direction: column; align-items: center; width: 100%;">
-                    <div id="rpm-box" style="color: #fff; font-size: 38px; font-style: italic; font-weight: 900; text-shadow: 0 0 10px rgba(255,255,255,0.5); line-height: 1;">0</div>
+                    <div id="rpm-box" style="color: #fff; font-size: 30px; font-style: italic; font-weight: 900; text-shadow: 0 0 10px rgba(255,255,255,0.5); line-height: 1;">0</div>
                     <div style="color: rgba(255,255,255,0.5); font-size: 12px; font-weight: bold; font-family: Orbitron; margin-top: 1px;">RPM</div>
                 </div>
             </div>

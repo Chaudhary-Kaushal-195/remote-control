@@ -25,12 +25,10 @@
 }
 
 #speed-box {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    padding: 0px 4px;
+    background: transparent;
+    border: none;
+    padding: 0;
     color: #fff;
-    font-size: 14px;
-    margin-left: 5px;
     pointer-events: auto;
     cursor: pointer;
 }
@@ -230,8 +228,8 @@
 }
 
 .gauge-sub {
-    width: 130px;
-    height: 130px;
+    width: 220px;
+    height: 220px;
     border: none;
 }
 
