@@ -72,7 +72,7 @@
                     font-weight="900" opacity="0.4" letter-spacing="1">SPEED</text>
             </svg>
             <div id="speed-box" class="gear-display"
-                style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -35%); color: #fff; font-size: 26px; font-style: italic; font-weight: 900; text-shadow: 0 0 10px rgba(255,255,255,0.3);">
+                style="margin-top: -10px; color: #fff; font-size: 24px; font-style: italic; font-weight: 900; text-shadow: 0 0 10px rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.3); padding: 2px 12px; background: rgba(0,0,0,0.5);">
                 0 KPH</div>
         </div>
 
@@ -114,8 +114,8 @@
 
                     <!-- Indicators inside Meter -->
                     <g id="meter-indicators">
-                        <!-- Gear Indicator (Center) -->
-                        <text id="gear-box" x="50" y="40" text-anchor="middle" fill="var(--neon-pink)"
+                        <!-- Gear Indicator (Middle Left) -->
+                        <text id="gear-box" x="28" y="52" text-anchor="middle" fill="var(--neon-pink)"
                             font-family="Orbitron" font-weight="900" font-size="16"
                             style="text-shadow: 0 0 10px rgba(240, 146, 255, 0.6);">N</text>
 
@@ -128,9 +128,11 @@
                     </g>
                 </svg>
 
-                <!-- Digital RPM Readout -->
-                <div class="dash-label" style="position: absolute; top: 68%; left: 50%; transform: translate(-50%, 0); opacity: 0.4;">RPM</div>
-                <div id="rpm-box" class="rpm-digit" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -10%); font-size: 34px; font-style: italic; font-weight: 900; text-shadow: 0 0 10px rgba(255,255,255,0.4);">0</div>
+                <!-- Digital RPM Readout (Stacked completely below) -->
+                <div style="display: flex; flex-direction: column; align-items: center; margin-top: -15px;">
+                    <div class="dash-label" style="opacity: 0.6; font-size: 14px; font-weight: bold; margin-bottom: 2px;">RPM</div>
+                    <div id="rpm-box" class="rpm-digit" style="font-size: 32px; font-style: italic; font-weight: 900; text-shadow: 0 0 10px rgba(255,255,255,0.4); line-height: 1;">0</div>
+                </div>
             </div>
         </div>
     </div>
