@@ -388,6 +388,14 @@
     /* Only shown in specific modes */
 }
 
+#steer-left, #steer-right {
+    width: 70px;
+    height: 150px;
+    border-color: #f092ff;
+    color: #f092ff;
+    font-size: 32px;
+}
+
 /* HIDE ON MOBILE (SYSTEM-WIDE SYNC) */
 @media (max-width: 1024px) {
     .desktop-only {
