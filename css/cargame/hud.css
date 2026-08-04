@@ -187,7 +187,7 @@
 /* DASH CLUSTER (GAUGES) */
 .dash-cluster {
     position: absolute;
-    bottom: 25px;
+    bottom: 5px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
