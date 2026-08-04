@@ -149,9 +149,14 @@ function animate() {
         // which was making hasInput=true permanently and blocking auto-center.
         hasInput = Math.abs(window.gyroTilt) > 5;
     } else if (useGamepad) {
-        const target = (window.gamepadSteerAxis || 0) * 120;
-        window.wheelAngle = window.wheelAngle * 0.8 + target * 0.2;
-        hasInput = Math.abs(window.gamepadSteerAxis) > 0.05;
+        const axisValue = window.gamepadSteerAxis || 0;
+        if (Math.abs(axisValue) > 0.05) {
+            const target = axisValue * 120;
+            window.wheelAngle = window.wheelAngle * 0.8 + target * 0.2;
+            hasInput = true;
+        } else {
+            hasInput = false;
+        }
     } else if (isTouchWheel) {
         // Touch wheel handles its own wheelAngle updates via touchmove
         hasInput = true;
