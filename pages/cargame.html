@@ -65,16 +65,14 @@
                     stroke-width="6" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="188.5" />
 
                 <g id="speed-needle-grp" transform="rotate(-135, 50, 50)">
-                    <path d="M 50 50 L 48.5 50 L 50 12 L 51.5 50 Z" fill="#fff" />
-                    <circle cx="50" cy="50" r="1.5" fill="#fff" />
+                    <rect x="49.2" y="10" width="1.6" height="40" fill="#ff2244" rx="0.8" style="filter: drop-shadow(0 0 3px rgba(255,34,68,0.8));" />
                 </g>
-                <circle cx="50" cy="50" r="4" fill="#fff" opacity="0.1" />
 
-                <text x="50" y="70" text-anchor="middle" fill="#fff" font-size="6" font-family="Orbitron"
-                    font-weight="900" opacity="0.3" letter-spacing="1">SPEED</text>
+                <text x="50" y="75" text-anchor="middle" fill="#fff" font-size="5" font-family="Orbitron"
+                    font-weight="900" opacity="0.4" letter-spacing="1">SPEED</text>
             </svg>
             <div id="speed-box" class="gear-display"
-                style="bottom: 15px; color: #fff; text-shadow: 0 0 15px rgba(255,255,255,0.3);">
+                style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -35%); color: #fff; font-size: 26px; font-style: italic; font-weight: 900; text-shadow: 0 0 10px rgba(255,255,255,0.3);">
                 0 KPH</div>
         </div>
 
@@ -116,25 +114,23 @@
 
                     <!-- Indicators inside Meter -->
                     <g id="meter-indicators">
-                        <!-- Gear Indicator (Left side, symmetrical to shift light) -->
-                        <text id="gear-box" x="35" y="48" text-anchor="middle" fill="var(--neon-pink)"
-                            font-family="Orbitron" font-weight="900" font-size="14"
+                        <!-- Gear Indicator (Center) -->
+                        <text id="gear-box" x="50" y="40" text-anchor="middle" fill="var(--neon-pink)"
+                            font-family="Orbitron" font-weight="900" font-size="16"
                             style="text-shadow: 0 0 10px rgba(240, 146, 255, 0.6);">N</text>
 
-                        <!-- Shift Light (Right side) -->
-                        <circle id="shift-light" cx="65" cy="45" r="3" fill="#fff" opacity="0.1" />
+                        <!-- Shift Light (Center Bottom) -->
+                        <circle id="shift-light" cx="50" cy="72" r="3" fill="#ff2244" opacity="0.1" />
                     </g>
 
                     <g id="rpm-needle-grp" transform="rotate(-135, 50, 50)">
-                        <path d="M 50 50 L 48.5 50 L 50 12 L 51.5 50 Z" fill="#fff" />
-                        <circle cx="50" cy="50" r="1.5" fill="#fff" />
+                        <rect x="49.2" y="10" width="1.6" height="40" fill="#ffffff" rx="0.8" style="filter: drop-shadow(0 0 4px rgba(255,255,255,0.9));" />
                     </g>
-                    <circle cx="50" cy="50" r="3" fill="#fff" opacity="0.2" />
                 </svg>
 
                 <!-- Digital RPM Readout -->
-                <div class="dash-label" style="bottom:45px; opacity: 0.4;">RPM</div>
-                <div id="rpm-box" class="rpm-digit" style="bottom: 25px; font-size: 18px;">0</div>
+                <div class="dash-label" style="position: absolute; top: 68%; left: 50%; transform: translate(-50%, 0); opacity: 0.4;">RPM</div>
+                <div id="rpm-box" class="rpm-digit" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -10%); font-size: 34px; font-style: italic; font-weight: 900; text-shadow: 0 0 10px rgba(255,255,255,0.4);">0</div>
             </div>
         </div>
     </div>
