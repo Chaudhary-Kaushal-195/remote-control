@@ -116,6 +116,7 @@ window.loadSettingsToModal = function () {
         }
         window.gameSettings = Object.assign(window.gameSettings, s);
     }
+    if (window.applyHUDVisibility) window.applyHUDVisibility();
 
     // Sync connection UI every time modal is loaded
     if (window.updateControllerUI) {

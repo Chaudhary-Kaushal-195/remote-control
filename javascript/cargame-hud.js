@@ -8,6 +8,7 @@ if (screen.orientation && screen.orientation.lock) {
 // HUD Management
 window.initHUD = function () {
     // Initial display logic
+    if (window.applyHUDVisibility) window.applyHUDVisibility();
     setTimeout(() => {
         if (window.applyHUDVisibility) window.applyHUDVisibility();
     }, 100);
@@ -144,3 +145,7 @@ window.updateHUD = function (rawSpeed, rpm, engineTemp, fuelLevel, engineData, m
     const gearBox = document.getElementById('gear-box');
     if (gearBox) gearBox.textContent = gearVal;
 };
+
+document.addEventListener('DOMContentLoaded', () => {
+    window.initHUD();
+});
