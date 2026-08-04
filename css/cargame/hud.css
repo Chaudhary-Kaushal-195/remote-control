@@ -343,57 +343,56 @@
 }
 
 .pedal {
-    border-radius: 10px;
+    border-radius: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    border: 2px solid;
-    background: rgba(0, 0, 0, 0.6);
-    font-size: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.15);
+    font-size: 24px;
     position: relative;
     cursor: pointer;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    color: rgba(255, 255, 255, 0.7);
+    transition: background 0.1s, border-color 0.1s;
 }
 
-#handbrake {
-    width: 70px;
-    height: 150px;
-    border-color: #ff4400;
-    color: #ff4400;
+.pedal:active {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.6);
 }
 
-#gas {
-    width: 70px;
-    height: 150px;
-    border-color: #0ffffa;
-    color: #0ffffa;
+#handbrake, #gas, #steer-left, #steer-right {
+    width: 90px;
+    height: 110px;
 }
 
 #rev-btn {
-    width: 70px;
-    height: 45px;
-    border-color: #0ffffa;
-    color: #0ffffa;
+    width: 90px;
+    height: 50px;
     margin-top: 10px;
+}
+
+.pedal .stripe {
+    display: none; /* Hide neon stripes for clean look */
+}
+
+.pedal-label {
+    color: rgba(255, 255, 255, 0.5) !important;
+    font-size: 11px !important;
 }
 
 #steering-buttons {
     position: absolute;
     bottom: 40px;
     left: 40px;
-    gap: 20px;
+    gap: 15px;
     z-index: 6000;
     display: none;
     /* Only shown in specific modes */
-}
-
-#steer-left, #steer-right {
-    width: 70px;
-    height: 150px;
-    border-color: #f092ff;
-    color: #f092ff;
-    font-size: 32px;
 }
 
 /* HIDE ON MOBILE (SYSTEM-WIDE SYNC) */
