@@ -138,7 +138,7 @@ function animate() {
     const useLocalGyro = steeringMode === 'gyro' && window.gyroActive && !isPhoneConnected;
     const useGyro = useRemoteGyro || useLocalGyro;
     const useGamepad = steeringMode === 'gamepad' && window.gamepadConnected && window.activeInputSource === 'gamepad';
-    const isTouchWheel = steeringMode === 'wheel' && window.activeTouchId !== null;
+    const isTouchWheel = steeringMode === 'wheel' && window.activeTouchId != null;
 
     let hasInput = false;
 
