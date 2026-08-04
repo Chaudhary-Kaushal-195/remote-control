@@ -296,8 +296,12 @@
     object-fit: contain;
     /* Make the black image look like the white translucent buttons */
     filter: invert(1) opacity(0.8) drop-shadow(0 0 2px rgba(255, 255, 255, 0.3));
-    transition: transform 0.1s ease-out;
+    transition: transform 0.1s ease-out, filter 0.15s ease-out;
     pointer-events: none;
+}
+
+#wheel-visual.active {
+    filter: invert(1) opacity(1) drop-shadow(0 0 15px #0ffffa) drop-shadow(0 0 25px rgba(15, 255, 250, 0.6));
 }
 
 .ui-container {
@@ -326,12 +330,61 @@
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     color: rgba(255, 255, 255, 0.7);
-    transition: background 0.1s, border-color 0.1s;
+    transition: background 0.1s, border-color 0.1s, box-shadow 0.1s, color 0.1s, transform 0.1s;
 }
 
-.pedal:active {
+.pedal:active,
+.pedal.active {
     background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.6);
+    border-color: rgba(255, 255, 255, 0.8);
+    color: #ffffff;
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.3);
+    transform: scale(0.96);
+}
+
+#gas:active,
+#gas.active {
+    border-color: #0ffffa;
+    color: #0ffffa;
+    box-shadow: 0 0 30px rgba(15, 255, 250, 0.7), inset 0 0 15px rgba(15, 255, 250, 0.4);
+    background: rgba(15, 255, 250, 0.2);
+}
+
+#gas:active .pedal-label,
+#gas.active .pedal-label {
+    color: #0ffffa !important;
+    text-shadow: 0 0 8px rgba(15, 255, 250, 0.8);
+}
+
+#handbrake:active,
+#handbrake.active {
+    border-color: #ff4400;
+    color: #ff4400;
+    box-shadow: 0 0 30px rgba(255, 68, 0, 0.7), inset 0 0 15px rgba(255, 68, 0, 0.4);
+    background: rgba(255, 68, 0, 0.2);
+}
+
+#handbrake:active .pedal-label,
+#handbrake.active .pedal-label {
+    color: #ff4400 !important;
+    text-shadow: 0 0 8px rgba(255, 68, 0, 0.8);
+}
+
+#steer-left:active,
+#steer-left.active,
+#steer-right:active,
+#steer-right.active,
+#rev-btn:active,
+#rev-btn.active {
+    border-color: #f092ff;
+    color: #f092ff;
+    box-shadow: 0 0 30px rgba(240, 146, 255, 0.7), inset 0 0 15px rgba(240, 146, 255, 0.4);
+    background: rgba(240, 146, 255, 0.2);
+}
+
+#rev-btn:active,
+#rev-btn.active {
+    text-shadow: 0 0 8px rgba(240, 146, 255, 0.8);
 }
 
 #handbrake, #gas, #steer-left, #steer-right {

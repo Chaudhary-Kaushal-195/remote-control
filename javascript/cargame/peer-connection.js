@@ -25,6 +25,10 @@ window.syncMergedInputs = () => {
             window.inputs[k] = window.localInputs[k] || false;
         }
     });
+
+    if (window.updateButtonGlow) {
+        window.updateButtonGlow();
+    }
 };
 
 window.setupRemote = (showQR = false) => {

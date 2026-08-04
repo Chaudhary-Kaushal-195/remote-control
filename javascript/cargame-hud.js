@@ -144,6 +144,59 @@ window.updateHUD = function (rawSpeed, rpm, engineTemp, fuelLevel, engineData, m
     }
     const gearBox = document.getElementById('gear-box');
     if (gearBox) gearBox.textContent = gearVal;
+
+    // Synchronize button glowing states across Keyboard, Phone, Controller, Mouse
+    if (window.updateButtonGlow) {
+        window.updateButtonGlow();
+    }
+};
+
+window.updateButtonGlow = function () {
+    const inputs = window.inputs || {};
+
+    // Gas pedal glow
+    const isGas = !!inputs.fwd || (typeof inputs.fwd === 'number' && inputs.fwd > 0.05);
+    const gasEl = document.getElementById('gas');
+    if (gasEl) {
+        gasEl.classList.toggle('active', isGas);
+    }
+
+    // Brake / Handbrake pedal glow
+    const isBrake = !!inputs.brake || !!inputs.handbrake ||
+                    (typeof inputs.brake === 'number' && inputs.brake > 0.05) ||
+                    (typeof inputs.handbrake === 'number' && inputs.handbrake > 0.05);
+    const brakeEl = document.getElementById('handbrake');
+    if (brakeEl) {
+        brakeEl.classList.toggle('active', isBrake);
+    }
+
+    // Reverse pedal glow
+    const isRev = !!inputs.bwd || (typeof inputs.bwd === 'number' && inputs.bwd > 0.05);
+    const revEl = document.getElementById('rev-btn');
+    if (revEl) {
+        revEl.classList.toggle('active', isRev);
+    }
+
+    // Steering left / right buttons and visual wheel glow
+    const angle = window.wheelAngle || 0;
+    const isLeft = !!inputs.left || angle < -8;
+    const isRight = !!inputs.right || angle > 8;
+
+    const leftEl = document.getElementById('steer-left');
+    if (leftEl) {
+        leftEl.classList.toggle('active', isLeft);
+    }
+
+    const rightEl = document.getElementById('steer-right');
+    if (rightEl) {
+        rightEl.classList.toggle('active', isRight);
+    }
+
+    const wheelVisual = document.getElementById('wheel-visual');
+    if (wheelVisual) {
+        const isTurning = Math.abs(angle) > 5 || isLeft || isRight;
+        wheelVisual.classList.toggle('active', isTurning);
+    }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
