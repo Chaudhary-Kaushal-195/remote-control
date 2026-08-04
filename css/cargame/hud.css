@@ -304,31 +304,53 @@
 #wheel-visual {
     width: 100%;
     height: 100%;
-    border: 3px solid #f092ff;
-    border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, 0.4);
+    background: rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border-radius: 50% 50% 40% 40% / 50% 50% 45% 45%; /* Sporty D-shape */
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 15px rgba(240, 146, 255, 0.4);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
     position: relative;
     transition: transform 0.1s ease-out;
 }
 
 .spoke-center {
-    width: 30px;
-    height: 22px;
-    border: 2px solid #f092ff;
-    border-radius: 50% 50% 40% 40%;
+    width: 36px;
+    height: 36px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
     z-index: 2;
+    position: relative;
+}
+
+/* Bottom vertical spoke */
+.spoke-center::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.1);
+    top: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 2px solid rgba(255, 255, 255, 0.3);
+    border-right: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .spoke-hand {
     position: absolute;
-    width: 68%;
-    height: 38%;
-    border: 2px solid #f092ff;
-    border-radius: 30% 30% 70% 70%;
-    top: 40%;
+    width: 100%;
+    height: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.05);
+    border-top: 2px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    z-index: 1;
 }
 
 .ui-container {
