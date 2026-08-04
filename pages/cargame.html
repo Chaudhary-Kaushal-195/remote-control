@@ -150,8 +150,17 @@
     </div>
 
     <div id="sound-overlay" onclick="window.initAudio()">
-        <h1>🏎️ DR. VICE</h1>
-        <p>TAP TO START SOUND & ENGINE</p>
+        <div class="loading-content">
+            <h1 class="loading-title">🏎️ DR. VICE</h1>
+            <p id="loading-start-prompt" class="loading-sub">TAP / PRESS ANY KEY TO START ENGINE</p>
+            
+            <div id="loading-bar-container" style="display: none;">
+                <div class="loading-bar-track">
+                    <div id="loading-bar-fill"></div>
+                </div>
+                <div id="loading-tip-text">Polishing headlights...</div>
+            </div>
+        </div>
     </div>
 
     <div id="qr-overlay">

@@ -57,14 +57,14 @@
     transform: scale(0.95);
 }
 
-/* Sound Overlay */
+/* Sound & Loading Overlay */
 #sound-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    background: radial-gradient(circle at center, rgba(15, 10, 25, 0.95) 0%, rgba(5, 0, 10, 0.98) 100%);
     z-index: 99999;
     display: flex;
     flex-direction: column;
@@ -72,16 +72,79 @@
     align-items: center;
     cursor: pointer;
     text-align: center;
+    backdrop-filter: blur(15px);
+    transition: opacity 0.5s ease;
 }
 
-#sound-overlay h1 {
-    color: #0ffffa;
+.loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 90%;
+    max-width: 420px;
+}
+
+.loading-title {
+    color: var(--neon-blue);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 36px;
+    font-weight: 900;
+    letter-spacing: 3px;
     margin: 0;
+    text-shadow: 0 0 20px rgba(15, 255, 250, 0.6);
 }
 
-#sound-overlay p {
+.loading-sub {
     color: #f092ff;
-    margin-top: 10px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    margin: 0;
+    text-shadow: 0 0 10px rgba(240, 146, 255, 0.4);
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+#loading-bar-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.loading-bar-track {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#loading-bar-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--neon-blue), #f092ff);
+    border-radius: 10px;
+    transition: width 0.2s ease-out;
+    box-shadow: 0 0 10px var(--neon-blue);
+}
+
+#loading-tip-text {
+    color: rgba(255, 255, 255, 0.85);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+    min-height: 20px;
+    transition: opacity 0.2s ease;
 }
 
 /* Pause Overlay */
