@@ -150,8 +150,12 @@ function animate() {
         hasInput = Math.abs(window.gyroTilt) > 5;
     } else if (useGamepad) {
         const axisValue = window.gamepadSteerAxis || 0;
-        if (Math.abs(axisValue) > 0.05) {
-            const target = axisValue * 120;
+        const deadzone = 0.2;
+        if (Math.abs(axisValue) > deadzone) {
+            // Re-map the value to start smoothly from 0 after exiting deadzone
+            const sign = Math.sign(axisValue);
+            const activeAxis = (Math.abs(axisValue) - deadzone) / (1.0 - deadzone);
+            const target = sign * activeAxis * 120;
             window.wheelAngle = window.wheelAngle * 0.8 + target * 0.2;
             hasInput = true;
         } else {
@@ -162,13 +166,16 @@ function animate() {
         hasInput = true;
     }
 
-    // Keyboard / Binary Buttons Override
-    if (window.inputs && window.inputs.left) {
-        window.wheelAngle = Math.max(-180, window.wheelAngle - 5);
-        hasInput = true;
-    } else if (window.inputs && window.inputs.right) {
-        window.wheelAngle = Math.min(180, window.wheelAngle + 5);
-        hasInput = true;
+    // Keyboard / Binary Buttons Override (Digital fallback)
+    // Only apply if we aren't already using the gamepad's analog stick 
+    if (!useGamepad) {
+        if (window.inputs && window.inputs.left) {
+            window.wheelAngle = Math.max(-180, window.wheelAngle - 5);
+            hasInput = true;
+        } else if (window.inputs && window.inputs.right) {
+            window.wheelAngle = Math.min(180, window.wheelAngle + 5);
+            hasInput = true;
+        }
     }
 
     // UNIVERSAL AUTO-CENTER
