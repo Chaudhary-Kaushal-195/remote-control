@@ -101,26 +101,32 @@ window.applyHUDVisibility = () => {
     }
 };
 
+const hudCache = {};
+function getHudEl(id) {
+    if (!hudCache[id]) hudCache[id] = document.getElementById(id);
+    return hudCache[id];
+}
+
 window.updateHUD = function (rawSpeed, rpm, engineTemp, fuelLevel, engineData, manualGearIndex) {
-    const speedBox = document.getElementById('speed-box');
+    const speedBox = getHudEl('speed-box');
     if (!speedBox || !window.gameSettings) return;
 
     // Speed display
     const units = window.gameSettings.units || 'kph';
     const displaySpeed = units === 'mph' ? Math.round(rawSpeed * 0.62) : Math.round(rawSpeed);
     speedBox.innerText = `${displaySpeed}`;
-    const speedUnitLabel = document.getElementById('speed-unit-label');
+    const speedUnitLabel = getHudEl('speed-unit-label');
     if (speedUnitLabel) speedUnitLabel.innerText = units.toUpperCase();
-    const unitLabel = document.getElementById('unit-label');
+    const unitLabel = getHudEl('unit-label');
     if (unitLabel) unitLabel.innerText = `unit: ${units.toUpperCase()}`;
 
     // Analog Needle & Arc Logic (270 Degree Sweep: 135deg to 405deg)
     const maxSpeed = 600;
     const speedNeedleAngle = -135 + ((rawSpeed / maxSpeed) * 270);
-    const speedNeedleGrp = document.getElementById('speed-needle-grp');
+    const speedNeedleGrp = getHudEl('speed-needle-grp');
     if (speedNeedleGrp) speedNeedleGrp.setAttribute('transform', `rotate(${speedNeedleAngle}, 50, 50)`);
 
-    const arc = document.getElementById('speed-arc');
+    const arc = getHudEl('speed-arc');
     if (arc) {
         const offset = 188.5 - (Math.min(1, rawSpeed / maxSpeed) * 188.5);
         arc.style.strokeDashoffset = offset;
@@ -129,16 +135,16 @@ window.updateHUD = function (rawSpeed, rpm, engineTemp, fuelLevel, engineData, m
     // RPM Logic (Standardized to 12000 RPM range to align 6000 RPM at Top-Center)
     const maxRpm = 12000;
     const rpmNeedleAngle = -135 + ((rpm / maxRpm) * 270);
-    const rpmNeedleGrp = document.getElementById('rpm-needle-grp');
+    const rpmNeedleGrp = getHudEl('rpm-needle-grp');
     if (rpmNeedleGrp) rpmNeedleGrp.setAttribute('transform', `rotate(${rpmNeedleAngle}, 50, 50)`);
 
-    const rpmArc = document.getElementById('rpm-arc');
+    const rpmArc = getHudEl('rpm-arc');
     if (rpmArc) {
         const offset = 188.5 - (Math.min(1, rpm / maxRpm) * 188.5);
         rpmArc.style.strokeDashoffset = offset;
 
         // Shift Light & Redline Pulse
-        const shiftLight = document.getElementById('shift-light');
+        const shiftLight = getHudEl('shift-light');
         if (rpm > 8000) {
             const pulse = (Math.sin(Date.now() * 0.02) + 1) / 2;
             rpmArc.style.filter = `drop-shadow(0 0 ${2 + pulse * 4}px rgba(255, 34, 68, 0.8))`;
@@ -155,17 +161,17 @@ window.updateHUD = function (rawSpeed, rpm, engineTemp, fuelLevel, engineData, m
         }
     }
 
-    const rpmBox = document.getElementById('rpm-box');
+    const rpmBox = getHudEl('rpm-box');
     if (rpmBox) rpmBox.innerText = Math.round(rpm);
 
     // Fuel Logic
     const fuelAngle = 45 - (fuelLevel / 100 * 90);
-    const fuelNeedleGrp = document.getElementById('fuel-needle-grp');
+    const fuelNeedleGrp = getHudEl('fuel-needle-grp');
     if (fuelNeedleGrp) fuelNeedleGrp.setAttribute('transform', `rotate(${fuelAngle}, 50, 50)`);
 
     // Temp Logic
     const tempAngle = -90 + ((engineTemp / 120) * 180);
-    const tempNeedleGrp = document.getElementById('temp-needle-grp');
+    const tempNeedleGrp = getHudEl('temp-needle-grp');
     if (tempNeedleGrp) tempNeedleGrp.setAttribute('transform', `rotate(${tempAngle}, 50, 50)`);
 
     // Gear Logic
@@ -180,7 +186,7 @@ window.updateHUD = function (rawSpeed, rpm, engineTemp, fuelLevel, engineData, m
         else if (gear === 0) gearVal = "N";
         else gearVal = gear.toString();
     }
-    const gearBox = document.getElementById('gear-box');
+    const gearBox = getHudEl('gear-box');
     if (gearBox) gearBox.textContent = gearVal;
 
     // Synchronize button glowing states across Keyboard, Phone, Controller, Mouse

@@ -114,10 +114,11 @@ function _gamepadLoop() {
         if (btnJustPressed(5)) window.requestGearShift('up');
         if (btnJustPressed(4)) window.requestGearShift('down');
 
-        // BUG FIX: Use Array.from. GamepadButtonList is an object, not an array.
-        // Calling .map on it directly throws "TypeError" in many browsers, 
-        // which kills the input loop instantly.
-        window.prevGamepadButtons = Array.from(gp.buttons).map(b => b.pressed);
+        // BUG FIX & OPTIMIZATION: Update array in-place to prevent 60fps Garbage Collection stutters
+        // GamepadButtonList is an object, not a real array in some browsers, but we can iterate its length.
+        for (let i = 0; i < gp.buttons.length; i++) {
+            window.prevGamepadButtons[i] = gp.buttons[i].pressed;
+        }
         
         if (window.syncMergedInputs) window.syncMergedInputs();
 
