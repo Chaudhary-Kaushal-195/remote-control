@@ -163,14 +163,24 @@ class AdvancedCarSimulator:
             self.state["slip_angle"] *= (1.0 - dt * 3.0)
 
         # Burnout / Wheelspin logic (Longitudinal slip)
-        # If high throttle at low speed in RWD, or holding brake + throttle
         wheelspin = 0.0
-        if gear != 0 and rear_power_ratio > 0.5 and throttle > 0.8:
-            if speed_kph < 20 or brake > 0.5:
-                wheelspin = throttle * rear_power_ratio
+        if gear != 0 and rear_power_ratio > 0.5 and throttle > 0.3:
+            # Dynamic spin based on throttle, speed, and grip
+            spin_factor = (throttle * 1.5) - (speed_kph / 40.0) - (rear_grip * 0.2)
+            if brake > 0.1: 
+                spin_factor += brake # Brake-stand burnout
+                
+            if spin_factor > 0:
+                wheelspin = min(1.0, spin_factor * rear_power_ratio)
                 if gear == -1:
                     wheelspin = -wheelspin
         self.state["wheelspin"] = wheelspin
+        
+        # Braking slip (Locking the tires at speed)
+        brake_lock = 0.0
+        if brake > 0.7 and speed_kph > 30:
+            brake_lock = min(1.0, brake * (speed_kph / 120.0))
+        self.state["brake_lock"] = brake_lock
 
         # 15. Advanced Sim (Thermals)
         engine_heat = (rpm / 8000.0) * throttle * dt

@@ -335,8 +335,16 @@ function animate() {
     car.rotation.y += slipAngle * dt * 4.0;
 
     let wheelspin = 0;
-    if (window.advancedTelemetry && window.advancedTelemetry.wheelspin) {
-        wheelspin = window.advancedTelemetry.wheelspin;
+    let brakeLock = 0;
+    if (window.advancedTelemetry) {
+        wheelspin = window.advancedTelemetry.wheelspin || 0;
+        brakeLock = window.advancedTelemetry.brake_lock || 0;
+    }
+    
+    // Donut physics! If spinning tires at very low speeds while steering
+    if (Math.abs(wheelspin) > 0.2 && Math.abs(speed) < 5.0 && Math.abs(window.wheelAngle) > 10) {
+        let donutSpin = (window.wheelAngle / 180) * Math.abs(wheelspin) * dt * 3.0;
+        car.rotation.y -= donutSpin;
     }
 
     wheels.forEach((w, i) => {
@@ -369,11 +377,12 @@ function animate() {
         }
     }
 
-    // Emit new particles if drifting or burnout
+    // Emit new particles if drifting, burnout, or locking brakes
     let isDrifting = Math.abs(slipAngle) > 0.1 && Math.abs(speed) > 0.5;
-    let isBurnout = Math.abs(wheelspin) > 0.5;
+    let isBurnout = Math.abs(wheelspin) > 0.3;
+    let isBraking = brakeLock > 0.3;
 
-    if (isDrifting || isBurnout) {
+    if (isDrifting || isBurnout || isBraking) {
         // Emit from rear wheels
         const rw1 = new THREE.Vector3();
         rw1.setFromMatrixPosition(wheels[2].anchor.matrixWorld);
