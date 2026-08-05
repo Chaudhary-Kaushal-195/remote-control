@@ -307,8 +307,11 @@ class Tire:
         self.wheel_rpm = 0.0
 
         # --- Thermal Model ---
-        self.temperature = 30.0      # deg C
-        self.optimal_temp = 85.0     # deg C (peak grip temperature)
+        self.temperature = 25.0  # Celsius
+        self.grip_multiplier = 1.0
+        
+        self.drift_mode = False
+        self.grip_level = 1.0     
         self.grip_multiplier = 1.0   # Temperature-based grip scaling
 
         # Is this wheel locked (ABS or brake lock)?
@@ -398,7 +401,12 @@ class Tire:
         # Peak force = mu x Fz (friction coefficient x normal force)
         # Load sensitivity: grip doesn't increase linearly with load
         # (diminishing returns at higher loads - this is critical for weight transfer feel)
-        base_mu = 1.4  # Base friction coefficient (sport tires on dry asphalt)
+        base_mu = 1.4 * self.grip_level  # Apply user grip level
+        
+        # Drift mode reduces rear grip specifically
+        if self.drift_mode and self.position in ["rl", "rr"]:
+            base_mu *= 0.55  # 45% reduction in rear grip for easy sliding
+            
         # Load sensitivity: reduce effective mu as load increases
         load_sensitivity = 1.0 - 0.0001 * (self.normal_force / 9.81)  # per kg
         load_sensitivity = max(0.5, load_sensitivity)
@@ -478,7 +486,7 @@ class Tire:
         """
         # Heat generation from slip
         slip_energy = (abs(self.slip_ratio) + abs(self.slip_angle)) * abs(self.force_total)
-        heat_gain = slip_energy * dt * 0.000005  # Tuning factor
+        heat_gain = slip_energy * dt * 0.0005  # 100x increase so it actually heats up
 
         # Cooling from airflow
         air_cooling = (airspeed * 0.3 + 5.0) * dt * 0.15
@@ -1098,6 +1106,12 @@ class ForceVehicleSimulator:
         handbrake = max(0.0, min(1.0, inputs.get("handbrake", 0.0)))
         gear_request = inputs.get("gear", None)
         drivetrain_type = inputs.get("drivetrain", "rwd")
+        drift_mode = inputs.get("drift_mode", False)
+        grip_level = inputs.get("grip_level", 1.0)
+        
+        for tire in self.tires:
+            tire.drift_mode = drift_mode
+            tire.grip_level = grip_level
 
         # Update drivetrain layout if changed
         self.drivetrain.set_layout(drivetrain_type)

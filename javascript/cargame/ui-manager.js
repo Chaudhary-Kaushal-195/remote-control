@@ -74,6 +74,11 @@ window.saveSettings = () => {
     window.gameSettings.steering = document.getElementById('setting-steering')?.value || window.gameSettings.steering;
     window.gameSettings.units = document.getElementById('setting-units')?.value || window.gameSettings.units;
     window.gameSettings.drivetrain = document.getElementById('setting-drivetrain')?.value || window.gameSettings.drivetrain;
+    window.gameSettings.driftMode = document.getElementById('setting-drift-mode')?.value === 'on';
+    
+    const gripSlider = document.getElementById('setting-grip-level');
+    window.gameSettings.gripLevel = gripSlider ? (parseInt(gripSlider.value) / 100.0) : (window.gameSettings.gripLevel !== undefined ? window.gameSettings.gripLevel : 1.0);
+    
     // Transmission is handled by toggleTransmission
     window.gameSettings.engineVol = document.getElementById('setting-engine-vol')?.value || window.gameSettings.engineVol;
     window.gameSettings.musicVol = document.getElementById('setting-music-vol')?.value || window.gameSettings.musicVol;
@@ -100,6 +105,12 @@ window.loadSettingsToModal = function () {
         document.getElementById('setting-units').value = s.units || 'kph';
         if (document.getElementById('setting-drivetrain')) {
             document.getElementById('setting-drivetrain').value = s.drivetrain || 'rwd';
+        }
+        if (document.getElementById('setting-drift-mode')) {
+            document.getElementById('setting-drift-mode').value = s.driftMode ? 'on' : 'off';
+        }
+        if (document.getElementById('setting-grip-level')) {
+            document.getElementById('setting-grip-level').value = s.gripLevel !== undefined ? Math.round(s.gripLevel * 100) : 100;
         }
         if (document.getElementById('setting-transmission')) {
             document.getElementById('setting-transmission').value = s.transmission || 'automatic';

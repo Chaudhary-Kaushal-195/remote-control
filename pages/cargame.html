@@ -327,6 +327,19 @@
             </div>
 
             <div class="setting-row">
+                <div class="setting-label" style="color: #ff00ff; font-weight: bold;">Drift Mode (Slip Easy)</div>
+                <select id="setting-drift-mode" onchange="window.saveSettings()">
+                    <option value="off">Off (Grip Racing)</option>
+                    <option value="on">On (Drift King)</option>
+                </select>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-label">Tire Grip Level</div>
+                <input type="range" id="setting-grip-level" min="0" max="100" value="100" oninput="window.saveSettings()">
+            </div>
+
+            <div class="setting-row">
                 <div class="setting-label">Control HUD</div>
                 <select id="setting-hud-toggle" onchange="window.saveSettings()">
                     <option value="on">On (Visible)</option>

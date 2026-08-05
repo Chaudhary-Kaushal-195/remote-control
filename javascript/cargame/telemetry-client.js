@@ -57,7 +57,9 @@ window.sendTelemetryData = (speed, rpm, gear) => {
             handbrake: window.inputs.handbrake ? 1.0 : 0.0,
             steering: steering,
             gear: currentGear,
-            drivetrain: window.gameSettings ? (window.gameSettings.drivetrain || 'rwd') : 'rwd'
+            drivetrain: window.gameSettings ? (window.gameSettings.drivetrain || 'rwd') : 'rwd',
+            drift_mode: window.gameSettings ? !!window.gameSettings.driftMode : false,
+            grip_level: window.gameSettings && window.gameSettings.gripLevel !== undefined ? parseFloat(window.gameSettings.gripLevel) : 1.0
         }));
     }
 };
