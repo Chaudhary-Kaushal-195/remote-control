@@ -271,7 +271,7 @@ window.updateTelemetryUI = () => {
         el('tel-slip').style.color = Math.abs(deg) > 10 ? '#ff00ff' : '#ffffff';
     }
     if(el('tel-spin')) {
-        let spinPct = Math.min(100, (data.wheelspin || 0) * 100);
+        let spinPct = Math.min(100, Math.abs(data.wheelspin || 0) * 100);
         el('tel-spin').innerText = Math.round(spinPct) + '%';
         el('tel-spin').style.color = spinPct > 20 ? '#ffaa00' : '#ffffff';
     }

@@ -165,9 +165,11 @@ class AdvancedCarSimulator:
         # Burnout / Wheelspin logic (Longitudinal slip)
         # If high throttle at low speed in RWD, or holding brake + throttle
         wheelspin = 0.0
-        if rear_power_ratio > 0.5 and throttle > 0.8:
+        if gear != 0 and rear_power_ratio > 0.5 and throttle > 0.8:
             if speed_kph < 20 or brake > 0.5:
                 wheelspin = throttle * rear_power_ratio
+                if gear == -1:
+                    wheelspin = -wheelspin
         self.state["wheelspin"] = wheelspin
 
         # 15. Advanced Sim (Thermals)
