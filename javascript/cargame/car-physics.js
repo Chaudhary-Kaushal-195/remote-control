@@ -248,32 +248,45 @@ function animate() {
     let engineData = null;
     if (window.getEngineData) engineData = window.getEngineData();
 
-    const maxGearSpeedsKPH = {
-        '-1': 60,
-        '0': 0,
-        '1': 100,
-        '2': 180,
-        '3': 260,
-        '4': 340,
-        '5': 420,
-        '6': 500
-    };
+    // ============================================================
+    // PHYSICS ENGINE DRIVEN MOVEMENT
+    // Python is the single source of truth for speed, heading, yaw.
+    // JS only renders what Python tells it.
+    // ============================================================
+    const tel = window.advancedTelemetry;
 
-    if (engineData) {
+    if (tel && tel.speed_kph !== undefined) {
+        // === Read authoritative state from Python ===
+        speed = tel.speed_ms || 0;
+        rpm = tel.rpm || 800;
+
+        // Read yaw rate and apply rotation
+        let yawRate = tel.yaw_rate || 0;
+        car.rotation.y += yawRate * dt;
+
+        // Read velocity components (car-local frame) and move the car
+        let vx_local = tel.vx || 0;
+        let vy_local = tel.vy || 0;
+
+        // Convert to Three.js coordinate system and move car
+        // In Three.js: translateZ = forward, translateX = sideways
+        car.translateZ(vx_local * dt);
+        car.translateX(vy_local * dt);
+
+    } else if (engineData) {
+        // === Fallback: old arcade physics (when Python server not connected) ===
+        const maxGearSpeedsKPH = {
+            '-1': 60, '0': 0, '1': 100, '2': 180,
+            '3': 260, '4': 340, '5': 420, '6': 500
+        };
         let currentGear = engineData.gear.toString();
         let maxGearKPH = maxGearSpeedsKPH[currentGear] || 0;
         let calculatedKPH = (engineData.rpm / 10000) * maxGearKPH;
-
         let targetSpeed = calculatedKPH / 3.6;
-        if (engineData.gear === -1) {
-            targetSpeed = -targetSpeed;
-        }
+        if (engineData.gear === -1) targetSpeed = -targetSpeed;
 
         let brakeIntensity = engineData.brake || 0;
-
-        if (brakeIntensity > 0) {
-            targetSpeed = 0;
-        }
+        if (brakeIntensity > 0) targetSpeed = 0;
 
         if (engineData.gear === 0) {
             if (brakeIntensity > 0) {
@@ -281,72 +294,42 @@ function animate() {
                 if (speed > 0) speed = Math.max(0, speed - brakeForce);
                 if (speed < 0) speed = Math.min(0, speed + brakeForce);
             } else {
-                // Smooth coasting in neutral (drag)
                 speed *= 0.99;
             }
         } else {
-            // Calculate natural smooth jump
             let smoothedDiff = (targetSpeed - speed) * (dt * 4.0);
-
-            // Limit maximum jump so putting reverse at 90kph acts like brakes 
-            // instead of teleporting the car backwards instantly
             let isBrakingOrReversing = (speed > 0 && targetSpeed <= 0) || (speed < 0 && targetSpeed >= 0);
-            let baseLimit = isBrakingOrReversing ? (dt * 30.0) : (dt * 12.0); // Braking force is stronger than acceleration
+            let baseLimit = isBrakingOrReversing ? (dt * 30.0) : (dt * 12.0);
             let fullBrakeLimit = dt * 50.0;
             let limit = baseLimit + (fullBrakeLimit - baseLimit) * brakeIntensity;
-
             if (smoothedDiff > limit) smoothedDiff = limit;
             if (smoothedDiff < -limit) smoothedDiff = -limit;
-
             speed += smoothedDiff;
         }
 
         rpm = engineData.rpm;
+
+        // Old arcade movement (fallback)
+        car.translateZ(speed * dt * 3.5);
+        car.rotation.y -= (window.wheelAngle / 180) * 0.05 * (speed * 0.2);
     } else {
+        // === Ultra-fallback: no engine, no server ===
         if (window.inputs && window.inputs.fwd) speed += 0.025;
         else if (window.inputs && window.inputs.bwd) speed -= 0.015;
-
-        let handbrakeIntensity = (window.inputs && window.inputs.handbrake) ? 1.0 : 0.0;
-        let combinedBrake = Math.max(brakeIntensity, handbrakeIntensity);
-
-        if (combinedBrake > 0) {
-            let brakeForce = 0.08 * combinedBrake;
-            if (speed > 0) speed = Math.max(0, speed - brakeForce);
-            if (speed < 0) speed = Math.min(0, speed + brakeForce);
-        }
-        speed *= (window.inputs && window.inputs.handbrake) ? 0.95 : 0.99;
+        speed *= 0.99;
         rpm = Math.abs(speed) * 8000;
+        car.translateZ(speed * dt * 3.5);
+        car.rotation.y -= (window.wheelAngle / 180) * 0.05 * (speed * 0.2);
     }
 
+    // === Read smoke/drift data from physics engine ===
     let slipAngle = 0;
-    if (window.advancedTelemetry && window.advancedTelemetry.slip_angle) {
-        slipAngle = window.advancedTelemetry.slip_angle;
-    }
-
-    let forwardSpeed = Math.cos(slipAngle) * speed;
-    let sidewaysSpeed = Math.sin(slipAngle) * speed;
-
-    car.translateZ(forwardSpeed * dt * 3.5);
-    car.translateX(-sidewaysSpeed * dt * 3.5); // Slide in the opposite direction of the nose
-    
-    // Base steering
-    car.rotation.y -= (window.wheelAngle / 180) * 0.05 * (speed * 0.2);
-    // Oversteer from slipping (whipping the tail)
-    car.rotation.y += slipAngle * dt * 4.0;
-
     let wheelspin = 0;
     let brakeLock = 0;
-    if (window.advancedTelemetry) {
-        wheelspin = window.advancedTelemetry.wheelspin || 0;
-        brakeLock = window.advancedTelemetry.brake_lock || 0;
-    }
-    
-    // Donut physics! If spinning tires at very low speeds while steering
-    if (Math.abs(wheelspin) > 0.2 && Math.abs(speed) < 5.0 && Math.abs(window.wheelAngle) > 10) {
-        let donutSpin = (window.wheelAngle / 180) * Math.abs(wheelspin) * dt * 3.0;
-        car.rotation.y -= donutSpin;
-        // Shift the car to pivot around the front axle (Z = 1.3) instead of the center
-        car.translateX(1.3 * donutSpin);
+    if (tel) {
+        slipAngle = tel.slip_angle || 0;
+        wheelspin = tel.wheelspin || 0;
+        brakeLock = tel.brake_lock || 0;
     }
 
     wheels.forEach((w, i) => {
