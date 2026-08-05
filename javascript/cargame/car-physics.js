@@ -334,7 +334,7 @@ function animate() {
     let camTarget = new THREE.Vector3();
     let camPos = new THREE.Vector3();
 
-    let kph = Math.abs(speed * 3.6);
+    kph = Math.abs(speed * 3.6);
     let speedOffset = Math.min(kph / 150, 1.0) * 2.5;
     let fovTightness = 0.12 + Math.min(kph / 500, 1.0) * 0.8;
 
