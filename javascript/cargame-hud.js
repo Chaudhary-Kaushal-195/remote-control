@@ -141,10 +141,10 @@ window.updateHUD = function (rawSpeed, rpm, engineTemp, fuelLevel, engineData, m
         const shiftLight = document.getElementById('shift-light');
         if (rpm > 8000) {
             const pulse = (Math.sin(Date.now() * 0.02) + 1) / 2;
-            rpmArc.style.filter = `drop-shadow(0 0 ${5 + pulse * 10}px #ff0000)`;
+            rpmArc.style.filter = `drop-shadow(0 0 ${2 + pulse * 4}px rgba(255, 34, 68, 0.8))`;
             if (shiftLight) {
                 shiftLight.style.opacity = pulse > 0.5 ? "1" : "0.2";
-                shiftLight.setAttribute('fill', '#ff0000');
+                shiftLight.setAttribute('fill', '#ff2244');
             }
         } else {
             rpmArc.style.filter = 'none';

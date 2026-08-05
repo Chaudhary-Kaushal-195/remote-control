@@ -195,6 +195,7 @@
     gap: 20px;
     z-index: 6000;
     pointer-events: none;
+    overflow: visible !important;
 }
 
 .gauge-wrapper {
@@ -202,6 +203,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: visible !important;
 }
 
 .gauge-pod {
@@ -214,6 +216,11 @@
     justify-content: center;
     position: relative;
     box-shadow: none;
+    overflow: visible !important;
+}
+
+.gauge-pod svg {
+    overflow: visible !important;
 }
 
 .gauge-pod::before {
@@ -225,12 +232,14 @@
     height: 220px;
     border: none;
     box-shadow: none;
+    overflow: visible !important;
 }
 
 .gauge-sub {
     width: 220px;
     height: 220px;
     border: none;
+    overflow: visible !important;
 }
 
 .gauge-mini {
