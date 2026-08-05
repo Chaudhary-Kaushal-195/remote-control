@@ -154,10 +154,10 @@ class AdvancedCarSimulator:
         # If lateral G exceeds rear grip, car starts sliding
         if abs(self.state["g_lat"]) > rear_grip:
             excess_g = abs(self.state["g_lat"]) - rear_grip
-            # Generate a slip angle (in radians)
-            target_slip = min(excess_g * 0.15, 0.8) * (1 if self.state["g_lat"] > 0 else -1)
+            # Generate a massive slip angle for arcade drifting
+            target_slip = min(excess_g * 0.8, 1.4) * (1 if self.state["g_lat"] > 0 else -1)
             # Smoothly interpolate slip angle
-            self.state["slip_angle"] += (target_slip - self.state["slip_angle"]) * dt * 5.0
+            self.state["slip_angle"] += (target_slip - self.state["slip_angle"]) * dt * 8.0
         else:
             # Regain grip, decay slip angle
             self.state["slip_angle"] *= (1.0 - dt * 3.0)

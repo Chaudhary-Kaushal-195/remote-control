@@ -426,14 +426,24 @@ function animate() {
     const worldPos = camPos.applyMatrix4(car.matrixWorld);
     const worldTarget = camTarget.applyMatrix4(car.matrixWorld);
 
-    if (window.cameraMode === 1) {
-        window.camera.position.copy(worldPos);
+    if (!window.actualCamPos) {
+        window.actualCamPos = worldPos.clone();
+        window.actualCamTarget = worldTarget.clone();
     } else {
-        window.camera.position.lerp(worldPos, fovTightness);
+        // Fast snap for inside cam, smooth lag for chase cams to show drifting
+        let lerpFactor = (window.cameraMode === 1) ? 1.0 : (dt * 10.0);
+        window.actualCamPos.lerp(worldPos, lerpFactor);
+        window.actualCamTarget.lerp(worldTarget, lerpFactor);
     }
 
-    window.camera.lookAt(worldTarget);
-
+    if (window.cameraMode === 1) {
+        window.camera.position.copy(window.actualCamPos);
+        window.camera.lookAt(window.actualCamTarget);
+    } else {
+        window.camera.position.copy(window.actualCamPos);
+        window.camera.lookAt(window.actualCamTarget);
+    }
+    
     window.renderer.render(window.scene, window.camera);
 
     if (window.updateHUD) {
