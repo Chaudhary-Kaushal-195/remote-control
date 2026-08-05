@@ -48,7 +48,8 @@ window.sendTelemetryData = (speed, rpm, gear) => {
             steering: steering,
             speed: speed,
             rpm: rpm,
-            gear: gear
+            gear: gear,
+            drivetrain: window.gameSettings ? (window.gameSettings.drivetrain || 'rwd') : 'rwd'
         }));
     }
 };

@@ -306,6 +306,16 @@
             </div>
 
             <div class="setting-row">
+                <div class="setting-label">Drivetrain Split</div>
+                <select id="setting-drivetrain" onchange="window.saveSettings()">
+                    <option value="rwd">Rear Wheel Drive (RWD)</option>
+                    <option value="fwd">Front Wheel Drive (FWD)</option>
+                    <option value="awd">All Wheel Drive (50/50 AWD)</option>
+                    <option value="awd-sport">Sport AWD (20/80 AWD)</option>
+                </select>
+            </div>
+
+            <div class="setting-row">
                 <div class="setting-label">Control HUD</div>
                 <select id="setting-hud-toggle" onchange="window.saveSettings()">
                     <option value="on">On (Visible)</option>

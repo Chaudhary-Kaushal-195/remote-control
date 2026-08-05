@@ -73,6 +73,7 @@ window.handleGyroPrompt = (action) => {
 window.saveSettings = () => {
     window.gameSettings.steering = document.getElementById('setting-steering')?.value || window.gameSettings.steering;
     window.gameSettings.units = document.getElementById('setting-units')?.value || window.gameSettings.units;
+    window.gameSettings.drivetrain = document.getElementById('setting-drivetrain')?.value || window.gameSettings.drivetrain;
     // Transmission is handled by toggleTransmission
     window.gameSettings.engineVol = document.getElementById('setting-engine-vol')?.value || window.gameSettings.engineVol;
     window.gameSettings.musicVol = document.getElementById('setting-music-vol')?.value || window.gameSettings.musicVol;
@@ -94,8 +95,12 @@ window.loadSettingsToModal = function () {
     const saved = localStorage.getItem('drViceSettings');
     if (saved) {
         const s = JSON.parse(saved);
+        window.gameSettings = { ...window.gameSettings, ...s };
         document.getElementById('setting-steering').value = s.steering || 'wheel';
         document.getElementById('setting-units').value = s.units || 'kph';
+        if (document.getElementById('setting-drivetrain')) {
+            document.getElementById('setting-drivetrain').value = s.drivetrain || 'rwd';
+        }
         if (document.getElementById('setting-transmission')) {
             document.getElementById('setting-transmission').value = s.transmission || 'automatic';
         }

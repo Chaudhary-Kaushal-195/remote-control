@@ -57,6 +57,11 @@ class AdvancedCarSimulator:
         throttle = inputs.get("throttle", 0.0)
         brake = inputs.get("brake", 0.0)
         steering = inputs.get("steering", 0.0)
+        drivetrain = inputs.get("drivetrain", "rwd")
+
+        # Reverse gear logic
+        if gear == -1:
+            speed_ms = -speed_ms
 
         # 1. Engine Calculations
         max_torque = 450 # Nm
@@ -86,20 +91,43 @@ class AdvancedCarSimulator:
         self.state["susp_rr"] = max(0, min(1, 0.5 + pitch - roll))
 
         # 3. Tires (Heating up under lateral/longitudinal load)
-        # Reduced heat factor to account for crazy 400+ KPH arcade speeds
+        # Reduced heat factor to account for crazy KPH arcade speeds
         load_factor = (abs(self.state["g_long"]) + abs(self.state["g_lat"])) * dt * 0.3 
         cooling = dt * 0.8
-        self.state["tire_temp_fl"] = max(25.0, self.state["tire_temp_fl"] + load_factor * (1 if roll > 0 else 0.5) - cooling)
-        self.state["tire_temp_fr"] = max(25.0, self.state["tire_temp_fr"] + load_factor * (1 if roll < 0 else 0.5) - cooling)
-        self.state["tire_temp_rl"] = max(25.0, self.state["tire_temp_rl"] + (load_factor + throttle*0.5) * (1 if roll > 0 else 0.5) - cooling)
-        self.state["tire_temp_rr"] = max(25.0, self.state["tire_temp_rr"] + (load_factor + throttle*0.5) * (1 if roll < 0 else 0.5) - cooling)
+        
+        # Smooth load distribution based on roll (0.5 when straight, shifting towards 0.8 / 0.2 when turning)
+        left_mult = 0.5 + max(0.0, roll * 2.0)
+        right_mult = 0.5 + max(0.0, -roll * 2.0)
+        
+        # Throttle spin heat based on drivetrain split
+        front_power_ratio = 0.0
+        rear_power_ratio = 1.0
+        if drivetrain == "fwd":
+            front_power_ratio = 1.0
+            rear_power_ratio = 0.0
+        elif drivetrain == "awd":
+            front_power_ratio = 0.5
+            rear_power_ratio = 0.5
+        elif drivetrain == "awd-sport":
+            front_power_ratio = 0.2
+            rear_power_ratio = 0.8
+            
+        fwd_heat = throttle * dt * 5.0 * front_power_ratio
+        rwd_heat = throttle * dt * 5.0 * rear_power_ratio
+
+        self.state["tire_temp_fl"] = max(25.0, self.state["tire_temp_fl"] + (load_factor + fwd_heat) * left_mult - cooling)
+        self.state["tire_temp_fr"] = max(25.0, self.state["tire_temp_fr"] + (load_factor + fwd_heat) * right_mult - cooling)
+        self.state["tire_temp_rl"] = max(25.0, self.state["tire_temp_rl"] + (load_factor + rwd_heat) * left_mult - cooling)
+        self.state["tire_temp_rr"] = max(25.0, self.state["tire_temp_rr"] + (load_factor + rwd_heat) * right_mult - cooling)
 
         # 8. Aerodynamics
         self.state["aero_drag"] = 0.5 * 1.225 * 2.2 * 0.3 * (speed_ms ** 2) # Fd = 1/2 p A Cd v^2
-        self.state["aero_downforce"] = 0.5 * 1.225 * 2.2 * 1.5 * (speed_ms ** 2) / 9.81 # kg equivalent
+        downforce = 0.5 * 1.225 * 2.2 * 1.5 * (speed_ms ** 2) / 9.81 # kg equivalent
+        # In reverse, wings generate lift (or just 0 downforce) instead of pushing the car down
+        self.state["aero_downforce"] = downforce if speed_ms >= 0 else -downforce * 0.5
 
         # 7. Brakes
-        brake_heating = brake * speed_ms * dt * 5.0
+        brake_heating = brake * abs(speed_ms) * dt * 5.0
         self.state["brake_temp_f"] = max(30.0, self.state["brake_temp_f"] + brake_heating * 0.7 - dt * 2.0)
         self.state["brake_temp_r"] = max(30.0, self.state["brake_temp_r"] + brake_heating * 0.3 - dt * 2.0)
         self.state["abs_active"] = brake > 0.8 and speed_kph > 20.0
