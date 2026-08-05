@@ -70,7 +70,9 @@ class AdvancedCarSimulator:
         self.state["g_long"] = accel / 9.81
         
         self.smooth_steering = self.smooth_steering * 0.8 + steering * 0.2
-        self.state["g_lat"] = (speed_ms * speed_ms / max(1.0, 100.0 - abs(self.smooth_steering) * 80)) / 9.81 * (1 if self.smooth_steering > 0 else -1)
+        # Base centrifugal force based on speed, multiplied by how much steering is applied
+        base_centrifugal = (speed_ms * speed_ms) / 100.0
+        self.state["g_lat"] = (base_centrifugal / 9.81) * self.smooth_steering
 
         # 4. Suspension (based on G-force)
         # Pitch (Braking dives front, accel squats rear)
@@ -84,8 +86,9 @@ class AdvancedCarSimulator:
         self.state["susp_rr"] = max(0, min(1, 0.5 + pitch - roll))
 
         # 3. Tires (Heating up under lateral/longitudinal load)
-        load_factor = (abs(self.state["g_long"]) + abs(self.state["g_lat"])) * dt * 2.0
-        cooling = dt * 0.5
+        # Reduced heat factor to account for crazy 400+ KPH arcade speeds
+        load_factor = (abs(self.state["g_long"]) + abs(self.state["g_lat"])) * dt * 0.3 
+        cooling = dt * 0.8
         self.state["tire_temp_fl"] = max(25.0, self.state["tire_temp_fl"] + load_factor * (1 if roll > 0 else 0.5) - cooling)
         self.state["tire_temp_fr"] = max(25.0, self.state["tire_temp_fr"] + load_factor * (1 if roll < 0 else 0.5) - cooling)
         self.state["tire_temp_rl"] = max(25.0, self.state["tire_temp_rl"] + (load_factor + throttle*0.5) * (1 if roll > 0 else 0.5) - cooling)
