@@ -142,6 +142,8 @@
     </div>
 
     <div style="position: absolute; top: 25px; right: 25px; display: flex; gap: 12px; z-index: 6001;">
+        <button id="sound-studio-btn" class="hud-btn" onclick="window.toggleSoundStudio()"
+            style="padding: 10px 18px; font-size: 11px; border-color: #f092ff; color: #f092ff; box-shadow: 0 0 15px rgba(240, 146, 255, 0.3);">🔊 CAR SOUND STUDIO</button>
         <button id="details-trigger-btn" class="hud-btn" onclick="window.toggleDebugPanel()"
             style="padding: 10px 20px; font-size: 11px;">MORE DETAILS</button>
         <button id="cam-trigger-btn" class="hud-btn-circle"
@@ -251,7 +253,188 @@
                 <input type="range" id="setting-music-vol" min="0" max="100" value="50" oninput="window.saveSettings()">
             </div>
 
+            <div class="setting-row">
+                <div class="setting-label">Engine Sound Studio</div>
+                <button class="hud-btn" style="padding: 6px 14px; font-size: 10px; border-color: #f092ff; color: #f092ff;" onclick="window.toggleSettings(); window.toggleSoundStudio();">TRAIN SOUNDS 🔊</button>
+            </div>
+
             <button class="close-modal-btn" onclick="window.toggleSettings()">RESUME WITH UPDATES</button>
+        </div>
+    </div>
+
+    <!-- CAR ENGINE SOUND STUDIO & TRAINER MODAL -->
+    <div id="sound-studio-modal" onclick="event.target === this && window.toggleSoundStudio()">
+        <div class="studio-modal-content">
+            <div class="studio-header">
+                <div>
+                    <h2 class="studio-title">🏎️ CAR ENGINE SOUND STUDIO</h2>
+                    <div class="studio-subtitle">Train, tune, preview & customize car engine audio profiles</div>
+                </div>
+                <button class="hud-btn-circle" style="width:36px; height:36px; font-size:14px; border-color:#f092ff; color:#f092ff;" onclick="window.toggleSoundStudio()">✖</button>
+            </div>
+
+            <div class="studio-tabs">
+                <button id="tab-btn-presets" class="studio-tab-btn active" onclick="window.switchStudioTab('presets')">📻 PRESET LIBRARY</button>
+                <button id="tab-btn-trainer" class="studio-tab-btn" onclick="window.switchStudioTab('trainer')">🎛️ TRAIN & TUNE SOUNDS</button>
+            </div>
+
+            <!-- TAB 1: PRESETS GRID -->
+            <div id="studio-tab-presets-content">
+                <div class="preset-grid" id="preset-cards-container">
+                    <!-- Injected dynamically by UI manager -->
+                </div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <button class="hud-btn" style="margin: 0 auto; border-color:#f092ff; color:#f092ff;" onclick="window.switchStudioTab('trainer')">
+                        ➕ TRAIN NEW CAR SOUND PROFILE
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 2: SOUND TRAINER FORM -->
+            <div id="studio-tab-trainer-content" style="display: none;">
+                <div class="trainer-form">
+                    <div class="form-group-row">
+                        <div>
+                            <label class="setting-label">Profile Name</label>
+                            <input type="text" id="trainer-profile-name" class="studio-input" placeholder="e.g. V8 Supercharged GT" value="Custom V8 Racer">
+                        </div>
+                        <div>
+                            <label class="setting-label">Base Engine Style</label>
+                            <select id="trainer-base-style" class="studio-input" onchange="window.loadBasePresetToTrainer(this.value)">
+                                <option value="bac_mono">BAC Mono (Inline-4 High Rev)</option>
+                                <option value="ferr_458">Ferrari 458 (Flat-Plane V8)</option>
+                                <option value="procar">BMW M1 Procar (Classic Inline-6)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="studio-section-title">⚡ ENGINE PERFORMANCE PARAMETERS</div>
+                    <div class="form-group-row">
+                        <div>
+                            <label class="setting-label">Limiter RPM <span id="val-trainer-limiter" class="studio-range-val">9000 RPM</span></label>
+                            <input type="range" id="trainer-limiter" min="5000" max="12000" step="100" value="9000" oninput="document.getElementById('val-trainer-limiter').innerText = this.value + ' RPM'">
+                        </div>
+                        <div>
+                            <label class="setting-label">Soft Limiter RPM <span id="val-trainer-soft-limiter" class="studio-range-val">8800 RPM</span></label>
+                            <input type="range" id="trainer-soft-limiter" min="4800" max="11800" step="100" value="8800" oninput="document.getElementById('val-trainer-soft-limiter').innerText = this.value + ' RPM'">
+                        </div>
+                    </div>
+
+                    <div class="form-group-row">
+                        <div>
+                            <label class="setting-label">Engine Inertia (Rev Speed) <span id="val-trainer-inertia" class="studio-range-val">1.0</span></label>
+                            <input type="range" id="trainer-inertia" min="0.2" max="3.0" step="0.1" value="1.0" oninput="document.getElementById('val-trainer-inertia').innerText = parseFloat(this.value).toFixed(1)">
+                        </div>
+                        <div>
+                            <label class="setting-label">Gear Shift Time <span id="val-trainer-shifttime" class="studio-range-val">50 ms</span></label>
+                            <input type="range" id="trainer-shifttime" min="10" max="300" step="10" value="50" oninput="document.getElementById('val-trainer-shifttime').innerText = this.value + ' ms'">
+                        </div>
+                    </div>
+
+                    <div class="studio-section-title">🔊 AUDIO SAMPLES & CUSTOM UPLOADS</div>
+                    <div class="form-group-row">
+                        <div class="audio-sample-box">
+                            <label class="setting-label" style="font-size: 11px;">ON THROTTLE - HIGH RPM</label>
+                            <select id="sample-on-high-src" class="studio-input" style="font-size:11px;">
+                                <option value="audio/BAC_Mono_onhigh.wav">BAC Mono On-High</option>
+                                <option value="audio/458/power_2 {1d0b3340-525d-418d-b809-a61f94a1d76a}.wav">Ferrari 458 Power High</option>
+                                <option value="audio/procar/on_midhigh {eed64b99-c102-43cf-834e-4e4cafa68fdc}.wav">Procar Mid-High</option>
+                                <option value="audio/BAC_Mono_onmid.wav">BAC Mono Mid</option>
+                            </select>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <label class="file-upload-btn">
+                                    📁 UPLOAD WAV/MP3
+                                    <input type="file" accept="audio/*" style="display:none;" onchange="window.handleStudioFileUpload('on_high', this)">
+                                </label>
+                                <span id="upload-status-on-high" style="font-size:9px; color:#0ffffa;">Default</span>
+                            </div>
+                        </div>
+
+                        <div class="audio-sample-box">
+                            <label class="setting-label" style="font-size: 11px;">ON THROTTLE - LOW RPM</label>
+                            <select id="sample-on-low-src" class="studio-input" style="font-size:11px;">
+                                <option value="audio/BAC_Mono_onlow.wav">BAC Mono On-Low</option>
+                                <option value="audio/458/mid_res_2 {a777a51b-a829-4637-ac37-ccdaca0a3e9b}.wav">Ferrari 458 Mid Res</option>
+                                <option value="audio/procar/on_low {0477930f-2954-45ee-8ac4-db4867fe1749}.wav">Procar On-Low</option>
+                            </select>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <label class="file-upload-btn">
+                                    📁 UPLOAD WAV/MP3
+                                    <input type="file" accept="audio/*" style="display:none;" onchange="window.handleStudioFileUpload('on_low', this)">
+                                </label>
+                                <span id="upload-status-on-low" style="font-size:9px; color:#0ffffa;">Default</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group-row">
+                        <div class="audio-sample-box">
+                            <label class="setting-label" style="font-size: 11px;">OFF THROTTLE - HIGH RPM (DECEL)</label>
+                            <select id="sample-off-high-src" class="studio-input" style="font-size:11px;">
+                                <option value="audio/BAC_Mono_offveryhigh.wav">BAC Mono Off-High</option>
+                                <option value="audio/458/off_higher {b1e2e686-3bd7-43df-9cf9-3b8c1afcffc1}.wav">Ferrari 458 Off-Higher</option>
+                                <option value="audio/procar/off_midhigh {092a60f7-c729-4d2c-979e-2e766ba42c6c}.wav">Procar Off-MidHigh</option>
+                            </select>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <label class="file-upload-btn">
+                                    📁 UPLOAD WAV/MP3
+                                    <input type="file" accept="audio/*" style="display:none;" onchange="window.handleStudioFileUpload('off_high', this)">
+                                </label>
+                                <span id="upload-status-off-high" style="font-size:9px; color:#0ffffa;">Default</span>
+                            </div>
+                        </div>
+
+                        <div class="audio-sample-box">
+                            <label class="setting-label" style="font-size: 11px;">OFF THROTTLE - LOW RPM</label>
+                            <select id="sample-off-low-src" class="studio-input" style="font-size:11px;">
+                                <option value="audio/BAC_Mono_offlow.wav">BAC Mono Off-Low</option>
+                                <option value="audio/458/off_midhigh {94a99615-de6b-4b18-a977-a3b5e9b10641}.wav">Ferrari 458 Off-MidLow</option>
+                                <option value="audio/procar/off_lower {05f28dcf-8251-4e6a-bc40-8099139ef81e}.wav">Procar Off-Lower</option>
+                            </select>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <label class="file-upload-btn">
+                                    📁 UPLOAD WAV/MP3
+                                    <input type="file" accept="audio/*" style="display:none;" onchange="window.handleStudioFileUpload('off_low', this)">
+                                </label>
+                                <span id="upload-status-off-low" style="font-size:9px; color:#0ffffa;">Default</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:12px; margin-top:15px;">
+                        <button class="hud-btn" style="flex:1; padding:12px; border-color:#0ffffa; color:#0ffffa;" onclick="window.saveTrainedSoundProfile(true)">
+                            💾 SAVE & APPLY TO CAR 🏎️
+                        </button>
+                        <button class="hud-btn" style="padding:12px 20px; border-color:rgba(255,255,255,0.3); color:#fff;" onclick="window.saveTrainedSoundProfile(false)">
+                            💾 SAVE ONLY
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LIVE REV SIMULATOR BAR -->
+            <div class="studio-rev-bar">
+                <div>
+                    <div style="font-size:10px; color:rgba(255,255,255,0.5);">TEST SOUND LIVE</div>
+                    <div style="display:flex; align-items:baseline; gap:8px;">
+                        <span id="studio-rpm-display" style="font-size:24px; font-weight:900; color:#0ffffa;">1000</span>
+                        <span style="font-size:11px; color:rgba(255,255,255,0.7);">RPM</span>
+                    </div>
+                </div>
+
+                <div style="flex:1; max-width:260px;">
+                    <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:10px; overflow:hidden;">
+                        <div id="studio-rpm-bar-fill" style="width:10%; height:100%; background:linear-gradient(90deg, #0ffffa, #f092ff, #ff0055); transition:width 0.05s;"></div>
+                    </div>
+                </div>
+
+                <button id="studio-rev-hold-btn" class="studio-rev-btn"
+                    onmousedown="window.setStudioRev(true)" onmouseup="window.setStudioRev(false)"
+                    onmouseleave="window.setStudioRev(false)"
+                    touchstart="event.preventDefault(); window.setStudioRev(true)" touchend="event.preventDefault(); window.setStudioRev(false)">
+                    HOLD TO REV 🏎️
+                </button>
+            </div>
         </div>
     </div>
 

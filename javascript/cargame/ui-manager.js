@@ -427,3 +427,304 @@ document.addEventListener('DOMContentLoaded', () => {
     // small delay to allow gamepad api init
     setTimeout(checkGamepads, 500);
 });
+
+// --- CAR ENGINE SOUND STUDIO & TRAINER LOGIC ---
+window.activeSoundPreset = localStorage.getItem('drViceActiveSoundPreset') || 'bac_mono';
+window.customEngineConfigs = JSON.parse(localStorage.getItem('drViceCustomAudioConfigs') || '{}');
+window.studioUploadedFiles = {};
+
+window.defaultSoundPresets = {
+    bac_mono: {
+        name: 'BAC Mono',
+        desc: '2.5L High-Revving Inline-4 Race Engine',
+        badge: 'FORMULA STYLE',
+        engine: { limiter: 9000, soft_limiter: 8950, limiter_ms: 0, inertia: 1.0 },
+        drivetrain: { shiftTime: 50, damping: 16 },
+        sounds: {
+            on_high: { source: 'audio/BAC_Mono_onhigh.wav', rpm: 1000, volume: 0.5 },
+            on_low: { source: 'audio/BAC_Mono_onlow.wav', rpm: 1000, volume: 0.5 },
+            off_high: { source: 'audio/BAC_Mono_offveryhigh.wav', rpm: 1000, volume: 0.5 },
+            off_low: { source: 'audio/BAC_Mono_offlow.wav', rpm: 1000, volume: 0.5 },
+            limiter: { source: 'audio/limiter.wav', volume: 0.4, rpm: 8000 }
+        }
+    },
+    ferr_458: {
+        name: 'Ferrari 458 Italia',
+        desc: '4.5L Flat-Plane V8 Screamer Engine',
+        badge: 'ITALIAN V8',
+        engine: { limiter: 8900, soft_limiter: 8800, limiter_ms: 0, inertia: 0.8 },
+        drivetrain: { shiftTime: 10, damping: 6 },
+        sounds: {
+            on_high: { source: 'audio/458/power_2 {1d0b3340-525d-418d-b809-a61f94a1d76a}.wav', rpm: 7700, volume: 2.5 },
+            on_low: { source: 'audio/458/mid_res_2 {a777a51b-a829-4637-ac37-ccdaca0a3e9b}.wav', rpm: 5300, volume: 1.5 },
+            off_high: { source: 'audio/458/off_higher {b1e2e686-3bd7-43df-9cf9-3b8c1afcffc1}.wav', rpm: 7900, volume: 1.6 },
+            off_low: { source: 'audio/458/off_midhigh {94a99615-de6b-4b18-a977-a3b5e9b10641}.wav', rpm: 6900, volume: 1.4 },
+            limiter: { source: 'audio/458/limiter.wav', volume: 1.8, rpm: 0 }
+        }
+    },
+    procar: {
+        name: 'BMW M1 Procar',
+        desc: '3.5L Classic Straight-6 Motorsports Engine',
+        badge: 'CLASSIC M RACER',
+        engine: { limiter: 9000, soft_limiter: 9000, limiter_ms: 150, inertia: 1.2 },
+        drivetrain: { shiftTime: 100, damping: 12 },
+        sounds: {
+            on_high: { source: 'audio/procar/on_midhigh {eed64b99-c102-43cf-834e-4e4cafa68fdc}.wav', rpm: 8000, volume: 1.0 },
+            on_low: { source: 'audio/procar/on_low {0477930f-2954-45ee-8ac4-db4867fe1749}.wav', rpm: 3200, volume: 1.0 },
+            off_high: { source: 'audio/procar/off_midhigh {092a60f7-c729-4d2c-979e-2e766ba42c6c}.wav', rpm: 8430, volume: 1.3 },
+            off_low: { source: 'audio/procar/off_lower {05f28dcf-8251-4e6a-bc40-8099139ef81e}.wav', rpm: 3400, volume: 1.3 },
+            limiter: { source: 'audio/limiter.wav', volume: 0.5, rpm: 8000 }
+        }
+    }
+};
+
+window.toggleSoundStudio = () => {
+    const modal = document.getElementById('sound-studio-modal');
+    if (!modal) return;
+    const isVisible = modal.style.display === 'flex';
+    if (isVisible) {
+        modal.style.display = 'none';
+    } else {
+        modal.style.display = 'flex';
+        window.renderStudioPresets();
+        window.startStudioRevLoop();
+    }
+};
+
+window.switchStudioTab = (tab) => {
+    const presetsTab = document.getElementById('studio-tab-presets-content');
+    const trainerTab = document.getElementById('studio-tab-trainer-content');
+    const btnPresets = document.getElementById('tab-btn-presets');
+    const btnTrainer = document.getElementById('tab-btn-trainer');
+
+    if (tab === 'presets') {
+        presetsTab.style.display = 'block';
+        trainerTab.style.display = 'none';
+        btnPresets.classList.add('active');
+        btnTrainer.classList.remove('active');
+    } else {
+        presetsTab.style.display = 'none';
+        trainerTab.style.display = 'block';
+        btnPresets.classList.remove('active');
+        btnTrainer.classList.add('active');
+    }
+};
+
+window.renderStudioPresets = () => {
+    const container = document.getElementById('preset-cards-container');
+    if (!container) return;
+
+    const allPresets = { ...window.defaultSoundPresets, ...window.customEngineConfigs };
+    const currentActive = window.activeSoundPreset || 'bac_mono';
+
+    let html = '';
+    for (const key in allPresets) {
+        const p = allPresets[key];
+        const isActive = key === currentActive;
+        const isCustom = !!window.customEngineConfigs[key];
+
+        html += `
+            <div class="preset-card ${isActive ? 'active' : ''}">
+                <div class="preset-card-title">
+                    <span>${p.name || key}</span>
+                    <span class="preset-badge">${isCustom ? 'CUSTOM TRAINED' : (p.badge || 'BUILT-IN')}</span>
+                </div>
+                <div style="font-size: 11px; color: rgba(255,255,255,0.6); font-family: 'Inter', sans-serif;">
+                    ${p.desc || 'Custom engineered sound profile'}
+                </div>
+                <div class="preset-stat">
+                    <span>LIMITER:</span>
+                    <span style="color:#0ffffa;">${p.engine?.limiter || 9000} RPM</span>
+                </div>
+                <div class="preset-stat">
+                    <span>INERTIA:</span>
+                    <span style="color:#f092ff;">${p.engine?.inertia || 1.0}</span>
+                </div>
+
+                <div style="display:flex; gap:8px; margin-top:8px;">
+                    <button class="hud-btn" style="flex:1; padding:8px; font-size:10px; ${isActive ? 'border-color:#0ffffa; color:#0ffffa;' : ''}" 
+                        onclick="window.applySoundPreset('${key}')">
+                        ${isActive ? 'CURRENTLY ACTIVE ✅' : 'APPLY TO CAR 🏎️'}
+                    </button>
+                    ${isCustom ? `
+                        <button class="hud-btn" style="padding:8px; font-size:10px; border-color:#ff0055; color:#ff0055;" 
+                            onclick="window.deleteCustomSoundProfile('${key}')">🗑️</button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    container.innerHTML = html;
+};
+
+window.applySoundPreset = async (key) => {
+    if (window.initAudio) window.initAudio();
+
+    const allPresets = { ...window.defaultSoundPresets, ...window.customEngineConfigs };
+    const config = allPresets[key];
+    if (!config) return;
+
+    window.activeSoundPreset = key;
+    localStorage.setItem('drViceActiveSoundPreset', key);
+
+    if (window.startTypeScriptEngineAudio) {
+        await window.startTypeScriptEngineAudio(config);
+    }
+
+    window.renderStudioPresets();
+
+    if (window.showGameNotification) {
+        window.showGameNotification(`CAR ENGINE AUDIO: ${config.name || key} 🔊`, '#f092ff');
+    }
+};
+
+window.loadBasePresetToTrainer = (baseKey) => {
+    const base = window.defaultSoundPresets[baseKey] || window.defaultSoundPresets.bac_mono;
+    document.getElementById('trainer-limiter').value = base.engine.limiter || 9000;
+    document.getElementById('val-trainer-limiter').innerText = (base.engine.limiter || 9000) + ' RPM';
+
+    document.getElementById('trainer-soft-limiter').value = base.engine.soft_limiter || 8800;
+    document.getElementById('val-trainer-soft-limiter').innerText = (base.engine.soft_limiter || 8800) + ' RPM';
+
+    document.getElementById('trainer-inertia').value = base.engine.inertia || 1.0;
+    document.getElementById('val-trainer-inertia').innerText = parseFloat(base.engine.inertia || 1.0).toFixed(1);
+
+    document.getElementById('trainer-shifttime').value = base.drivetrain.shiftTime || 50;
+    document.getElementById('val-trainer-shifttime').innerText = (base.drivetrain.shiftTime || 50) + ' ms';
+};
+
+window.handleStudioFileUpload = (sampleKey, inputElem) => {
+    const file = inputElem.files && inputElem.files[0];
+    if (!file) return;
+
+    const fileUrl = URL.createObjectURL(file);
+    window.studioUploadedFiles[sampleKey] = fileUrl;
+
+    const statusElem = document.getElementById(`upload-status-${sampleKey.replace('_', '-')}`);
+    if (statusElem) {
+        statusElem.innerText = `Uploaded: ${file.name.substring(0, 15)}...`;
+        statusElem.style.color = '#f092ff';
+    }
+
+    if (window.showGameNotification) {
+        window.showGameNotification(`AUDIO FILE LOADED: ${file.name} 🎵`, '#0ffffa');
+    }
+};
+
+window.saveTrainedSoundProfile = (applyNow = true) => {
+    const name = document.getElementById('trainer-profile-name').value.trim() || 'Custom Trained Engine';
+    const key = 'custom_' + name.toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Date.now().toString().slice(-4);
+    const baseKey = document.getElementById('trainer-base-style').value;
+    const base = window.defaultSoundPresets[baseKey] || window.defaultSoundPresets.bac_mono;
+
+    const limiter = parseInt(document.getElementById('trainer-limiter').value) || 9000;
+    const softLimiter = parseInt(document.getElementById('trainer-soft-limiter').value) || 8800;
+    const inertia = parseFloat(document.getElementById('trainer-inertia').value) || 1.0;
+    const shiftTime = parseInt(document.getElementById('trainer-shifttime').value) || 50;
+
+    const getSampleSrc = (sampleKey) => {
+        if (window.studioUploadedFiles[sampleKey]) {
+            return window.studioUploadedFiles[sampleKey];
+        }
+        const sel = document.getElementById(`sample-${sampleKey.replace('_', '-')}-src`);
+        return sel ? sel.value : base.sounds[sampleKey].source;
+    };
+
+    const newConfig = {
+        name: name,
+        desc: `Custom trained ${limiter} RPM engine sound profile`,
+        badge: 'CUSTOM TRAINED',
+        engine: {
+            limiter: limiter,
+            soft_limiter: softLimiter,
+            limiter_ms: base.engine.limiter_ms || 0,
+            inertia: inertia
+        },
+        drivetrain: {
+            shiftTime: shiftTime,
+            damping: base.drivetrain.damping || 12
+        },
+        sounds: {
+            on_high: { source: getSampleSrc('on_high'), rpm: base.sounds.on_high.rpm, volume: base.sounds.on_high.volume || 1.0 },
+            on_low: { source: getSampleSrc('on_low'), rpm: base.sounds.on_low.rpm, volume: base.sounds.on_low.volume || 1.0 },
+            off_high: { source: getSampleSrc('off_high'), rpm: base.sounds.off_high.rpm, volume: base.sounds.off_high.volume || 1.0 },
+            off_low: { source: getSampleSrc('off_low'), rpm: base.sounds.off_low.rpm, volume: base.sounds.off_low.volume || 1.0 },
+            limiter: { source: 'audio/limiter.wav', volume: 0.5, rpm: limiter * 0.9 }
+        }
+    };
+
+    window.customEngineConfigs[key] = newConfig;
+
+    // Persist only non-blob configs or serialize safely
+    try {
+        localStorage.setItem('drViceCustomAudioConfigs', JSON.stringify(window.customEngineConfigs));
+    } catch (e) {
+        console.warn('Could not save to localStorage:', e);
+    }
+
+    if (applyNow) {
+        window.applySoundPreset(key);
+    } else {
+        window.renderStudioPresets();
+        window.switchStudioTab('presets');
+        if (window.showGameNotification) {
+            window.showGameNotification(`TRAINED SOUND PROFILE SAVED: ${name} 💾`, '#0ffffa');
+        }
+    }
+};
+
+window.deleteCustomSoundProfile = (key) => {
+    if (confirm("Delete this custom engine sound profile?")) {
+        delete window.customEngineConfigs[key];
+        try {
+            localStorage.setItem('drViceCustomAudioConfigs', JSON.stringify(window.customEngineConfigs));
+        } catch (e) {}
+
+        if (window.activeSoundPreset === key) {
+            window.applySoundPreset('bac_mono');
+        } else {
+            window.renderStudioPresets();
+        }
+    }
+};
+
+// Studio Live Rev Simulator
+window.isStudioRevving = false;
+window.setStudioRev = (isRevving) => {
+    window.isStudioRevving = isRevving;
+};
+
+window.startStudioRevLoop = () => {
+    if (window.studioRevLoopActive) return;
+    window.studioRevLoopActive = true;
+
+    const loop = () => {
+        const modal = document.getElementById('sound-studio-modal');
+        if (modal && modal.style.display === 'flex') {
+            const activeRef = window.getActiveVehicleEngine ? window.getActiveVehicleEngine() : null;
+            if (activeRef && activeRef.engine) {
+                if (window.isStudioRevving) {
+                    activeRef.engine.throttle = Math.min(1.0, activeRef.engine.throttle + 0.15);
+                } else if (!window.inputs?.fwd && !(window.keys && window.keys['KeyW']) && !(window.keys && window.keys['Space'])) {
+                    activeRef.engine.throttle = Math.max(0.0, activeRef.engine.throttle - 0.1);
+                }
+
+                const currentRpm = Math.floor(activeRef.engine.rpm || 1000);
+                const limiterRpm = activeRef.engine.limiter || 9000;
+                const percent = Math.min(100, Math.max(0, (currentRpm / limiterRpm) * 100));
+
+                const rpmDisp = document.getElementById('studio-rpm-display');
+                const rpmFill = document.getElementById('studio-rpm-bar-fill');
+                if (rpmDisp) rpmDisp.innerText = currentRpm;
+                if (rpmFill) rpmFill.style.width = percent + '%';
+            }
+            requestAnimationFrame(loop);
+        } else {
+            window.studioRevLoopActive = false;
+        }
+    };
+
+    requestAnimationFrame(loop);
+};
+

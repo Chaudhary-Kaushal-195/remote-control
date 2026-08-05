@@ -70,9 +70,21 @@ const startBtn = document.getElementById('start_btn');
 const controls = document.getElementById('controls');
 
 // @ts-ignore
-window.startTypeScriptEngineAudio = async function () {
-    // @ts-ignore
-    await vehicle.init(configurations[settings.activeConfig]);
+window.startTypeScriptEngineAudio = async function (customConfig?: any) {
+    let targetConfig = customConfig;
+    if (!targetConfig) {
+        // @ts-ignore
+        if (configurations[settings.activeConfig]) {
+            // @ts-ignore
+            targetConfig = configurations[settings.activeConfig];
+        } else if ((window as any).customEngineConfigs && (window as any).customEngineConfigs[settings.activeConfig]) {
+            targetConfig = (window as any).customEngineConfigs[settings.activeConfig];
+        } else {
+            targetConfig = configurations.bac_mono;
+        }
+    }
+
+    await vehicle.init(targetConfig);
 
     drivetrain.hp = 0; // Reset peak HP for new config
     engine.peakTorque = 0; // Reset peak torque for new config
@@ -88,8 +100,13 @@ window.startTypeScriptEngineAudio = async function () {
     }
 }
 
-startBtn?.addEventListener('click', (window as any).startTypeScriptEngineAudio, { once: true })
-document.querySelector('select')?.addEventListener('change', (window as any).startTypeScriptEngineAudio)
+// @ts-ignore
+window.getActiveVehicleEngine = function() {
+    return { vehicle, engine, drivetrain };
+};
+
+startBtn?.addEventListener('click', () => (window as any).startTypeScriptEngineAudio(), { once: true })
+document.querySelector('select')?.addEventListener('change', () => (window as any).startTypeScriptEngineAudio())
 
 /* Update loop */
 let
