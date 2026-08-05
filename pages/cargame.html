@@ -28,7 +28,7 @@
     </div>
 
     <!-- REMOTE CONNECTION STATUS BOX -->
-    <div id="remote-box" 
+    <div id="remote-box"
         style="position: absolute; top: 25px; left: 25px; padding: 12px 20px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: #fff; font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 1px; cursor: pointer; backdrop-filter: blur(5px); z-index: 6000; transition: all 0.3s;"
         onclick="window.initAudio(); window.setupRemote(true);">
         🤳 SYNC PHONE
@@ -47,13 +47,20 @@
                     <!-- RPM Ticks & Labels (0-12) -->
                     <g id="rpm-ticks">
                         <g id="rpm-ticks-lines"></g>
-                        <text x="29" y="73" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">0</text>
-                        <text x="22" y="52" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">2</text>
-                        <text x="29" y="31" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">4</text>
-                        <text x="50" y="24" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">6</text>
-                        <text x="71" y="31" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">8</text>
-                        <text x="78" y="52" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">10</text>
-                        <text x="71" y="73" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">12</text>
+                        <text x="29" y="73" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle"
+                            opacity="0.4">0</text>
+                        <text x="22" y="52" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle"
+                            opacity="0.4">2</text>
+                        <text x="29" y="31" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle"
+                            opacity="0.4">4</text>
+                        <text x="50" y="24" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle"
+                            opacity="0.4">6</text>
+                        <text x="71" y="31" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle"
+                            opacity="0.4">8</text>
+                        <text x="78" y="52" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle"
+                            opacity="0.4">10</text>
+                        <text x="71" y="73" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle"
+                            opacity="0.4">12</text>
                     </g>
 
                     <defs>
@@ -77,13 +84,19 @@
                     <circle id="shift-light" cx="50" cy="34" r="2.5" fill="#ff2244" opacity="0.1" />
 
                     <g id="rpm-needle-grp" transform="rotate(-135, 50, 50)">
-                        <rect x="49.5" y="11.5" width="1" height="29.5" fill="#ffffff" style="filter: drop-shadow(0 0 4px rgba(255,255,255,0.9));" />
+                        <rect x="49.5" y="11.5" width="1" height="29.5" fill="#ffffff"
+                            style="filter: drop-shadow(0 0 4px rgba(255,255,255,0.9));" />
                     </g>
                 </svg>
 
-                <div style="position: absolute; bottom: 20%; display: flex; flex-direction: column; align-items: center; width: 100%;">
-                    <div id="rpm-box" style="color: #fff; font-size: 30px; font-style: italic; font-weight: 900; text-shadow: 0 0 10px rgba(255,255,255,0.5); line-height: 1;">0</div>
-                    <div style="color: rgba(255,255,255,0.5); font-size: 12px; font-weight: bold; font-family: Orbitron; margin-top: 1px;">RPM</div>
+                <div
+                    style="position: absolute; bottom: 20%; display: flex; flex-direction: column; align-items: center; width: 100%;">
+                    <div id="rpm-box"
+                        style="color: #fff; font-size: 30px; font-style: italic; font-weight: 900; text-shadow: 0 0 10px rgba(255,255,255,0.5); line-height: 1;">
+                        0</div>
+                    <div
+                        style="color: rgba(255,255,255,0.5); font-size: 12px; font-weight: bold; font-family: Orbitron; margin-top: 1px;">
+                        RPM</div>
                 </div>
             </div>
         </div>
@@ -99,25 +112,39 @@
                     <!-- Speed Ticks -->
                     <g id="speed-ticks">
                         <g id="speed-ticks-lines"></g>
-                        <text x="29" y="73" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">0</text>
-                        <text x="22" y="52" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">100</text>
-                        <text x="29" y="31" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">200</text>
-                        <text x="50" y="24" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">300</text>
-                        <text x="71" y="31" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">400</text>
-                        <text x="78" y="52" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">500</text>
-                        <text x="71" y="73" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle" opacity="0.4">600</text>
+                        <text x="29" y="73" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle"
+                            opacity="0.4">0</text>
+                        <text x="22" y="52" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle"
+                            opacity="0.4">100</text>
+                        <text x="29" y="31" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle"
+                            opacity="0.4">200</text>
+                        <text x="50" y="24" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle"
+                            opacity="0.4">300</text>
+                        <text x="71" y="31" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle"
+                            opacity="0.4">400</text>
+                        <text x="78" y="52" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle"
+                            opacity="0.4">500</text>
+                        <text x="71" y="73" fill="#fff" font-size="5" font-family="Orbitron" text-anchor="middle"
+                            opacity="0.4">600</text>
                     </g>
 
-                    <path id="speed-arc" d="M 21.7 78.3 A 40 40 0 1 1 78.3 78.3" fill="none" stroke="rgba(255,255,255,0.8)"
-                        stroke-width="3" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="188.5" />
+                    <path id="speed-arc" d="M 21.7 78.3 A 40 40 0 1 1 78.3 78.3" fill="none"
+                        stroke="rgba(255,255,255,0.8)" stroke-width="3" stroke-linecap="round" stroke-dasharray="188.5"
+                        stroke-dashoffset="188.5" />
 
                     <g id="speed-needle-grp" transform="rotate(-135, 50, 50)">
-                        <rect x="49.5" y="11.5" width="1" height="29.5" fill="#fff" style="filter: drop-shadow(0 0 3px rgba(255,255,255,0.9));" />
+                        <rect x="49.5" y="11.5" width="1" height="29.5" fill="#fff"
+                            style="filter: drop-shadow(0 0 3px rgba(255,255,255,0.9));" />
                     </g>
                 </svg>
-                <div style="position: absolute; bottom: 20%; display: flex; flex-direction: column; align-items: center; width: 100%;">
-                    <div id="speed-box" style="color: #fff; font-size: 30px; font-style: italic; font-weight: 900; line-height: 1; text-shadow: 0 0 10px rgba(255,255,255,0.5);">0</div>
-                    <div id="speed-unit-label" style="color: rgba(255,255,255,0.5); font-size: 12px; font-weight: bold; font-family: Orbitron; margin-top: 1px;">KPH</div>
+                <div
+                    style="position: absolute; bottom: 20%; display: flex; flex-direction: column; align-items: center; width: 100%;">
+                    <div id="speed-box"
+                        style="color: #fff; font-size: 30px; font-style: italic; font-weight: 900; line-height: 1; text-shadow: 0 0 10px rgba(255,255,255,0.5);">
+                        0</div>
+                    <div id="speed-unit-label"
+                        style="color: rgba(255,255,255,0.5); font-size: 12px; font-weight: bold; font-family: Orbitron; margin-top: 1px;">
+                        KPH</div>
                 </div>
             </div>
         </div>
@@ -132,9 +159,8 @@
             <div style="display:flex; flex-direction:column; gap:15px; width:200px; margin:0 auto;">
                 <button class="hud-btn" style="padding:15px; font-size:16px;" onclick="window.togglePause()">RESUME
                     RACE</button>
-                <button class="hud-btn"
-                    style="padding:15px; font-size:16px;"
-                    onclick="window.toggleSettings()">⚙️ SETTINGS</button>
+                <button class="hud-btn" style="padding:15px; font-size:16px;" onclick="window.toggleSettings()">⚙️
+                    SETTINGS</button>
                 <button class="hud-btn" style="padding:10px; opacity:0.6; font-size:12px;"
                     onclick="window.location.href='index.html'">EXIT TO HUB</button>
             </div>
@@ -157,7 +183,7 @@
         <div class="loading-content">
             <h1 class="loading-title">🏎️ DR. VICE</h1>
             <p id="loading-start-prompt" class="loading-sub">TAP / PRESS ANY KEY TO START ENGINE</p>
-            
+
             <div id="loading-bar-container" style="display: none;">
                 <div class="loading-bar-track">
                     <div id="loading-bar-fill"></div>
@@ -182,8 +208,7 @@
             <div style="display:flex; gap:10px; justify-content:center;">
                 <button class="hud-btn" style="padding:10px 20px; font-size:14px; flex:1;"
                     onclick="window.handleGyroPrompt('connect')">CONNECT</button>
-                <button class="hud-btn"
-                    style="padding:10px 20px; font-size:14px; flex:1; opacity:0.7;"
+                <button class="hud-btn" style="padding:10px 20px; font-size:14px; flex:1; opacity:0.7;"
                     onclick="window.handleGyroPrompt('not_now')">NOT NOW</button>
             </div>
         </div>
@@ -200,7 +225,7 @@
                     PHONE DISCONNECTED
                 </div>
             </div>
-            
+
             <div class="setting-row" style="margin-bottom: 20px;">
                 <div id="settings-gamepad-status"
                     style="flex:1; display:flex; justify-content: space-between; align-items: center; padding:12px 20px; font-size:12px; border: 1px solid gray; color: gray; background: rgba(255,255,255,0.05); border-radius: 12px; font-family: 'Orbitron', sans-serif;">
@@ -208,7 +233,8 @@
                 </div>
             </div>
 
-            <div class="setting-row" style="flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 25px;">
+            <div class="setting-row"
+                style="flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 25px;">
                 <div class="setting-label">ACTIVE INPUT HARDWARE</div>
                 <div id="input-source-toggle" class="source-toggle-bar">
                     <!-- Dynamic content injected by ui-manager.js -->
@@ -255,7 +281,8 @@
 
             <div class="setting-row">
                 <div class="setting-label">Engine Sound Studio</div>
-                <button class="hud-btn" style="padding: 6px 14px; font-size: 10px;" onclick="window.toggleSettings(); window.toggleSoundStudio();">TRAIN SOUNDS 🔊</button>
+                <button class="hud-btn" style="padding: 6px 14px; font-size: 10px;"
+                    onclick="window.toggleSettings(); window.toggleSoundStudio();">TRAIN SOUNDS 🔊</button>
             </div>
 
             <button class="close-modal-btn" onclick="window.toggleSettings()">RESUME WITH UPDATES</button>
@@ -270,12 +297,15 @@
                     <h2 class="studio-title">🏎️ CAR ENGINE SOUND STUDIO</h2>
                     <div class="studio-subtitle">Train, tune, preview & customize car engine audio profiles</div>
                 </div>
-                <button class="hud-btn-circle" style="width:36px; height:36px; font-size:14px;" onclick="window.toggleSoundStudio()">✖</button>
+                <button class="hud-btn-circle" style="width:36px; height:36px; font-size:14px;"
+                    onclick="window.toggleSoundStudio()">✖</button>
             </div>
 
             <div class="studio-tabs">
-                <button id="tab-btn-presets" class="studio-tab-btn active" onclick="window.switchStudioTab('presets')">📻 PRESET LIBRARY</button>
-                <button id="tab-btn-trainer" class="studio-tab-btn" onclick="window.switchStudioTab('trainer')">🎛️ TRAIN & TUNE SOUNDS</button>
+                <button id="tab-btn-presets" class="studio-tab-btn active"
+                    onclick="window.switchStudioTab('presets')">📻 PRESET LIBRARY</button>
+                <button id="tab-btn-trainer" class="studio-tab-btn" onclick="window.switchStudioTab('trainer')">🎛️
+                    TRAIN & TUNE SOUNDS</button>
             </div>
 
             <!-- TAB 1: PRESETS GRID -->
@@ -296,11 +326,13 @@
                     <div class="form-group-row">
                         <div>
                             <label class="setting-label">Profile Name</label>
-                            <input type="text" id="trainer-profile-name" class="studio-input" placeholder="e.g. V8 Supercharged GT" value="Custom V8 Racer">
+                            <input type="text" id="trainer-profile-name" class="studio-input"
+                                placeholder="e.g. V8 Supercharged GT" value="Custom V8 Racer">
                         </div>
                         <div>
                             <label class="setting-label">Base Engine Style</label>
-                            <select id="trainer-base-style" class="studio-input" onchange="window.loadBasePresetToTrainer(this.value)">
+                            <select id="trainer-base-style" class="studio-input"
+                                onchange="window.loadBasePresetToTrainer(this.value)">
                                 <option value="bac_mono">BAC Mono (Inline-4 High Rev)</option>
                                 <option value="ferr_458">Ferrari 458 (Flat-Plane V8)</option>
                                 <option value="procar">BMW M1 Procar (Classic Inline-6)</option>
@@ -311,23 +343,31 @@
                     <div class="studio-section-title">⚡ ENGINE PERFORMANCE PARAMETERS</div>
                     <div class="form-group-row">
                         <div>
-                            <label class="setting-label">Limiter RPM <span id="val-trainer-limiter" class="studio-range-val">9000 RPM</span></label>
-                            <input type="range" id="trainer-limiter" min="5000" max="12000" step="100" value="9000" oninput="document.getElementById('val-trainer-limiter').innerText = this.value + ' RPM'">
+                            <label class="setting-label">Limiter RPM <span id="val-trainer-limiter"
+                                    class="studio-range-val">9000 RPM</span></label>
+                            <input type="range" id="trainer-limiter" min="5000" max="12000" step="100" value="9000"
+                                oninput="document.getElementById('val-trainer-limiter').innerText = this.value + ' RPM'">
                         </div>
                         <div>
-                            <label class="setting-label">Soft Limiter RPM <span id="val-trainer-soft-limiter" class="studio-range-val">8800 RPM</span></label>
-                            <input type="range" id="trainer-soft-limiter" min="4800" max="11800" step="100" value="8800" oninput="document.getElementById('val-trainer-soft-limiter').innerText = this.value + ' RPM'">
+                            <label class="setting-label">Soft Limiter RPM <span id="val-trainer-soft-limiter"
+                                    class="studio-range-val">8800 RPM</span></label>
+                            <input type="range" id="trainer-soft-limiter" min="4800" max="11800" step="100" value="8800"
+                                oninput="document.getElementById('val-trainer-soft-limiter').innerText = this.value + ' RPM'">
                         </div>
                     </div>
 
                     <div class="form-group-row">
                         <div>
-                            <label class="setting-label">Engine Inertia (Rev Speed) <span id="val-trainer-inertia" class="studio-range-val">1.0</span></label>
-                            <input type="range" id="trainer-inertia" min="0.2" max="3.0" step="0.1" value="1.0" oninput="document.getElementById('val-trainer-inertia').innerText = parseFloat(this.value).toFixed(1)">
+                            <label class="setting-label">Engine Inertia (Rev Speed) <span id="val-trainer-inertia"
+                                    class="studio-range-val">1.0</span></label>
+                            <input type="range" id="trainer-inertia" min="0.2" max="3.0" step="0.1" value="1.0"
+                                oninput="document.getElementById('val-trainer-inertia').innerText = parseFloat(this.value).toFixed(1)">
                         </div>
                         <div>
-                            <label class="setting-label">Gear Shift Time <span id="val-trainer-shifttime" class="studio-range-val">50 ms</span></label>
-                            <input type="range" id="trainer-shifttime" min="10" max="300" step="10" value="50" oninput="document.getElementById('val-trainer-shifttime').innerText = this.value + ' ms'">
+                            <label class="setting-label">Gear Shift Time <span id="val-trainer-shifttime"
+                                    class="studio-range-val">50 ms</span></label>
+                            <input type="range" id="trainer-shifttime" min="10" max="300" step="10" value="50"
+                                oninput="document.getElementById('val-trainer-shifttime').innerText = this.value + ' ms'">
                         </div>
                     </div>
 
@@ -337,16 +377,20 @@
                             <label class="setting-label" style="font-size: 11px;">ON THROTTLE - HIGH RPM</label>
                             <select id="sample-on-high-src" class="studio-input" style="font-size:11px;">
                                 <option value="audio/BAC_Mono_onhigh.wav">BAC Mono On-High</option>
-                                <option value="audio/458/power_2 {1d0b3340-525d-418d-b809-a61f94a1d76a}.wav">Ferrari 458 Power High</option>
-                                <option value="audio/procar/on_midhigh {eed64b99-c102-43cf-834e-4e4cafa68fdc}.wav">Procar Mid-High</option>
+                                <option value="audio/458/power_2 {1d0b3340-525d-418d-b809-a61f94a1d76a}.wav">Ferrari 458
+                                    Power High</option>
+                                <option value="audio/procar/on_midhigh {eed64b99-c102-43cf-834e-4e4cafa68fdc}.wav">
+                                    Procar Mid-High</option>
                                 <option value="audio/BAC_Mono_onmid.wav">BAC Mono Mid</option>
                             </select>
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <label class="file-upload-btn">
                                     📁 UPLOAD WAV/MP3
-                                    <input type="file" accept="audio/*" style="display:none;" onchange="window.handleStudioFileUpload('on_high', this)">
+                                    <input type="file" accept="audio/*" style="display:none;"
+                                        onchange="window.handleStudioFileUpload('on_high', this)">
                                 </label>
-                                <span id="upload-status-on-high" style="font-size:9px; color:rgba(255,255,255,0.7);">Default</span>
+                                <span id="upload-status-on-high"
+                                    style="font-size:9px; color:rgba(255,255,255,0.7);">Default</span>
                             </div>
                         </div>
 
@@ -354,33 +398,42 @@
                             <label class="setting-label" style="font-size: 11px;">ON THROTTLE - LOW RPM</label>
                             <select id="sample-on-low-src" class="studio-input" style="font-size:11px;">
                                 <option value="audio/BAC_Mono_onlow.wav">BAC Mono On-Low</option>
-                                <option value="audio/458/mid_res_2 {a777a51b-a829-4637-ac37-ccdaca0a3e9b}.wav">Ferrari 458 Mid Res</option>
-                                <option value="audio/procar/on_low {0477930f-2954-45ee-8ac4-db4867fe1749}.wav">Procar On-Low</option>
+                                <option value="audio/458/mid_res_2 {a777a51b-a829-4637-ac37-ccdaca0a3e9b}.wav">Ferrari
+                                    458 Mid Res</option>
+                                <option value="audio/procar/on_low {0477930f-2954-45ee-8ac4-db4867fe1749}.wav">Procar
+                                    On-Low</option>
                             </select>
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <label class="file-upload-btn">
                                     📁 UPLOAD WAV/MP3
-                                    <input type="file" accept="audio/*" style="display:none;" onchange="window.handleStudioFileUpload('on_low', this)">
+                                    <input type="file" accept="audio/*" style="display:none;"
+                                        onchange="window.handleStudioFileUpload('on_low', this)">
                                 </label>
-                                <span id="upload-status-on-low" style="font-size:9px; color:rgba(255,255,255,0.7);">Default</span>
+                                <span id="upload-status-on-low"
+                                    style="font-size:9px; color:rgba(255,255,255,0.7);">Default</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="form-group-row">
                         <div class="audio-sample-box">
-                            <label class="setting-label" style="font-size: 11px;">OFF THROTTLE - HIGH RPM (DECEL)</label>
+                            <label class="setting-label" style="font-size: 11px;">OFF THROTTLE - HIGH RPM
+                                (DECEL)</label>
                             <select id="sample-off-high-src" class="studio-input" style="font-size:11px;">
                                 <option value="audio/BAC_Mono_offveryhigh.wav">BAC Mono Off-High</option>
-                                <option value="audio/458/off_higher {b1e2e686-3bd7-43df-9cf9-3b8c1afcffc1}.wav">Ferrari 458 Off-Higher</option>
-                                <option value="audio/procar/off_midhigh {092a60f7-c729-4d2c-979e-2e766ba42c6c}.wav">Procar Off-MidHigh</option>
+                                <option value="audio/458/off_higher {b1e2e686-3bd7-43df-9cf9-3b8c1afcffc1}.wav">Ferrari
+                                    458 Off-Higher</option>
+                                <option value="audio/procar/off_midhigh {092a60f7-c729-4d2c-979e-2e766ba42c6c}.wav">
+                                    Procar Off-MidHigh</option>
                             </select>
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <label class="file-upload-btn">
                                     📁 UPLOAD WAV/MP3
-                                    <input type="file" accept="audio/*" style="display:none;" onchange="window.handleStudioFileUpload('off_high', this)">
+                                    <input type="file" accept="audio/*" style="display:none;"
+                                        onchange="window.handleStudioFileUpload('off_high', this)">
                                 </label>
-                                <span id="upload-status-off-high" style="font-size:9px; color:rgba(255,255,255,0.7);">Default</span>
+                                <span id="upload-status-off-high"
+                                    style="font-size:9px; color:rgba(255,255,255,0.7);">Default</span>
                             </div>
                         </div>
 
@@ -388,24 +441,30 @@
                             <label class="setting-label" style="font-size: 11px;">OFF THROTTLE - LOW RPM</label>
                             <select id="sample-off-low-src" class="studio-input" style="font-size:11px;">
                                 <option value="audio/BAC_Mono_offlow.wav">BAC Mono Off-Low</option>
-                                <option value="audio/458/off_midhigh {94a99615-de6b-4b18-a977-a3b5e9b10641}.wav">Ferrari 458 Off-MidLow</option>
-                                <option value="audio/procar/off_lower {05f28dcf-8251-4e6a-bc40-8099139ef81e}.wav">Procar Off-Lower</option>
+                                <option value="audio/458/off_midhigh {94a99615-de6b-4b18-a977-a3b5e9b10641}.wav">Ferrari
+                                    458 Off-MidLow</option>
+                                <option value="audio/procar/off_lower {05f28dcf-8251-4e6a-bc40-8099139ef81e}.wav">Procar
+                                    Off-Lower</option>
                             </select>
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <label class="file-upload-btn">
                                     📁 UPLOAD WAV/MP3
-                                    <input type="file" accept="audio/*" style="display:none;" onchange="window.handleStudioFileUpload('off_low', this)">
+                                    <input type="file" accept="audio/*" style="display:none;"
+                                        onchange="window.handleStudioFileUpload('off_low', this)">
                                 </label>
-                                <span id="upload-status-off-low" style="font-size:9px; color:rgba(255,255,255,0.7);">Default</span>
+                                <span id="upload-status-off-low"
+                                    style="font-size:9px; color:rgba(255,255,255,0.7);">Default</span>
                             </div>
                         </div>
                     </div>
 
                     <div style="display:flex; gap:12px; margin-top:15px;">
-                        <button class="hud-btn" style="flex:1; padding:12px;" onclick="window.saveTrainedSoundProfile(true)">
+                        <button class="hud-btn" style="flex:1; padding:12px;"
+                            onclick="window.saveTrainedSoundProfile(true)">
                             💾 SAVE & APPLY TO CAR 🏎️
                         </button>
-                        <button class="hud-btn" style="padding:12px 20px; opacity:0.8;" onclick="window.saveTrainedSoundProfile(false)">
+                        <button class="hud-btn" style="padding:12px 20px; opacity:0.8;"
+                            onclick="window.saveTrainedSoundProfile(false)">
                             💾 SAVE ONLY
                         </button>
                     </div>
@@ -417,21 +476,24 @@
                 <div>
                     <div style="font-size:10px; color:rgba(255,255,255,0.5);">TEST SOUND LIVE</div>
                     <div style="display:flex; align-items:baseline; gap:8px;">
-                        <span id="studio-rpm-display" style="font-size:24px; font-weight:900; color:#ffffff;">1000</span>
+                        <span id="studio-rpm-display"
+                            style="font-size:24px; font-weight:900; color:#ffffff;">1000</span>
                         <span style="font-size:11px; color:rgba(255,255,255,0.7);">RPM</span>
                     </div>
                 </div>
 
                 <div style="flex:1; max-width:260px;">
                     <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:10px; overflow:hidden;">
-                        <div id="studio-rpm-bar-fill" style="width:10%; height:100%; background:linear-gradient(90deg, rgba(255,255,255,0.4), #ffffff); transition:width 0.05s;"></div>
+                        <div id="studio-rpm-bar-fill"
+                            style="width:10%; height:100%; background:linear-gradient(90deg, rgba(255,255,255,0.4), #ffffff); transition:width 0.05s;">
+                        </div>
                     </div>
                 </div>
 
-                <button id="studio-rev-hold-btn" class="studio-rev-btn"
-                    onmousedown="window.setStudioRev(true)" onmouseup="window.setStudioRev(false)"
-                    onmouseleave="window.setStudioRev(false)"
-                    touchstart="event.preventDefault(); window.setStudioRev(true)" touchend="event.preventDefault(); window.setStudioRev(false)">
+                <button id="studio-rev-hold-btn" class="studio-rev-btn" onmousedown="window.setStudioRev(true)"
+                    onmouseup="window.setStudioRev(false)" onmouseleave="window.setStudioRev(false)"
+                    touchstart="event.preventDefault(); window.setStudioRev(true)"
+                    touchend="event.preventDefault(); window.setStudioRev(false)">
                     HOLD TO REV 🏎️
                 </button>
             </div>
@@ -477,8 +539,7 @@
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
     </script>
-    <!-- BASIC AUDIO SYNTHESIZER -->
-    <script src="../javascript/cargame/audio-synthesizer.js"></script>
+    <script type="module" src="../typescript/audio-engine/dist/assets/engine-audio.js"></script>
 
     <!-- EXTERNAL PEER JS API -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>

@@ -129,7 +129,7 @@ function animate() {
 
     const steeringMode = window.gameSettings ? window.gameSettings.steering : 'wheel';
     const isPhoneConnected = !!(window.conn && window.conn.open);
-    
+
     // BUG FIX: Use a 300ms staleness check.
     // Once gyroActive is set it was never cleared, causing the wheel to stay locked
     // to the last tilt value even after the user released the phone wheel.
@@ -188,7 +188,7 @@ function animate() {
             window.wheelAngle = 0;
         }
     }
-    
+
     // Sync visual wheel if not on phone (laptop HUD)
     if (!window.wheelVisualEl) window.wheelVisualEl = document.getElementById('wheel-visual');
     if (window.wheelVisualEl) window.wheelVisualEl.style.transform = `rotate(${window.wheelAngle}deg)`;
@@ -241,84 +241,77 @@ function animate() {
     const dt = Math.min((now - lastTime) / 1000, 0.1);
     lastTime = now;
 
-    let fwd = window.inputs?.fwd || 0;
-    let bwd = window.inputs?.bwd || 0;
-    let brakeIntensity = window.inputs?.brake || (window.inputs?.bwd ? 1.0 : 0.0);
-    let handbrake = window.inputs?.handbrake ? 1.0 : 0.0;
-    let throttle = (typeof fwd === 'number') ? fwd : (fwd ? 1.0 : 0.0);
+    let engineData = null;
+    if (window.getEngineData) engineData = window.getEngineData();
 
-    if (window.currentGear === undefined) window.currentGear = 1;
+    const maxGearSpeedsKPH = {
+        '-1': 60,
+        '0': 0,
+        '1': 100,
+        '2': 180,
+        '3': 260,
+        '4': 340,
+        '5': 420,
+        '6': 500
+    };
 
-    // Transmission Logic
-    let isAuto = window.gameSettings?.transmission === 'automatic';
-    let reverseBtn = window.inputs?.bwd;
-    
-    // Auto shift into reverse / forward when stopped
-    if (isAuto) {
-        if (reverseBtn && Math.abs(speed) <= 0.1) {
-            window.currentGear = -1;
-        } else if (throttle > 0 && window.currentGear === -1 && speed >= -0.1) {
-            window.currentGear = 1;
+    if (engineData) {
+        let currentGear = engineData.gear.toString();
+        let maxGearKPH = maxGearSpeedsKPH[currentGear] || 0;
+        let calculatedKPH = (engineData.rpm / 10000) * maxGearKPH;
+
+        let targetSpeed = calculatedKPH / 3.6;
+        if (engineData.gear === -1) {
+            targetSpeed = -targetSpeed;
         }
-    }
 
-    const maxGearSpeedsKPH = { '-1': 60, '0': 0, '1': 100, '2': 180, '3': 260, '4': 340, '5': 420, '6': 500 };
-    let maxKph = maxGearSpeedsKPH[window.currentGear.toString()] || 100;
-    let kph = Math.abs(speed) * 3.6;
+        let brakeIntensity = engineData.brake || 0;
 
-    // Auto upshifting / downshifting
-    if (isAuto && window.currentGear > 0) {
-        if (kph > maxKph * 0.9 && window.currentGear < 6) {
-            window.currentGear++;
-            maxKph = maxGearSpeedsKPH[window.currentGear.toString()];
-        } else if (kph < (maxGearSpeedsKPH[(window.currentGear - 1).toString()] || 0) * 0.7 && window.currentGear > 1) {
-            window.currentGear--;
-            maxKph = maxGearSpeedsKPH[window.currentGear.toString()];
+        if (brakeIntensity > 0) {
+            targetSpeed = 0;
         }
-    }
 
-    // Acceleration
-    if (throttle > 0 && window.currentGear !== 0) {
-        let accel = (window.currentGear === -1 ? -1 : 1) * throttle * (dt * 20.0);
-        speed += accel;
-    }
+        if (engineData.gear === 0) {
+            if (brakeIntensity > 0) {
+                let brakeForce = 0.5 * brakeIntensity * (dt * 60.0);
+                if (speed > 0) speed = Math.max(0, speed - brakeForce);
+                if (speed < 0) speed = Math.min(0, speed + brakeForce);
+            } else {
+                // Smooth coasting in neutral (drag)
+                speed *= 0.99;
+            }
+        } else {
+            // Calculate natural smooth jump
+            let smoothedDiff = (targetSpeed - speed) * (dt * 4.0);
 
-    // Natural drag
-    speed *= 0.992;
+            // Limit maximum jump so putting reverse at 90kph acts like brakes 
+            // instead of teleporting the car backwards instantly
+            let isBrakingOrReversing = (speed > 0 && targetSpeed <= 0) || (speed < 0 && targetSpeed >= 0);
+            let baseLimit = isBrakingOrReversing ? (dt * 30.0) : (dt * 12.0); // Braking force is stronger than acceleration
+            let fullBrakeLimit = dt * 50.0;
+            let limit = baseLimit + (fullBrakeLimit - baseLimit) * brakeIntensity;
 
-    // Braking
-    let totalBrake = Math.max(brakeIntensity, handbrake);
-    if (totalBrake > 0) {
-        let brakeForce = dt * 60.0 * totalBrake;
-        if (speed > 0) speed = Math.max(0, speed - brakeForce);
-        if (speed < 0) speed = Math.min(0, speed + brakeForce);
-    }
+            if (smoothedDiff > limit) smoothedDiff = limit;
+            if (smoothedDiff < -limit) smoothedDiff = -limit;
 
-    // Cap speed to gear limit
-    let speedKph = speed * 3.6;
-    if (window.currentGear > 0 && speedKph > maxKph) {
-        speed = maxKph / 3.6;
-    } else if (window.currentGear === -1 && speedKph < -maxKph) {
-        speed = -maxKph / 3.6;
-    }
+            speed += smoothedDiff;
+        }
 
-    // Calculate RPM based on speed and gear
-    let rpmPercent = (Math.abs(speed * 3.6) / maxKph);
-    rpm = 1000 + (rpmPercent * 9000); // 1000 Idle to 10000 Redline
+        rpm = engineData.rpm;
+    } else {
+        if (window.inputs && window.inputs.fwd) speed += 0.025;
+        else if (window.inputs && window.inputs.bwd) speed -= 0.015;
 
-    // Neutral revving
-    if (window.currentGear === 0) {
-        rpm = 1000 + (throttle * 9000);
-    }
+        let handbrakeIntensity = (window.inputs && window.inputs.handbrake) ? 1.0 : 0.0;
+        let combinedBrake = Math.max(brakeIntensity, handbrakeIntensity);
 
-    // Traditional Audio Synthesizer Pitch & Volume Mapping
-    if (window.engineOscillator && window.audioCtx) {
-        // Map 1000-10000 RPM to ~50Hz-400Hz
-        window.engineOscillator.frequency.setTargetAtTime(50 + (rpm * 0.035), window.audioCtx.currentTime, 0.05);
-    }
-    if (window.engineGain && window.masterVolume !== undefined) {
-        let volLevel = Math.max(0.15, throttle);
-        window.engineGain.gain.setTargetAtTime(volLevel * window.masterVolume * 0.5, window.audioCtx.currentTime, 0.1);
+        if (combinedBrake > 0) {
+            let brakeForce = 0.08 * combinedBrake;
+            if (speed > 0) speed = Math.max(0, speed - brakeForce);
+            if (speed < 0) speed = Math.min(0, speed + brakeForce);
+        }
+        speed *= (window.inputs && window.inputs.handbrake) ? 0.95 : 0.99;
+        rpm = Math.abs(speed) * 8000;
     }
 
     car.translateZ(speed * dt * 3.5);
@@ -334,7 +327,7 @@ function animate() {
     let camTarget = new THREE.Vector3();
     let camPos = new THREE.Vector3();
 
-    kph = Math.abs(speed * 3.6);
+    let kph = Math.abs(speed * 3.6);
     let speedOffset = Math.min(kph / 150, 1.0) * 2.5;
     let fovTightness = 0.12 + Math.min(kph / 500, 1.0) * 0.8;
 
@@ -371,7 +364,7 @@ function animate() {
         if (rawSpeed > 1) fuelLevel -= 0.001;
         if (rawSpeed > 1 && engineTemp < 90) engineTemp += 0.002;
         else if (engineTemp > 20) engineTemp -= 0.001;
-        window.updateHUD(rawSpeed, rpm, engineTemp, fuelLevel, null, window.currentGear);
+        window.updateHUD(rawSpeed, rpm, engineTemp, fuelLevel, engineData, window.manualGearIndex);
     }
 
     if (backfireTick > 0) {

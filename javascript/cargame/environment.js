@@ -60,9 +60,9 @@ window.initAudio = async () => {
     // Perform REAL Audio & Sound Engine Initialization
     if (!isAudioInit) {
         isAudioInit = true;
-        if (window.startBasicEngineAudio) {
+        if (window.startTypeScriptEngineAudio) {
             try {
-                await window.startBasicEngineAudio();
+                await window.startTypeScriptEngineAudio();
             } catch (err) {
                 console.error("Audio initialization error:", err);
             }
