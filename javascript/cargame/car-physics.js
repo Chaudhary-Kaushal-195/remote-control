@@ -343,7 +343,7 @@ function animate() {
         w.roller.rotation.x += speed * dt * 5.0;
         
         // Spin rear wheels during a burnout
-        if (i >= 2 && wheelspin > 0.1) {
+        if (i >= 2 && Math.abs(wheelspin) > 0.1) {
             w.roller.rotation.x += wheelspin * dt * 50.0;
         }
 
