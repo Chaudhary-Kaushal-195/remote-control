@@ -162,6 +162,14 @@ class AdvancedCarSimulator:
             # Regain grip, decay slip angle
             self.state["slip_angle"] *= (1.0 - dt * 3.0)
 
+        # Burnout / Wheelspin logic (Longitudinal slip)
+        # If high throttle at low speed in RWD, or holding brake + throttle
+        wheelspin = 0.0
+        if rear_power_ratio > 0.5 and throttle > 0.8:
+            if speed_kph < 20 or brake > 0.5:
+                wheelspin = throttle * rear_power_ratio
+        self.state["wheelspin"] = wheelspin
+
         # 15. Advanced Sim (Thermals)
         engine_heat = (rpm / 8000.0) * throttle * dt
         self.state["coolant_temp"] = max(90.0, min(120.0, self.state["coolant_temp"] + engine_heat * 0.5 - dt * (speed_kph/200.0)))

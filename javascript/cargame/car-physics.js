@@ -115,6 +115,10 @@ exhaust.add(flame);
 window.scene.add(car);
 window.car = car; // Store globally if needed
 
+const smokeParticles = [];
+const smokeGeo = new THREE.BoxGeometry(0.6, 0.6, 0.6);
+const smokeMat = new THREE.MeshBasicMaterial({ color: 0xdddddd, transparent: true, opacity: 0.6 });
+
 // --- ANIMATION LOOP ---
 let lastTime = performance.now();
 
@@ -336,6 +340,60 @@ function animate() {
     });
 
     car.updateMatrixWorld(true);
+
+    // --- DRIFT SMOKE PARTICLES ---
+    // Update existing particles
+    for (let i = smokeParticles.length - 1; i >= 0; i--) {
+        const p = smokeParticles[i];
+        p.position.y += dt * 2.0;
+        p.position.x += p.userData.vx * dt;
+        p.position.z += p.userData.vz * dt;
+        p.scale.x += dt * 2.0;
+        p.scale.y += dt * 2.0;
+        p.scale.z += dt * 2.0;
+        p.material.opacity -= dt * 1.5;
+        if (p.material.opacity <= 0) {
+            window.scene.remove(p);
+            smokeParticles.splice(i, 1);
+        }
+    }
+
+    // Emit new particles if drifting or burnout
+    let wheelspin = 0;
+    if (window.advancedTelemetry && window.advancedTelemetry.wheelspin) {
+        wheelspin = window.advancedTelemetry.wheelspin;
+    }
+    
+    let isDrifting = Math.abs(slipAngle) > 0.1 && Math.abs(speed) > 0.5;
+    let isBurnout = wheelspin > 0.5;
+
+    if (isDrifting || isBurnout) {
+        // Emit from rear wheels
+        const rw1 = new THREE.Vector3();
+        rw1.setFromMatrixPosition(wheels[2].anchor.matrixWorld);
+        const rw2 = new THREE.Vector3();
+        rw2.setFromMatrixPosition(wheels[3].anchor.matrixWorld);
+
+        [rw1, rw2].forEach(pos => {
+            // Create a few particles per wheel for density
+            for(let k = 0; k < 2; k++) {
+                const smoke = new THREE.Mesh(smokeGeo, smokeMat.clone());
+                smoke.position.copy(pos);
+                // Start slightly above ground
+                smoke.position.y = 0.2;
+                // Add random velocity spread
+                smoke.userData = {
+                    vx: (Math.random() - 0.5) * 2.0,
+                    vz: (Math.random() - 0.5) * 2.0
+                };
+                // Random scale
+                const s = 0.5 + Math.random() * 0.5;
+                smoke.scale.set(s, s, s);
+                window.scene.add(smoke);
+                smokeParticles.push(smoke);
+            }
+        });
+    }
 
     let camTarget = new THREE.Vector3();
     let camPos = new THREE.Vector3();

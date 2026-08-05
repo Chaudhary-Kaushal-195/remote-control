@@ -264,6 +264,17 @@ window.updateTelemetryUI = () => {
     if(el('tel-aero')) el('tel-aero').innerText = Math.round(data.aero_downforce || 0) + ' kg';
     if(el('tel-glat')) el('tel-glat').innerText = (data.g_lat || 0).toFixed(2) + ' G';
     if(el('tel-oil')) el('tel-oil').innerText = Math.round(data.oil_temp || 80) + ' °C';
+
+    if(el('tel-slip')) {
+        let deg = (data.slip_angle || 0) * (180 / Math.PI);
+        el('tel-slip').innerText = Math.abs(deg).toFixed(1) + '°';
+        el('tel-slip').style.color = Math.abs(deg) > 10 ? '#ff00ff' : '#ffffff';
+    }
+    if(el('tel-spin')) {
+        let spinPct = Math.min(100, (data.wheelspin || 0) * 100);
+        el('tel-spin').innerText = Math.round(spinPct) + '%';
+        el('tel-spin').style.color = spinPct > 20 ? '#ffaa00' : '#ffffff';
+    }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
