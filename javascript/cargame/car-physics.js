@@ -365,6 +365,10 @@ function animate() {
         if (rawSpeed > 1 && engineTemp < 90) engineTemp += 0.002;
         else if (engineTemp > 20) engineTemp -= 0.001;
         window.updateHUD(rawSpeed, rpm, engineTemp, fuelLevel, engineData, window.manualGearIndex);
+        if (window.sendTelemetryData) {
+            let currentGear = engineData ? engineData.gear : (window.manualGearIndex || 1);
+            window.sendTelemetryData(rawSpeed, rpm, currentGear);
+        }
     }
 
     if (backfireTick > 0) {

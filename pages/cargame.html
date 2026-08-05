@@ -177,6 +177,51 @@
         <button id="trans-trigger-btn" class="hud-btn" onclick="window.toggleTransmission()">AUTO</button>
         <button id="settings-trigger-btn" class="hud-btn-circle" onclick="window.toggleSettings()">⚙️</button>
         <button id="pause-btn" class="hud-btn" onclick="window.togglePause()">⏸ PAUSE</button>
+        <button id="telemetry-trigger-btn" class="hud-btn" onclick="document.getElementById('advanced-telemetry-panel').style.display = document.getElementById('advanced-telemetry-panel').style.display === 'none' ? 'block' : 'none';" style="padding: 10px 20px; font-size: 11px; border-color: #ffaa00; color: #ffaa00;">ADVANCED TELEMETRY</button>
+    </div>
+
+    <!-- ADVANCED TELEMETRY PANEL -->
+    <div id="advanced-telemetry-panel" style="display: none; position: absolute; top: 70px; right: 25px; width: 350px; background: rgba(0,0,0,0.85); border: 1px solid #ffaa00; border-radius: 8px; color: #fff; font-family: 'Orbitron', sans-serif; font-size: 10px; z-index: 5500; padding: 15px; box-shadow: 0 0 15px rgba(255, 170, 0, 0.2); backdrop-filter: blur(10px);">
+        <h3 style="color: #ffaa00; margin-top: 0; border-bottom: 1px solid rgba(255,170,0,0.3); padding-bottom: 8px; font-size: 12px; letter-spacing: 2px;">ADVANCED SIMULATION LIVE</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+            <div style="background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px;">
+                <div style="color: #aaa; font-size: 8px;">ENGINE HP</div>
+                <div id="tel-hp" style="font-size: 14px; font-weight: bold; color: #fff;">0</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px;">
+                <div style="color: #aaa; font-size: 8px;">TORQUE (Nm)</div>
+                <div id="tel-tq" style="font-size: 14px; font-weight: bold; color: #fff;">0</div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+            <div style="background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px;">
+                <div style="color: #aaa; font-size: 8px; margin-bottom:4px;">TIRE TEMPS (°C)</div>
+                <div style="display:flex; justify-content:space-between;"><span id="tel-tire-fl">25</span><span id="tel-tire-fr">25</span></div>
+                <div style="display:flex; justify-content:space-between;"><span id="tel-tire-rl">25</span><span id="tel-tire-rr">25</span></div>
+            </div>
+            <div style="background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px;">
+                <div style="color: #aaa; font-size: 8px; margin-bottom:4px;">SUSPENSION LOAD (%)</div>
+                <div style="display:flex; justify-content:space-between;"><span id="tel-susp-fl">50</span><span id="tel-susp-fr">50</span></div>
+                <div style="display:flex; justify-content:space-between;"><span id="tel-susp-rl">50</span><span id="tel-susp-rr">50</span></div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+            <div style="background: rgba(255,255,255,0.05); padding: 6px; border-radius: 4px; text-align: center;">
+                <div style="color: #aaa; font-size: 8px;">DOWNFORCE</div>
+                <div id="tel-aero" style="font-size: 11px; font-weight: bold;">0 kg</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.05); padding: 6px; border-radius: 4px; text-align: center;">
+                <div style="color: #aaa; font-size: 8px;">G-FORCE (LAT)</div>
+                <div id="tel-glat" style="font-size: 11px; font-weight: bold;">0.00 G</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.05); padding: 6px; border-radius: 4px; text-align: center;">
+                <div style="color: #aaa; font-size: 8px;">OIL TEMP</div>
+                <div id="tel-oil" style="font-size: 11px; font-weight: bold;">80 °C</div>
+            </div>
+        </div>
     </div>
 
     <div id="sound-overlay" onclick="window.initAudio()">
@@ -547,6 +592,7 @@
     <!-- LINKED JAVASCRIPT MODULES -->
     <script src="../javascript/cargame-hud.js"></script>
     <script src="../javascript/cargame/ui-manager.js"></script>
+    <script src="../javascript/cargame/telemetry-client.js"></script>
     <script src="../javascript/cargame/peer-connection.js"></script>
     <script src="../javascript/cargame/input-manager.js"></script>
     <script type="module" src="../javascript/cargame/environment.js"></script>
