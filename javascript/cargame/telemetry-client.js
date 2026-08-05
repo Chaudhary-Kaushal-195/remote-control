@@ -45,6 +45,7 @@ window.sendTelemetryData = (speed, rpm, gear) => {
         ws.send(JSON.stringify({
             throttle: throttle,
             brake: brake,
+            handbrake: window.inputs.handbrake ? 1.0 : 0.0,
             steering: steering,
             speed: speed,
             rpm: rpm,

@@ -1,5 +1,6 @@
 import asyncio
 import json
+# pyrefly: ignore [missing-import]
 import websockets
 import math
 import time
@@ -29,6 +30,8 @@ class AdvancedCarSimulator:
             # 5. Weight Transfer (G-Forces)
             "g_long": 0.0,
             "g_lat": 0.0,
+            # 6. Traction & Drift
+            "slip_angle": 0.0,
             # 7. Brakes
             "brake_temp_f": 30.0,
             "brake_temp_r": 30.0,
@@ -135,6 +138,30 @@ class AdvancedCarSimulator:
         # 11. Electronics
         self.state["tcs_active"] = throttle > 0.8 and speed_kph < 60.0 and gear == 1
 
+        # 12. Traction & Slip Angle (Drifting!)
+        handbrake = inputs.get("handbrake", 0.0)
+        
+        # Base grip limit increases with aero downforce (kg)
+        base_grip = 1.2 + (downforce / 800.0) 
+        
+        # Reduce rear grip if handbrake is pulled or extreme throttle is applied to RWD
+        rear_grip_loss = handbrake * 0.8
+        if rear_power_ratio > 0.5 and throttle > 0.7 and speed_kph > 30:
+            rear_grip_loss += (throttle - 0.7) * 1.5 * rear_power_ratio
+            
+        rear_grip = max(0.2, base_grip - rear_grip_loss)
+        
+        # If lateral G exceeds rear grip, car starts sliding
+        if abs(self.state["g_lat"]) > rear_grip:
+            excess_g = abs(self.state["g_lat"]) - rear_grip
+            # Generate a slip angle (in radians)
+            target_slip = min(excess_g * 0.15, 0.8) * (1 if self.state["g_lat"] > 0 else -1)
+            # Smoothly interpolate slip angle
+            self.state["slip_angle"] += (target_slip - self.state["slip_angle"]) * dt * 5.0
+        else:
+            # Regain grip, decay slip angle
+            self.state["slip_angle"] *= (1.0 - dt * 3.0)
+
         # 15. Advanced Sim (Thermals)
         engine_heat = (rpm / 8000.0) * throttle * dt
         self.state["coolant_temp"] = max(90.0, min(120.0, self.state["coolant_temp"] + engine_heat * 0.5 - dt * (speed_kph/200.0)))
@@ -152,7 +179,7 @@ async def telemetry_handler(websocket):
             # data looks like: { "throttle": 1.0, "brake": 0.0, "steering": 0.5, "speed": 120, "rpm": 6500, "gear": 3 }
             
             state = simulator.update(
-                inputs={"throttle": data.get("throttle", 0), "brake": data.get("brake", 0), "steering": data.get("steering", 0)},
+                inputs=data,
                 speed_kph=data.get("speed", 0),
                 rpm=data.get("rpm", 800),
                 gear=data.get("gear", 1)

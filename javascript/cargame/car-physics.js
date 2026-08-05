@@ -314,8 +314,21 @@ function animate() {
         rpm = Math.abs(speed) * 8000;
     }
 
-    car.translateZ(speed * dt * 3.5);
+    let slipAngle = 0;
+    if (window.advancedTelemetry && window.advancedTelemetry.slip_angle) {
+        slipAngle = window.advancedTelemetry.slip_angle;
+    }
+
+    let forwardSpeed = Math.cos(slipAngle) * speed;
+    let sidewaysSpeed = Math.sin(slipAngle) * speed;
+
+    car.translateZ(forwardSpeed * dt * 3.5);
+    car.translateX(-sidewaysSpeed * dt * 3.5); // Slide in the opposite direction of the nose
+    
+    // Base steering
     car.rotation.y -= (window.wheelAngle / 180) * 0.05 * (speed * 0.2);
+    // Oversteer from slipping (whipping the tail)
+    car.rotation.y += slipAngle * dt * 4.0;
 
     wheels.forEach((w, i) => {
         w.roller.rotation.x += speed * dt * 5.0;
