@@ -322,8 +322,8 @@ window.applyGameConfig = (config) => {
     if (transBtn) {
         const isAuto = config.transmission === 'automatic';
         transBtn.innerText = isAuto ? "AUTO" : "MANUAL";
-        transBtn.style.borderColor = isAuto ? "var(--neon-blue)" : "var(--neon-pink)";
-        transBtn.style.color = isAuto ? "var(--neon-blue)" : "var(--neon-pink)";
+        transBtn.style.borderColor = "rgba(255, 255, 255, 0.4)";
+        transBtn.style.color = "#ffffff";
     }
 
     // Reset visibility

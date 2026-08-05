@@ -3,9 +3,9 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(0, 0, 0, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     z-index: 9999;
     flex-direction: column;
     align-items: center;
@@ -15,14 +15,14 @@
 }
 
 #reader-modal {
-    background: linear-gradient(145deg, #1a0030, #0d0020);
-    border: 2px solid var(--neon-blue);
+    background: linear-gradient(145deg, #121620, #0a0c10);
+    border: 1px solid var(--border-dim);
     padding: 16px;
     border-radius: var(--radius-lg);
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-shadow: 0 0 40px rgba(15, 255, 250, 0.2);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
     width: 90%;
     max-width: 380px;
     max-height: 95vh;
@@ -30,7 +30,7 @@
 }
 
 #reader-modal h2 {
-    color: var(--neon-blue);
+    color: var(--accent-primary);
     margin: 0 0 10px 0;
     font-size: 18px;
     letter-spacing: 2px;
@@ -42,10 +42,10 @@
     aspect-ratio: 1 / 1;
     height: auto;
     max-height: 42vh;
-    border: 2px solid var(--neon-blue);
+    border: 1px solid var(--border-dim);
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 0 20px rgba(15, 255, 250, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     background: #000;
 }
 
@@ -70,7 +70,7 @@
 
 /* ─── SCAN BUTTON (Connection Overlay) ─── */
 .scan-btn {
-    background: rgba(255, 255, 255, 0.92) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
     color: #000 !important;
     font-weight: 900 !important;
     font-family: inherit;

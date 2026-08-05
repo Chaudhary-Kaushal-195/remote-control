@@ -1,7 +1,7 @@
         :root {
-            --neon-blue: #0ffffa;
-            --neon-pink: #f092ff;
-            --neon-red: #ff0055;
+            --accent-primary: #ffffff;
+            --accent-secondary: rgba(255, 255, 255, 0.85);
+            --accent-red: #ff3b30;
             --glass: rgba(255, 255, 255, 0.05);
             --glass-border: rgba(255, 255, 255, 0.1);
         }
@@ -74,11 +74,11 @@
             font-size: 4rem;
             margin: 0;
             letter-spacing: 12px;
-            background: linear-gradient(to bottom, #fff, var(--neon-blue));
+            background: linear-gradient(to bottom, #fff, rgba(255,255,255,0.7));
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 20px 40px rgba(15, 255, 250, 0.3);
+            text-shadow: none;
         }
 
         .header p {
@@ -118,11 +118,11 @@
         }
 
         .card.primary {
-            border-left: 4px solid var(--neon-blue);
+            border-left: 4px solid var(--accent-primary);
         }
 
         .card.secondary {
-            border-left: 4px solid var(--neon-pink);
+            border-left: 4px solid var(--accent-secondary);
         }
 
         .card-info {
@@ -168,7 +168,7 @@
 
         .settings-btn:hover {
             transform: rotate(90deg) scale(1.1);
-            border-color: var(--neon-pink);
+            border-color: rgba(255, 255, 255, 0.4);
         }
 
         /* Settings Modal */
@@ -191,7 +191,7 @@
             max-height: 85vh;
             border-radius: 30px;
             padding: 30px;
-            box-shadow: 0 0 100px rgba(240, 146, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
             overflow-y: auto;
             box-sizing: border-box;
             display: flex;
@@ -204,7 +204,7 @@
         }
 
         .modal-content::-webkit-scrollbar-thumb {
-            background: var(--neon-pink);
+            background: rgba(255, 255, 255, 0.3);
             border-radius: 10px;
         }
 
@@ -219,7 +219,7 @@
         .setting-label {
             font-size: 14px;
             font-weight: 600;
-            color: var(--neon-pink);
+            color: var(--accent-primary);
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -255,13 +255,13 @@
             margin-top: 30px;
             width: 100%;
             padding: 15px;
-            background: var(--neon-pink);
+            background: #ffffff;
             border: none;
             border-radius: 12px;
             font-weight: bold;
             cursor: pointer;
             color: #000;
-            box-shadow: 0 0 20px rgba(240, 146, 255, 0.3);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
             transition: 0.2s;
         }
 
@@ -286,19 +286,19 @@
             appearance: none;
             width: 20px;
             height: 20px;
-            background: var(--neon-blue);
+            background: var(--accent-primary);
             border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 0 10px var(--neon-blue);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
             border: 2px solid #fff;
         }
 
         input[type="range"]::-moz-range-thumb {
             width: 20px;
             height: 20px;
-            background: var(--neon-blue);
+            background: var(--accent-primary);
             border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 0 10px var(--neon-blue);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
             border: 2px solid #fff;
         }

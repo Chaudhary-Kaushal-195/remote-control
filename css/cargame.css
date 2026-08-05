@@ -5,17 +5,17 @@
 @import url('cargame/environment.css');
 
 :root {
-    --neon-blue: #0ffffa;
-    --neon-pink: #f092ff;
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.1);
+    --accent-primary: #ffffff;
+    --accent-secondary: rgba(255, 255, 255, 0.85);
+    --glass-bg: rgba(20, 24, 32, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.15);
 }
 
 html,
 body {
     margin: 0 !important;
     overflow: hidden !important;
-    background: #05000a !important;
+    background: #0b0d12 !important;
     font-family: 'Inter', sans-serif;
     user-select: none;
     touch-action: none;

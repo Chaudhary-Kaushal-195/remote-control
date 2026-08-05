@@ -3,15 +3,15 @@
     position: absolute;
     top: 25px;
     left: 25px;
-    color: var(--neon-blue);
+    color: #ffffff;
     text-transform: uppercase;
     letter-spacing: 1px;
     pointer-events: none;
     z-index: 100;
-    font-size: 16px;
+    font-size: 15px;
     font-family: 'Orbitron', sans-serif;
-    background: rgba(10, 0, 20, 0.7);
-    border: 1px solid rgba(15, 255, 250, 0.2);
+    background: rgba(18, 20, 26, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     padding: 18px;
     border-radius: 16px;
     backdrop-filter: blur(15px);
@@ -20,7 +20,7 @@
 }
 
 #hud b {
-    color: #0ffffa;
+    color: #ffffff;
     font-weight: 900;
 }
 
@@ -34,7 +34,7 @@
 }
 
 #speed-box:active {
-    background: rgba(0, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
 }
 
 .hud-meta {
@@ -59,30 +59,30 @@
 
 /* ELEGANT DAT.GUI THEME OVERRIDES */
 .dg.main {
-    background: rgba(10, 0, 20, 0.7) !important;
+    background: rgba(16, 18, 24, 0.85) !important;
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(15, 255, 250, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
     border-bottom: none !important;
     border-right: none !important;
-    border-radius: 6px !important;
+    border-radius: 12px !important;
     overflow: hidden !important;
-    box-shadow: -10px 10px 40px rgba(0, 0, 0, 0.8) !important;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7) !important;
     padding-bottom: 10px !important;
     width: 280px !important;
 }
 
 .dg li.title {
-    background: linear-gradient(90deg, rgba(15, 255, 250, 0.1), transparent) !important;
-    border-bottom: 1px solid rgba(15, 255, 250, 0.2) !important;
-    color: var(--neon-blue) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
     font-family: 'Orbitron', sans-serif !important;
     text-transform: uppercase !important;
     letter-spacing: 2px !important;
     font-size: 10px !important;
-    padding: 4px 15px !important;
+    padding: 6px 15px !important;
     line-height: normal !important;
-    text-shadow: 0 0 10px rgba(15, 255, 250, 0.3) !important;
+    text-shadow: none !important;
 }
 
 /* Ensure closed folders hide their content */
@@ -94,7 +94,7 @@
 
 .dg li.cr {
     background: transparent !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
     height: 28px !important;
     line-height: 28px !important;
     padding: 0 10px !important;
@@ -104,7 +104,7 @@
 .dg .property-name {
     font-family: 'Inter', sans-serif !important;
     font-size: 11px !important;
-    color: rgba(255, 255, 255, 0.6) !important;
+    color: rgba(255, 255, 255, 0.65) !important;
     font-weight: 600 !important;
     float: left !important;
     width: 30% !important;
@@ -121,7 +121,7 @@
 
 .dg .c input[type=text] {
     background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
     border-radius: 6px !important;
     color: #fff !important;
     padding: 2px 8px !important;
@@ -136,7 +136,7 @@
 
 .dg .c select {
     background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
     border-radius: 6px !important;
     color: #fff !important;
     padding: 2px 8px !important;
@@ -150,25 +150,25 @@
 }
 
 .dg .c .slider {
-    background: rgba(255, 255, 255, 0.05) !important;
-    height: 14px !important;
-    margin-top: 6px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    height: 12px !important;
+    margin-top: 8px !important;
     border-radius: 4px !important;
-    border: 1px solid rgba(15, 255, 250, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
     overflow: hidden !important;
     float: left !important;
     width: 60% !important;
 }
 
 .dg .slider-fg {
-    background: #0ffffa !important;
+    background: #ffffff !important;
     height: 100% !important;
-    box-shadow: 0 0 15px rgba(15, 255, 250, 0.5) !important;
+    box-shadow: none !important;
 }
 
 .dg .c input[type=text] {
     background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
     border-radius: 6px !important;
     color: #fff !important;
     padding: 3px 8px !important;
@@ -178,7 +178,7 @@
 }
 
 .dg .cr.number input[type=text] {
-    color: var(--neon-blue) !important;
+    color: #ffffff !important;
     font-family: 'Orbitron', sans-serif !important;
     font-weight: 700 !important;
     text-align: right !important;
@@ -259,8 +259,8 @@
     position: absolute;
     font-family: 'Orbitron', sans-serif;
     font-weight: 900;
-    color: var(--neon-pink);
-    text-shadow: 0 0 20px rgba(240, 146, 255, 0.6);
+    color: var(--accent-secondary);
+    text-shadow: none;
     filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
     bottom: 45px;
     font-size: 42px;

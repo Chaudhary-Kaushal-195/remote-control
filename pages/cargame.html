@@ -126,14 +126,14 @@
     <!-- UI Overlays -->
     <div id="pause-overlay">
         <div class="pause-content">
-            <h1 style="color:var(--neon-blue); margin-bottom:10px;">GAME PAUSED</h1>
+            <h1 style="color:var(--accent-primary); margin-bottom:10px;">GAME PAUSED</h1>
             <p style="color:#fff; opacity:0.7; margin-bottom:30px;">TAKE A BREATH, CHAMP.</p>
 
             <div style="display:flex; flex-direction:column; gap:15px; width:200px; margin:0 auto;">
                 <button class="hud-btn" style="padding:15px; font-size:16px;" onclick="window.togglePause()">RESUME
                     RACE</button>
                 <button class="hud-btn"
-                    style="padding:15px; font-size:16px; border-color:var(--neon-pink); color:var(--neon-pink);"
+                    style="padding:15px; font-size:16px;"
                     onclick="window.toggleSettings()">⚙️ SETTINGS</button>
                 <button class="hud-btn" style="padding:10px; opacity:0.6; font-size:12px;"
                     onclick="window.location.href='index.html'">EXIT TO HUB</button>
@@ -143,7 +143,7 @@
 
     <div style="position: absolute; top: 25px; right: 25px; display: flex; gap: 12px; z-index: 6001;">
         <button id="sound-studio-btn" class="hud-btn" onclick="window.toggleSoundStudio()"
-            style="padding: 10px 18px; font-size: 11px; border-color: #f092ff; color: #f092ff; box-shadow: 0 0 15px rgba(240, 146, 255, 0.3);">🔊 CAR SOUND STUDIO</button>
+            style="padding: 10px 18px; font-size: 11px;">🔊 CAR SOUND STUDIO</button>
         <button id="details-trigger-btn" class="hud-btn" onclick="window.toggleDebugPanel()"
             style="padding: 10px 20px; font-size: 11px;">MORE DETAILS</button>
         <button id="cam-trigger-btn" class="hud-btn-circle"
@@ -168,7 +168,7 @@
     </div>
 
     <div id="qr-overlay">
-        <h2 style="color:#0ffffa; margin-top:0;">SCAN TO CONNECT</h2>
+        <h2 style="color:#ffffff; margin-top:0;">SCAN TO CONNECT</h2>
         <div id="qr-code"></div>
         <p style="font-size:12px; opacity:0.8;">SCAN WITH PHONE CAMERA TO USE AS CONTROLLER</p>
         <div class="qr-close" onclick="document.getElementById('qr-overlay').style.display='none'">CLOSE</div>
@@ -177,13 +177,13 @@
     <div id="gyro-prompt-overlay"
         style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9000; align-items:center; justify-content:center; flex-direction:column; backdrop-filter: blur(8px);">
         <div class="modal-content" style="text-align:center;">
-            <h2 style="color:var(--neon-blue); margin-top:0;">CONNECT PHONE</h2>
+            <h2 style="color:#ffffff; margin-top:0;">CONNECT PHONE</h2>
             <p style="color:#fff; opacity:0.8; margin-bottom:20px;">Connect your phone to use Gyro steering.</p>
             <div style="display:flex; gap:10px; justify-content:center;">
                 <button class="hud-btn" style="padding:10px 20px; font-size:14px; flex:1;"
                     onclick="window.handleGyroPrompt('connect')">CONNECT</button>
                 <button class="hud-btn"
-                    style="padding:10px 20px; font-size:14px; flex:1; border-color:var(--neon-pink); color:var(--neon-pink);"
+                    style="padding:10px 20px; font-size:14px; flex:1; opacity:0.7;"
                     onclick="window.handleGyroPrompt('not_now')">NOT NOW</button>
             </div>
         </div>
@@ -192,7 +192,7 @@
     <!-- IN-GAME SETTINGS MODAL -->
     <div id="settings-modal" onclick="event.target === this && window.toggleSettings()">
         <div class="modal-content">
-            <h2 style="margin-top:0; color:var(--neon-blue); letter-spacing:2px;">LIVE SETTINGS</h2>
+            <h2 style="margin-top:0; color:var(--accent-primary); letter-spacing:2px;">LIVE SETTINGS</h2>
 
             <div class="setting-row" style="margin-bottom: 10px;">
                 <div id="settings-phone-status"
@@ -255,7 +255,7 @@
 
             <div class="setting-row">
                 <div class="setting-label">Engine Sound Studio</div>
-                <button class="hud-btn" style="padding: 6px 14px; font-size: 10px; border-color: #f092ff; color: #f092ff;" onclick="window.toggleSettings(); window.toggleSoundStudio();">TRAIN SOUNDS 🔊</button>
+                <button class="hud-btn" style="padding: 6px 14px; font-size: 10px;" onclick="window.toggleSettings(); window.toggleSoundStudio();">TRAIN SOUNDS 🔊</button>
             </div>
 
             <button class="close-modal-btn" onclick="window.toggleSettings()">RESUME WITH UPDATES</button>
@@ -270,7 +270,7 @@
                     <h2 class="studio-title">🏎️ CAR ENGINE SOUND STUDIO</h2>
                     <div class="studio-subtitle">Train, tune, preview & customize car engine audio profiles</div>
                 </div>
-                <button class="hud-btn-circle" style="width:36px; height:36px; font-size:14px; border-color:#f092ff; color:#f092ff;" onclick="window.toggleSoundStudio()">✖</button>
+                <button class="hud-btn-circle" style="width:36px; height:36px; font-size:14px;" onclick="window.toggleSoundStudio()">✖</button>
             </div>
 
             <div class="studio-tabs">
@@ -284,7 +284,7 @@
                     <!-- Injected dynamically by UI manager -->
                 </div>
                 <div style="text-align: center; margin-top: 15px;">
-                    <button class="hud-btn" style="margin: 0 auto; border-color:#f092ff; color:#f092ff;" onclick="window.switchStudioTab('trainer')">
+                    <button class="hud-btn" style="margin: 0 auto;" onclick="window.switchStudioTab('trainer')">
                         ➕ TRAIN NEW CAR SOUND PROFILE
                     </button>
                 </div>
@@ -346,7 +346,7 @@
                                     📁 UPLOAD WAV/MP3
                                     <input type="file" accept="audio/*" style="display:none;" onchange="window.handleStudioFileUpload('on_high', this)">
                                 </label>
-                                <span id="upload-status-on-high" style="font-size:9px; color:#0ffffa;">Default</span>
+                                <span id="upload-status-on-high" style="font-size:9px; color:rgba(255,255,255,0.7);">Default</span>
                             </div>
                         </div>
 
@@ -362,7 +362,7 @@
                                     📁 UPLOAD WAV/MP3
                                     <input type="file" accept="audio/*" style="display:none;" onchange="window.handleStudioFileUpload('on_low', this)">
                                 </label>
-                                <span id="upload-status-on-low" style="font-size:9px; color:#0ffffa;">Default</span>
+                                <span id="upload-status-on-low" style="font-size:9px; color:rgba(255,255,255,0.7);">Default</span>
                             </div>
                         </div>
                     </div>
@@ -380,7 +380,7 @@
                                     📁 UPLOAD WAV/MP3
                                     <input type="file" accept="audio/*" style="display:none;" onchange="window.handleStudioFileUpload('off_high', this)">
                                 </label>
-                                <span id="upload-status-off-high" style="font-size:9px; color:#0ffffa;">Default</span>
+                                <span id="upload-status-off-high" style="font-size:9px; color:rgba(255,255,255,0.7);">Default</span>
                             </div>
                         </div>
 
@@ -396,16 +396,16 @@
                                     📁 UPLOAD WAV/MP3
                                     <input type="file" accept="audio/*" style="display:none;" onchange="window.handleStudioFileUpload('off_low', this)">
                                 </label>
-                                <span id="upload-status-off-low" style="font-size:9px; color:#0ffffa;">Default</span>
+                                <span id="upload-status-off-low" style="font-size:9px; color:rgba(255,255,255,0.7);">Default</span>
                             </div>
                         </div>
                     </div>
 
                     <div style="display:flex; gap:12px; margin-top:15px;">
-                        <button class="hud-btn" style="flex:1; padding:12px; border-color:#0ffffa; color:#0ffffa;" onclick="window.saveTrainedSoundProfile(true)">
+                        <button class="hud-btn" style="flex:1; padding:12px;" onclick="window.saveTrainedSoundProfile(true)">
                             💾 SAVE & APPLY TO CAR 🏎️
                         </button>
-                        <button class="hud-btn" style="padding:12px 20px; border-color:rgba(255,255,255,0.3); color:#fff;" onclick="window.saveTrainedSoundProfile(false)">
+                        <button class="hud-btn" style="padding:12px 20px; opacity:0.8;" onclick="window.saveTrainedSoundProfile(false)">
                             💾 SAVE ONLY
                         </button>
                     </div>
@@ -417,14 +417,14 @@
                 <div>
                     <div style="font-size:10px; color:rgba(255,255,255,0.5);">TEST SOUND LIVE</div>
                     <div style="display:flex; align-items:baseline; gap:8px;">
-                        <span id="studio-rpm-display" style="font-size:24px; font-weight:900; color:#0ffffa;">1000</span>
+                        <span id="studio-rpm-display" style="font-size:24px; font-weight:900; color:#ffffff;">1000</span>
                         <span style="font-size:11px; color:rgba(255,255,255,0.7);">RPM</span>
                     </div>
                 </div>
 
                 <div style="flex:1; max-width:260px;">
                     <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:10px; overflow:hidden;">
-                        <div id="studio-rpm-bar-fill" style="width:10%; height:100%; background:linear-gradient(90deg, #0ffffa, #f092ff, #ff0055); transition:width 0.05s;"></div>
+                        <div id="studio-rpm-bar-fill" style="width:10%; height:100%; background:linear-gradient(90deg, rgba(255,255,255,0.4), #ffffff); transition:width 0.05s;"></div>
                     </div>
                 </div>
 

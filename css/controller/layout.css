@@ -1,13 +1,13 @@
 /* ─── CSS VARIABLES ─── */
 :root {
-    --neon-blue: #0ffffa;
-    --neon-pink: #f092ff;
-    --neon-red: #ff0055;
-    --bg-deep: #0a0015;
-    --bg-glass: rgba(15, 5, 30, 0.85);
+    --accent-primary: #ffffff;
+    --accent-secondary: rgba(255, 255, 255, 0.85);
+    --accent-red: #ff3b30;
+    --bg-deep: #0b0d12;
+    --bg-glass: rgba(18, 22, 30, 0.85);
     --bg-glass-light: rgba(255, 255, 255, 0.05);
-    --border-dim: rgba(255, 255, 255, 0.08);
-    --border-glow: rgba(15, 255, 250, 0.4);
+    --border-dim: rgba(255, 255, 255, 0.15);
+    --border-glow: rgba(255, 255, 255, 0.3);
     --radius-lg: 20px;
     --radius-md: 14px;
     --radius-sm: 8px;
@@ -20,8 +20,8 @@
     left: 50%;
     transform: translateX(-50%);
     font-size: 11px;
-    color: var(--neon-pink);
-    text-shadow: 0 0 8px var(--neon-pink);
+    color: var(--accent-secondary);
+    text-shadow: none;
     z-index: 300;
     letter-spacing: 1px;
     pointer-events: none;
@@ -65,14 +65,14 @@
 #overlay h1 {
     font-size: 32px;
     margin: 0 0 5px 0;
-    color: var(--neon-blue);
-    text-shadow: 0 0 20px var(--neon-blue);
+    color: var(--accent-primary);
+    text-shadow: none;
     letter-spacing: 3px;
 }
 
 input[type="text"] {
     background: var(--bg-glass-light);
-    border: 2px solid var(--neon-pink);
+    border: 1px solid var(--border-dim);
     color: #fff;
     padding: 14px 20px;
     font-size: 20px;
@@ -84,18 +84,18 @@ input[type="text"] {
     outline: none;
     font-family: inherit;
     font-weight: bold;
-    box-shadow: 0 0 12px rgba(240, 146, 255, 0.15);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 input[type="text"]:focus {
-    border-color: var(--neon-blue);
-    box-shadow: 0 0 20px rgba(15, 255, 250, 0.3);
+    border-color: var(--accent-primary);
+    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
 }
 
 /* Generic overlay buttons */
 #overlay button {
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.95);
     color: #000;
     border: none;
     padding: 14px 36px;
@@ -106,7 +106,7 @@ input[type="text"]:focus {
     margin: 8px 0;
     max-width: 85%;
     transition: transform 0.15s, box-shadow 0.15s;
-    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.15);
     font-family: 'Inter', sans-serif;
 }
 
@@ -127,8 +127,8 @@ input[type="text"]:focus {
 
 .ctrl-hub-btn {
     background: var(--bg-glass);
-    border: 1.5px solid var(--neon-blue);
-    color: var(--neon-blue);
+    border: 1px solid var(--border-dim);
+    color: var(--accent-primary);
     padding: 0;
     margin: 0;
     box-sizing: border-box;
@@ -138,18 +138,17 @@ input[type="text"]:focus {
     display: grid;
     place-items: center;
     font-size: 22px;
-    box-shadow: 0 0 12px rgba(15, 255, 250, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     cursor: pointer;
     transition: transform 0.15s, background 0.15s;
     overflow: hidden;
     text-align: center;
     -webkit-user-select: none;
     user-select: none;
-    /* Allow normal click behavior — NO touch-action override */
 }
 
 .ctrl-hub-btn:active {
-    background: var(--neon-blue);
+    background: var(--accent-primary);
     color: #000;
     transform: scale(0.88);
 }
@@ -170,7 +169,7 @@ input[type="text"]:focus {
     bottom: 6px;
     left: 10px;
     font-size: 9px;
-    color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.3);
     z-index: 10;
     pointer-events: none;
 }
@@ -182,8 +181,8 @@ input[type="text"]:focus {
     left: 50%;
     transform: translateX(-50%);
     background: rgba(255, 255, 255, 0.06);
-    border: 1px solid var(--neon-pink);
-    color: var(--neon-pink);
+    border: 1px solid var(--border-dim);
+    color: var(--accent-primary);
     padding: 10px 18px;
     border-radius: var(--radius-sm);
     cursor: pointer;
@@ -195,7 +194,7 @@ input[type="text"]:focus {
 }
 
 #fix-sensors:active {
-    background: var(--neon-pink);
+    background: var(--accent-primary);
     color: #000;
 }
 
@@ -215,15 +214,15 @@ input[type="text"]:focus {
 
 .gear-btn {
     background: var(--bg-glass);
-    border: 2px solid var(--neon-pink);
-    color: var(--neon-pink);
+    border: 1px solid var(--border-dim);
+    color: var(--accent-primary);
     padding: 18px 28px;
     border-radius: var(--radius-md);
     font-family: inherit;
     font-weight: 900;
     font-size: 14px;
-    text-shadow: 0 0 8px var(--neon-pink);
-    box-shadow: 0 0 12px rgba(240, 146, 255, 0.15);
+    text-shadow: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     transition: transform 0.1s, background 0.1s;
     touch-action: none;
     -webkit-user-select: none;
@@ -231,7 +230,7 @@ input[type="text"]:focus {
 }
 
 .gear-btn:active {
-    background: var(--neon-pink);
+    background: var(--accent-primary);
     color: #000;
     text-shadow: none;
     transform: scale(0.94);
@@ -241,9 +240,9 @@ input[type="text"]:focus {
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(0, 0, 0, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -251,16 +250,16 @@ input[type="text"]:focus {
 }
 
 .modal-content {
-    background: linear-gradient(145deg, #1a0030, #0d0020);
-    border: 1.5px solid var(--neon-blue);
-    padding: 20px;
+    background: linear-gradient(145deg, #121620, #0a0c10);
+    border: 1px solid var(--border-dim);
+    padding: 24px;
     border-radius: var(--radius-lg);
     width: 88%;
     max-width: 440px;
     max-height: 85vh;
     overflow-y: auto;
     text-align: center;
-    box-shadow: 0 0 40px rgba(15, 255, 250, 0.15), inset 0 0 30px rgba(15, 255, 250, 0.03);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -272,7 +271,7 @@ input[type="text"]:focus {
 }
 
 .modal-content::-webkit-scrollbar-thumb {
-    background: var(--neon-blue);
+    background: rgba(255, 255, 255, 0.3);
     border-radius: 10px;
 }
 
@@ -309,7 +308,7 @@ input[type="text"]:focus {
 
 .setting-row label {
     font-size: 9px;
-    color: var(--neon-pink);
+    color: var(--accent-secondary);
     letter-spacing: 1.5px;
     text-transform: uppercase;
 }
@@ -328,7 +327,7 @@ select {
 }
 
 select:focus {
-    border-color: var(--neon-blue);
+    border-color: var(--accent-primary);
 }
 
 /* Range Sliders */
@@ -350,42 +349,41 @@ input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 22px;
     height: 22px;
-    background: var(--neon-blue);
+    background: var(--accent-primary);
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 0 10px var(--neon-blue);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     border: 2px solid #fff;
 }
 
 input[type="range"]::-moz-range-thumb {
     width: 22px;
     height: 22px;
-    background: var(--neon-blue);
+    background: var(--accent-primary);
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 0 10px var(--neon-blue);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     border: 2px solid #fff;
 }
 
 /* Modal close / action button */
 .modal-close-btn {
-    background: transparent;
-    border: 1.5px solid var(--neon-pink);
-    color: var(--neon-pink);
-    text-shadow: 0 0 8px var(--neon-pink);
-    box-shadow: 0 0 12px rgba(240, 146, 255, 0.15);
+    background: #ffffff;
+    border: none;
+    color: #000000;
+    text-shadow: none;
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
     transition: transform 0.15s, background 0.15s;
     padding: 12px 20px;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 800;
     border-radius: var(--radius-md);
     cursor: pointer;
 }
 
 .modal-close-btn:active {
-    background: var(--neon-pink);
+    background: rgba(255, 255, 255, 0.8);
     color: #000;
-    text-shadow: none;
     transform: scale(0.97);
 }
 
@@ -404,12 +402,12 @@ input[type="range"]::-moz-range-thumb {
 }
 
 #desktop-blocker h1 {
-    color: var(--neon-red);
-    text-shadow: 0 0 15px var(--neon-red);
+    color: var(--accent-red);
+    text-shadow: none;
 }
 
 #desktop-blocker p {
-    color: var(--neon-pink);
+    color: var(--accent-secondary);
     max-width: 380px;
     line-height: 1.5;
 }

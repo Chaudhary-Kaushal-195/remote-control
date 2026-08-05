@@ -22,8 +22,8 @@ window.toggleTransmission = () => {
     if (transBtn) {
         const isAuto = window.gameSettings.transmission === 'automatic';
         transBtn.innerText = isAuto ? "AUTO" : "MANUAL";
-        transBtn.style.borderColor = isAuto ? "var(--neon-blue)" : "var(--neon-pink)";
-        transBtn.style.color = isAuto ? "var(--neon-blue)" : "var(--neon-pink)";
+        transBtn.style.borderColor = "rgba(255, 255, 255, 0.4)";
+        transBtn.style.color = "#ffffff";
     }
 
     // Save to localStorage directly to avoid reading from (possibly closed) modal
@@ -149,8 +149,8 @@ window.toggleDebugPanel = () => {
     const btn = document.getElementById('details-trigger-btn');
     if (btn) {
         btn.innerText = isHidden ? "CLOSE CONTROLS" : "MORE DETAILS";
-        btn.style.borderColor = isHidden ? "var(--neon-pink)" : "var(--neon-blue)";
-        btn.style.color = isHidden ? "var(--neon-pink)" : "var(--neon-blue)";
+        btn.style.borderColor = "rgba(255, 255, 255, 0.4)";
+        btn.style.color = "#ffffff";
     }
 };
 
@@ -162,24 +162,24 @@ window.updateControllerUI = (isConnected) => {
         const isUsingPhone = isConnected && window.activeInputSource === 'phone';
         if (isConnected) {
             statusRow.innerHTML = `
-                <span style="color: #00ffff; text-transform: uppercase;">PHONE CONNECTED</span>
+                <span style="color: #ffffff; text-transform: uppercase;">PHONE CONNECTED</span>
                 <button class="hud-btn" onclick="window.toggleControllerConnection()" 
-                    style="padding: 6px 14px; font-size: 10px; border-color: #fff; color: #fff; opacity: 0.5; cursor: pointer; border-radius: 8px; margin-left: auto;">
+                    style="padding: 6px 14px; font-size: 10px; border-color: #fff; color: #fff; opacity: 0.7; cursor: pointer; border-radius: 8px; margin-left: auto;">
                     DISCONNECT
                 </button>
             `;
-            statusRow.style.borderColor = "#00ffff";
-            statusRow.style.background = "rgba(0,255,255,0.05)";
+            statusRow.style.borderColor = "rgba(255, 255, 255, 0.3)";
+            statusRow.style.background = "rgba(255,255,255,0.08)";
         } else {
             statusRow.innerHTML = `
                 <span style="color: gray; text-transform: uppercase;">PHONE DISCONNECTED</span>
                 <button class="hud-btn" onclick="window.toggleControllerConnection()" 
-                    style="padding: 6px 14px; font-size: 10px; border-color: #0ffffa; color: #0ffffa; cursor: pointer; border-radius: 8px;">
+                    style="padding: 6px 14px; font-size: 10px; border-color: rgba(255,255,255,0.4); color: #fff; cursor: pointer; border-radius: 8px;">
                     CONNECT
                 </button>
             `;
-            statusRow.style.borderColor = "gray";
-            statusRow.style.background = "rgba(255,255,255,0.05)";
+            statusRow.style.borderColor = "rgba(255,255,255,0.15)";
+            statusRow.style.background = "rgba(255,255,255,0.03)";
         }
     }
 
@@ -193,13 +193,13 @@ window.updateControllerUI = (isConnected) => {
         const isGamepadInUse = window.gamepadConnected && window.activeInputSource === 'gamepad';
 
         if (phoneConnectedActual) {
-            phoneRow = `<div style="color: #0ffffa;">PHONE CONNECTED${isPhoneInUse ? ' <span style="font-size:8px; opacity:0.8;">(IN USE)</span>' : ''}</div>`;
+            phoneRow = `<div style="color: #ffffff;">PHONE CONNECTED${isPhoneInUse ? ' <span style="font-size:8px; opacity:0.8;">(IN USE)</span>' : ''}</div>`;
         } else if (window.lastPeerId) {
-            phoneRow = `<div style="color: #0ffffa; opacity: 0.8;">ID: ${window.lastPeerId} (CLICK FOR QR)</div>`;
+            phoneRow = `<div style="color: #ffffff; opacity: 0.8;">ID: ${window.lastPeerId} (CLICK FOR QR)</div>`;
         }
 
         if (window.gamepadConnected) {
-            gamepadRow = `<div style="color: var(--neon-pink);">GAMEPAD CONNECTED${isGamepadInUse ? ' <span style="font-size:8px; opacity:0.8;">(IN USE)</span>' : ''}</div>`;
+            gamepadRow = `<div style="color: #ffffff;">GAMEPAD CONNECTED${isGamepadInUse ? ' <span style="font-size:8px; opacity:0.8;">(IN USE)</span>' : ''}</div>`;
         }
 
         const combinedHtml = (phoneRow + gamepadRow).trim();
@@ -231,14 +231,14 @@ window.updateGamepadUI = (isConnected) => {
         const isUsingGamepad = isConnected && window.activeInputSource === 'gamepad';
         if (isConnected) {
             statusRow.innerHTML = `
-                <span style="color: var(--neon-pink); text-transform: uppercase;">GAMEPAD CONNECTED</span>
+                <span style="color: #ffffff; text-transform: uppercase;">GAMEPAD CONNECTED</span>
                 <button class="hud-btn" onclick="window.manualGamepadDisconnect()" 
-                    style="padding: 6px 14px; font-size: 10px; border-color: #fff; color: #fff; opacity: 0.5; cursor: pointer; border-radius: 8px; margin-left: auto;">
+                    style="padding: 6px 14px; font-size: 10px; border-color: #fff; color: #fff; opacity: 0.7; cursor: pointer; border-radius: 8px; margin-left: auto;">
                     DISCONNECT
                 </button>
             `;
-            statusRow.style.borderColor = "var(--neon-pink)";
-            statusRow.style.background = "rgba(240, 146, 255, 0.05)";
+            statusRow.style.borderColor = "rgba(255, 255, 255, 0.3)";
+            statusRow.style.background = "rgba(255,255,255,0.08)";
         } else {
             statusRow.innerHTML = `
                 <span style="color: gray; text-transform: uppercase;">GAMEPAD DISCONNECTED</span>
@@ -247,8 +247,8 @@ window.updateGamepadUI = (isConnected) => {
                     CONNECT
                 </button>
             `;
-            statusRow.style.borderColor = "gray";
-            statusRow.style.background = "rgba(255,255,255,0.05)";
+            statusRow.style.borderColor = "rgba(255,255,255,0.15)";
+            statusRow.style.background = "rgba(255,255,255,0.03)";
         }
     }
     if (window.updateInputSourceToggle) window.updateInputSourceToggle();
@@ -276,8 +276,7 @@ window.activateInputSource = (source) => {
     
     if (window.showGameNotification) {
         const label = source === 'keyboard' ? 'LAPTOP 💻' : source.toUpperCase();
-        const color = source === 'gamepad' ? 'var(--neon-pink)' : (source === 'phone' ? '#00ffff' : 'white');
-        window.showGameNotification(`INPUT SOURCE: ${label} 🏎️`, color);
+        window.showGameNotification(`INPUT SOURCE: ${label} 🏎️`, 'white');
     }
 
     // Force UI refresh
@@ -371,7 +370,7 @@ window.addEventListener("gamepadconnected", (e) => {
     window.gamepadIndex = e.gamepad.index;
     if (window.updateGamepadUI) window.updateGamepadUI(true);
     if (window.startGamepadLoop) window.startGamepadLoop();
-    if (window.showGameNotification) window.showGameNotification("GAMEPAD CONNECTED ✅", "#f092ff");
+    if (window.showGameNotification) window.showGameNotification("GAMEPAD CONNECTED ✅", "white");
 });
 
 window.addEventListener("gamepaddisconnected", (e) => {
@@ -379,7 +378,7 @@ window.addEventListener("gamepaddisconnected", (e) => {
         window.gamepadConnected = false;
         window.gamepadIndex = null;
         if (window.updateGamepadUI) window.updateGamepadUI(false);
-        if (window.showGameNotification) window.showGameNotification("GAMEPAD DISCONNECTED ❌", "#ff0055");
+        if (window.showGameNotification) window.showGameNotification("GAMEPAD DISCONNECTED ❌", "#ff3b30");
     }
 });
 
@@ -534,20 +533,20 @@ window.renderStudioPresets = () => {
                 </div>
                 <div class="preset-stat">
                     <span>LIMITER:</span>
-                    <span style="color:#0ffffa;">${p.engine?.limiter || 9000} RPM</span>
+                    <span style="color:#ffffff;">${p.engine?.limiter || 9000} RPM</span>
                 </div>
                 <div class="preset-stat">
                     <span>INERTIA:</span>
-                    <span style="color:#f092ff;">${p.engine?.inertia || 1.0}</span>
+                    <span style="color:rgba(255,255,255,0.8);">${p.engine?.inertia || 1.0}</span>
                 </div>
 
                 <div style="display:flex; gap:8px; margin-top:8px;">
-                    <button class="hud-btn" style="flex:1; padding:8px; font-size:10px; ${isActive ? 'border-color:#0ffffa; color:#0ffffa;' : ''}" 
+                    <button class="hud-btn" style="flex:1; padding:8px; font-size:10px; ${isActive ? 'background:rgba(255,255,255,0.2); border-color:#ffffff;' : ''}" 
                         onclick="window.applySoundPreset('${key}')">
                         ${isActive ? 'CURRENTLY ACTIVE ✅' : 'APPLY TO CAR 🏎️'}
                     </button>
                     ${isCustom ? `
-                        <button class="hud-btn" style="padding:8px; font-size:10px; border-color:#ff0055; color:#ff0055;" 
+                        <button class="hud-btn" style="padding:8px; font-size:10px; opacity:0.7;" 
                             onclick="window.deleteCustomSoundProfile('${key}')">🗑️</button>
                     ` : ''}
                 </div>
@@ -575,7 +574,7 @@ window.applySoundPreset = async (key) => {
     window.renderStudioPresets();
 
     if (window.showGameNotification) {
-        window.showGameNotification(`CAR ENGINE AUDIO: ${config.name || key} 🔊`, '#f092ff');
+        window.showGameNotification(`CAR ENGINE AUDIO: ${config.name || key} 🔊`, 'white');
     }
 };
 
@@ -604,11 +603,11 @@ window.handleStudioFileUpload = (sampleKey, inputElem) => {
     const statusElem = document.getElementById(`upload-status-${sampleKey.replace('_', '-')}`);
     if (statusElem) {
         statusElem.innerText = `Uploaded: ${file.name.substring(0, 15)}...`;
-        statusElem.style.color = '#f092ff';
+        statusElem.style.color = '#ffffff';
     }
 
     if (window.showGameNotification) {
-        window.showGameNotification(`AUDIO FILE LOADED: ${file.name} 🎵`, '#0ffffa');
+        window.showGameNotification(`AUDIO FILE LOADED: ${file.name} 🎵`, 'white');
     }
 };
 
@@ -669,7 +668,7 @@ window.saveTrainedSoundProfile = (applyNow = true) => {
         window.renderStudioPresets();
         window.switchStudioTab('presets');
         if (window.showGameNotification) {
-            window.showGameNotification(`TRAINED SOUND PROFILE SAVED: ${name} 💾`, '#0ffffa');
+            window.showGameNotification(`TRAINED SOUND PROFILE SAVED: ${name} 💾`, 'white');
         }
     }
 };

@@ -27,7 +27,7 @@ window.requestGearShift = (direction) => {
         if (window.toggleTransmission) {
             window.toggleTransmission();
             if (window.showGameNotification) {
-                window.showGameNotification("MANUAL TRANSMISSION ACTIVATED ⚙️", "var(--neon-pink)");
+                window.showGameNotification("MANUAL TRANSMISSION ACTIVATED ⚙️", "white");
             }
         }
     }
