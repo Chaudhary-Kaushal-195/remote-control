@@ -345,6 +345,8 @@ function animate() {
     if (Math.abs(wheelspin) > 0.2 && Math.abs(speed) < 5.0 && Math.abs(window.wheelAngle) > 10) {
         let donutSpin = (window.wheelAngle / 180) * Math.abs(wheelspin) * dt * 3.0;
         car.rotation.y -= donutSpin;
+        // Shift the car to pivot around the front axle (Z = 1.3) instead of the center
+        car.translateX(1.3 * donutSpin);
     }
 
     wheels.forEach((w, i) => {
