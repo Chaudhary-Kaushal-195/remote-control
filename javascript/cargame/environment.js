@@ -133,21 +133,69 @@ window.cycleCamera = () => {
     if (btn) btn.innerText = `🎥 VIEW: ${cameraModes[window.cameraMode]}`;
 };
 
-const canvas = document.createElement('canvas');
-canvas.width = 512; canvas.height = 512;
-const ctx = canvas.getContext('2d');
-ctx.fillStyle = '#cccccc'; ctx.fillRect(0, 0, 512, 512);
-ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0, 0, 256, 256); ctx.fillRect(256, 256, 256, 256);
+// Grass Terrain
+const grassMat = new THREE.MeshStandardMaterial({ color: 0x1f5c22, roughness: 1.0 });
+const grassGeo = new THREE.PlaneGeometry(100000, 100000);
+const grass = new THREE.Mesh(grassGeo, grassMat);
+grass.rotation.x = -Math.PI / 2;
+window.scene.add(grass);
 
-const floorTex = new THREE.CanvasTexture(canvas);
-floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping;
-floorTex.repeat.set(2500, 2500);
+// Road
+const roadMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
+const roadGeo = new THREE.PlaneGeometry(30, 100000); // 30 wide highway
+const road = new THREE.Mesh(roadGeo, roadMat);
+road.rotation.x = -Math.PI / 2;
+road.position.y = 0.01; // Slightly above grass
+window.scene.add(road);
 
-const floorMat = new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.8 });
-const floorGeo = new THREE.PlaneGeometry(100000, 100000);
-const floor = new THREE.Mesh(floorGeo, floorMat);
-floor.rotation.x = -Math.PI / 2;
-window.scene.add(floor);
+// Road markings (white dashed line)
+const lineCanvas = document.createElement('canvas');
+lineCanvas.width = 64; lineCanvas.height = 256;
+const ctx = lineCanvas.getContext('2d');
+ctx.fillStyle = '#222222'; ctx.fillRect(0,0,64,256);
+ctx.fillStyle = '#ffffff'; ctx.fillRect(28, 0, 8, 128); // Dashed line
+const lineTex = new THREE.CanvasTexture(lineCanvas);
+lineTex.wrapS = lineTex.wrapT = THREE.RepeatWrapping;
+lineTex.repeat.set(1, 100000 / 5);
+
+const lineMat = new THREE.MeshBasicMaterial({ map: lineTex });
+const lineGeo = new THREE.PlaneGeometry(1, 100000);
+const line = new THREE.Mesh(lineGeo, lineMat);
+line.rotation.x = -Math.PI / 2;
+line.position.y = 0.02;
+window.scene.add(line);
+
+// Scenery Group
+const sceneries = new THREE.Group();
+window.scene.add(sceneries);
+
+function createTree() {
+    const tree = new THREE.Group();
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 2), new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 1 }));
+    trunk.position.y = 1; tree.add(trunk);
+    const leaves = new THREE.Mesh(new THREE.ConeGeometry(2.5, 4, 8), new THREE.MeshStandardMaterial({ color: 0x228b22, roughness: 0.8 }));
+    leaves.position.y = 3; tree.add(leaves);
+    return tree;
+}
+
+function createRock() {
+    const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(1 + Math.random() * 2, 1), new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.9 }));
+    rock.position.y = rock.geometry.parameters.radius * 0.5;
+    return rock;
+}
+
+// Generate scenery
+for(let i=0; i<1500; i++) {
+    let obj = (Math.random() > 0.3) ? createTree() : createRock();
+    let side = Math.random() > 0.5 ? 1 : -1;
+    let x = side * (20 + Math.random() * 100);
+    let z = (Math.random() - 0.5) * 10000;
+    obj.position.set(x, 0, z);
+    let scale = 0.8 + Math.random() * 0.6;
+    obj.scale.set(scale, scale, scale);
+    obj.rotation.y = Math.random() * Math.PI * 2;
+    sceneries.add(obj);
+}
 window.scene.add(new THREE.AmbientLight(0xffffff, 1.0));
 
 window.orbitX = 0;
