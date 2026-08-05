@@ -334,8 +334,19 @@ function animate() {
     // Oversteer from slipping (whipping the tail)
     car.rotation.y += slipAngle * dt * 4.0;
 
+    let wheelspin = 0;
+    if (window.advancedTelemetry && window.advancedTelemetry.wheelspin) {
+        wheelspin = window.advancedTelemetry.wheelspin;
+    }
+
     wheels.forEach((w, i) => {
         w.roller.rotation.x += speed * dt * 5.0;
+        
+        // Spin rear wheels during a burnout
+        if (i >= 2 && wheelspin > 0.1) {
+            w.roller.rotation.x += wheelspin * dt * 50.0;
+        }
+
         if (i < 2) w.anchor.rotation.y = -(window.wheelAngle / 180) * 0.7;
     });
 
@@ -359,11 +370,6 @@ function animate() {
     }
 
     // Emit new particles if drifting or burnout
-    let wheelspin = 0;
-    if (window.advancedTelemetry && window.advancedTelemetry.wheelspin) {
-        wheelspin = window.advancedTelemetry.wheelspin;
-    }
-    
     let isDrifting = Math.abs(slipAngle) > 0.1 && Math.abs(speed) > 0.5;
     let isBurnout = wheelspin > 0.5;
 
