@@ -371,7 +371,7 @@ function animate() {
 
     // Emit new particles if drifting or burnout
     let isDrifting = Math.abs(slipAngle) > 0.1 && Math.abs(speed) > 0.5;
-    let isBurnout = wheelspin > 0.5;
+    let isBurnout = Math.abs(wheelspin) > 0.5;
 
     if (isDrifting || isBurnout) {
         // Emit from rear wheels
