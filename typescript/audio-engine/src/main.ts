@@ -19,15 +19,11 @@ const drivetrain = vehicle.drivetrain;
 /* GUI */
 const gui = new dat.GUI();
 
-const guiMain = gui.addFolder('Settings');
 const guiEngine = gui.addFolder('Engine');
 const guiDrivetrain = gui.addFolder('Drivetrain');
 
-guiMain.open();
 guiEngine.open();
 guiDrivetrain.open();
-
-guiMain.add(settings, 'activeConfig', Object.keys(configurations)).name('Select config');
 
 guiEngine.add(engine, 'throttle', 0, 1).step(0.01).name('Throttle').listen();
 guiEngine.add(engine, 'brake', 0, 1).step(0.01).name('Brake').listen();
@@ -106,7 +102,6 @@ window.getActiveVehicleEngine = function() {
 };
 
 startBtn?.addEventListener('click', () => (window as any).startTypeScriptEngineAudio(), { once: true })
-document.querySelector('select')?.addEventListener('change', () => (window as any).startTypeScriptEngineAudio())
 
 /* Update loop */
 let
