@@ -48,14 +48,23 @@ window.sendTelemetryData = (speed, rpm, gear) => {
         // Get gear from the audio engine (it manages gear state for both manual and auto)
         let currentGear = gear;
         if (window.getEngineData) {
-            currentGear = window.getEngineData().gear;
+            let engData = window.getEngineData();
+            if (engData && engData.rpm > 0) {
+                currentGear = engData.gear;
+            }
+        }
+
+        // Failsafe: if the audio engine isn't running, auto-shift so the car can move
+        if (currentGear === 0) {
+            if (throttle > 0.1) currentGear = 1;
+            else if (brake > 0.1) currentGear = -1;
         }
 
         ws.send(JSON.stringify({
             throttle: throttle,
             brake: brake,
             handbrake: window.inputs.handbrake ? 1.0 : 0.0,
-            steering: steering,
+            steering: -steering, // Invert steering to match backend physics coordinate system
             gear: currentGear,
             drivetrain: window.gameSettings ? (window.gameSettings.drivetrain || 'rwd') : 'rwd',
             drift_mode: window.gameSettings ? !!window.gameSettings.driftMode : false,
