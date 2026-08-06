@@ -98,17 +98,16 @@ class Engine:
         # Fallback (shouldn't reach here)
         return self.torque_curve[-1][1]
 
-    def update(self, throttle, current_rpm, dt):
+    def update(self, throttle, target_rpm, clutch_engagement, dt):
         """
         Calculate engine output for this frame.
 
         Args:
             throttle: 0.0 to 1.0
-            current_rpm: Current engine RPM (driven by wheel speed through transmission)
+            target_rpm: Wheel speed converted to engine RPM
+            clutch_engagement: 0.0 to 1.0 (0 = neutral/clutch in, 1 = in gear)
             dt: Time step in seconds
         """
-        self.rpm = max(self.idle_rpm, min(current_rpm, self.max_rpm))
-
         # --- Rev Limiter ---
         # Hard cut fuel above rev limit (like real rev limiters)
         if self.rpm >= self.rev_limiter:
@@ -126,19 +125,54 @@ class Engine:
         drive_torque = max_torque * throttle
 
         # --- Engine Braking ---
-        # When throttle is released, engine resists rotation
-        # Stronger at higher RPM (compression braking)
-        rpm_factor = self.rpm / self.max_rpm
-        engine_brake = self.engine_braking_torque * (1.0 - throttle) * rpm_factor
+        # When throttle is released, engine resists rotation, but NOT at idle!
+        # Engine braking should smoothly drop to 0 as we approach idle_rpm.
+        if self.rpm > self.idle_rpm:
+            rpm_factor = (self.rpm - self.idle_rpm) / (self.max_rpm - self.idle_rpm)
+            engine_brake = self.engine_braking_torque * (1.0 - throttle) * rpm_factor
+        else:
+            engine_brake = 0.0
 
         # Net torque output
         self.torque_output = drive_torque - engine_brake
 
-        # --- Idle Control ---
-        # If RPM drops near idle, apply a small positive torque to maintain idle
-        if self.rpm < self.idle_rpm * 1.2 and throttle < 0.1:
-            idle_correction = (self.idle_rpm - self.rpm) * 0.5
-            self.torque_output += max(0, idle_correction)
+        # --- Idle Control (Creep) ---
+        # If RPM drops near or below idle, apply a positive torque to maintain idle
+        if self.rpm < self.idle_rpm * 1.5 and throttle < 0.1:
+            idle_correction = (self.idle_rpm - self.rpm) * 1.0  # Proportional creep
+            self.torque_output = max(self.torque_output, idle_correction)
+
+        # --- Simulate Engine RPM (Inertia & Clutch Slip) ---
+        # 1. Engine accelerates based on its own torque
+        engine_angular_accel = self.torque_output / self.inertia
+        self.rpm += engine_angular_accel * dt * (30.0 / math.pi)
+
+        # 2. Soft-couple to the wheels (Torque converter / slipping clutch)
+        # This is the torque transmitted TO the transmission.
+        transmitted_torque = 0.0
+        
+        if clutch_engagement > 0.0:
+            slip_factor = 5.0 * clutch_engagement # How stiff the coupling is
+            
+            # The engine pulls the wheels forward if it's spinning faster, 
+            # and drags them down if it's spinning slower.
+            # We calculate how much the engine's RPM changed due to the clutch,
+            # and convert that back to a torque applied to the transmission.
+            
+            if self.rpm < target_rpm:
+                rpm_change = (target_rpm - self.rpm) * slip_factor * dt
+                self.rpm += rpm_change
+                # Engine is dragged up by wheels -> Wheels are dragged down by engine -> Negative transmitted torque
+                transmitted_torque = -(rpm_change * self.inertia / dt) * (math.pi / 30.0)
+            elif self.rpm > target_rpm:
+                drag_factor = slip_factor * (1.0 - throttle * 0.8) 
+                rpm_change = (target_rpm - self.rpm) * drag_factor * dt
+                self.rpm += rpm_change
+                # Engine is dragged down by wheels -> Wheels are pushed forward by engine -> Positive transmitted torque
+                transmitted_torque = -(rpm_change * self.inertia / dt) * (math.pi / 30.0)
+            
+        # Hard limits
+        self.rpm = max(self.idle_rpm, min(self.rpm, self.max_rpm + 500))
 
         # --- Horsepower ---
         self.horsepower = (self.torque_output * self.rpm) / 5252.0
@@ -146,7 +180,7 @@ class Engine:
         # --- Load ---
         self.load = throttle * 100.0
 
-        return self.torque_output
+        return transmitted_torque
 
 
 # ============================================================================
@@ -1077,6 +1111,9 @@ class ForceVehicleSimulator:
             Tire("fl"), Tire("fr"), Tire("rl"), Tire("rr")
         ]
 
+        # --- Logistics ---
+        self.fuel_level = 100.0  # Percentage
+
         # --- Timing ---
         self.last_time = time.time()
         self.physics_hz = 120  # Physics sub-steps per second minimum
@@ -1145,6 +1182,10 @@ class ForceVehicleSimulator:
             self.engine.rpm, throttle,
             self.dynamics.speed_kph, frame_dt
         )
+        
+        # Simple fuel consumption model based on engine speed and load
+        fuel_consumption_rate = (self.engine.rpm / 10000.0) * (0.2 + 0.8 * throttle) * 0.05
+        self.fuel_level = max(0.0, self.fuel_level - fuel_consumption_rate * frame_dt)
 
         # --- Build Telemetry Output ---
         self._build_telemetry(throttle, steer_angle_deg)
@@ -1183,12 +1224,25 @@ class ForceVehicleSimulator:
             driven_speeds.extend([tire_speeds[2], tire_speeds[3]])
 
         if driven_speeds:
-            avg_wheel_speed = sum(abs(s) for s in driven_speeds) / len(driven_speeds)
+            avg_wheel_speed = sum(driven_speeds) / len(driven_speeds)  # Maintain sign
         else:
             avg_wheel_speed = 0.0
 
-        engine_rpm = self.transmission.engine_rpm_from_wheel_speed(avg_wheel_speed)
-        engine_torque = self.engine.update(throttle, engine_rpm, dt)
+        # Calculate forced engine speed (can be negative if rolling backwards in forward gear)
+        forced_engine_rads = avg_wheel_speed * self.transmission.get_total_ratio()
+        
+        # Engine only spins forward in our model, so we pass abs()
+        target_rpm = abs(forced_engine_rads * 60.0 / (2.0 * math.pi))
+
+        # Pass clutch engagement (0.0 if in neutral, so engine can free-rev)
+        effective_clutch = self.transmission.clutch if self.transmission.gear != 0 else 0.0
+        engine_torque = self.engine.update(throttle, target_rpm, effective_clutch, dt)
+
+        # If the engine is providing braking torque (negative), it must oppose the forced rotation.
+        # If forced_engine_rads is negative, the wheels are spinning the engine backwards,
+        # so the engine's resistance should be a POSITIVE torque.
+        if engine_torque < 0 and forced_engine_rads < 0:
+            engine_torque = -engine_torque
 
         # === 5. TRANSMISSION ===
         self.transmission.update(dt)
@@ -1365,9 +1419,10 @@ class ForceVehicleSimulator:
             "wheelspin_rl": round(wheelspin_values[2], 3),
             "wheelspin_rr": round(wheelspin_values[3], 3),
 
-            # === Thermals ===
+            # === Thermals & Logistics ===
             "coolant_temp": round(self.thermals.coolant_temp, 0),
             "oil_temp": round(self.thermals.oil_temp, 0),
+            "fuel_level": round(self.fuel_level, 2),
 
             # === Electronics ===
             "tcs_active": False,  # TODO: implement traction control

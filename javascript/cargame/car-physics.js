@@ -260,18 +260,10 @@ function animate() {
         speed = tel.speed_ms || 0;
         rpm = tel.rpm || 800;
 
-        // Read yaw rate and apply rotation
-        let yawRate = tel.yaw_rate || 0;
-        car.rotation.y += yawRate * dt;
-
-        // Read velocity components (car-local frame) and move the car
-        let vx_local = tel.vx || 0;
-        let vy_local = tel.vy || 0;
-
-        // Convert to Three.js coordinate system and move car
-        // In Three.js: translateZ = forward, translateX = sideways
-        car.translateZ(vx_local * dt);
-        car.translateX(vy_local * dt);
+        // Map backend world coordinates (X forward, Z left) to Three.js (Z forward, X left)
+        if (tel.pos_x !== undefined) car.position.z = tel.pos_x;
+        if (tel.pos_z !== undefined) car.position.x = tel.pos_z;
+        if (tel.heading !== undefined) car.rotation.y = tel.heading;
 
     } else if (engineData) {
         // === Fallback: old arcade physics (when Python server not connected) ===
@@ -442,9 +434,16 @@ function animate() {
 
     if (window.updateHUD) {
         const rawSpeed = Math.abs(speed * 3.6);
-        if (rawSpeed > 1) fuelLevel -= 0.001;
-        if (rawSpeed > 1 && engineTemp < 90) engineTemp += 0.002;
-        else if (engineTemp > 20) engineTemp -= 0.001;
+        if (tel) {
+            // Read logistics from authoritative backend
+            if (tel.fuel_level !== undefined) fuelLevel = tel.fuel_level;
+            if (tel.coolant_temp !== undefined) engineTemp = tel.coolant_temp;
+        } else {
+            // Fallback local calculations if disconnected
+            if (rawSpeed > 1) fuelLevel -= 0.001;
+            if (rawSpeed > 1 && engineTemp < 90) engineTemp += 0.002;
+            else if (engineTemp > 20) engineTemp -= 0.001;
+        }
         window.updateHUD(rawSpeed, rpm, engineTemp, fuelLevel, engineData, window.manualGearIndex);
         if (window.sendTelemetryData) {
             let currentGear = engineData ? engineData.gear : (window.manualGearIndex || 1);
