@@ -455,7 +455,8 @@ class Tire:
         )
 
         # --- Lateral Force (Pacejka) ---
-        raw_lat = self.pacejka(
+        # Must be negated because lateral friction OPPOSES the lateral sliding velocity
+        raw_lat = -self.pacejka(
             self.slip_angle,
             self.B_lat, self.C_lat, self.D_lat, self.E_lat
         )
@@ -473,14 +474,10 @@ class Tire:
         self.force_lat = raw_lat * peak_force
         self.force_total = math.sqrt(self.force_long ** 2 + self.force_lat ** 2)
 
-    def update_angular_velocity(self, drive_torque, brake_torque, dt):
+    def update_angular_velocity(self, drive_torque, brake_torque, car_speed_at_wheel, dt):
         """
         Update wheel spin based on applied torques.
-
-        drive_torque: From engine through drivetrain (Nm)
-        brake_torque: From brakes (always opposing rotation) (Nm)
         """
-        # Net torque = drive - brake - tire reaction
         # The tire's longitudinal force acts as a reaction torque on the wheel
         reaction_torque = self.force_long * self.radius
 
@@ -490,7 +487,6 @@ class Tire:
         elif self.angular_velocity < -0.01:
             effective_brake = brake_torque
         else:
-            # Nearly stopped - brake holds wheel still
             effective_brake = 0.0
             if brake_torque > abs(drive_torque):
                 self.angular_velocity = 0.0
@@ -500,12 +496,21 @@ class Tire:
         self.locked = False
         net_torque = drive_torque - reaction_torque + effective_brake
 
+        # --- PREVENT PACEJKA INTEGRATION OVERSHOOT ---
+        # Torque needed to exactly match ground speed in one timestep
+        target_w = car_speed_at_wheel / self.radius
+        torque_to_match = (target_w - self.angular_velocity) * self.inertia / dt
+
+        # If net_torque is pushing the wheel towards ground speed, cap it so it doesn't overshoot
+        if net_torque * torque_to_match > 0:
+            if abs(net_torque) > abs(torque_to_match):
+                net_torque = torque_to_match
+
         # Angular acceleration = torque / inertia
         angular_accel = net_torque / self.inertia
         self.angular_velocity += angular_accel * dt
 
-        # Prevent negative spin in forward gear (wheel can't spin backwards when driving forward)
-        # (but allow it when braking to simulate lockup)
+        # Prevent negative spin in forward gear
         if brake_torque < 1.0 and drive_torque > 0 and self.angular_velocity < 0:
             self.angular_velocity = 0.0
 
@@ -1116,8 +1121,8 @@ class ForceVehicleSimulator:
 
         # --- Timing ---
         self.last_time = time.time()
-        self.physics_hz = 120  # Physics sub-steps per second minimum
-        self.max_substeps = 8  # Max sub-steps per frame
+        self.physics_hz = 400  # Increased from 120 to 400 to prevent Pacejka oscillation
+        self.max_substeps = 16 # Increased from 8 to 16
 
         # --- State for telemetry output ---
         self.telemetry = {}
@@ -1272,7 +1277,7 @@ class ForceVehicleSimulator:
             tire.calculate_forces(normal_forces[i], vx_tire, vx_tire, vy_tire)
 
             # Update wheel spin
-            tire.update_angular_velocity(drive_torques[i], brake_torques[i], dt)
+            tire.update_angular_velocity(drive_torques[i], brake_torques[i], vx_tire, dt)
 
             # Update tire temperature
             tire.update_temperature(dt, self.dynamics.speed)
@@ -1307,11 +1312,17 @@ class ForceVehicleSimulator:
                 arm_y = self.dynamics.track_width * 0.5 * (1 if i == 2 else -1)
                 total_mz += tire.force_lat * arm_x + tire.force_long * arm_y
 
-        # === 10. AERODYNAMIC DRAG (opposes motion) ===
-        if self.dynamics.vx > 0.1:
-            total_fx -= drag_force + rolling_resistance
-        elif self.dynamics.vx < -0.1:
-            total_fx += drag_force + rolling_resistance
+        # === 10. AERODYNAMIC DRAG & ROLLING RESISTANCE (opposes motion) ===
+        speed = math.sqrt(self.dynamics.vx**2 + self.dynamics.vy**2)
+        if speed > 0.1:
+            # Vector-based drag to prevent infinite sideways speed
+            total_drag = drag_force + rolling_resistance
+            
+            drag_x = total_drag * (self.dynamics.vx / speed)
+            drag_y = total_drag * (self.dynamics.vy / speed)
+            
+            total_fx -= drag_x
+            total_fy -= drag_y
 
         # === 11. INTEGRATE ===
         self.dynamics.integrate(total_fx, total_fy, total_mz, dt)
