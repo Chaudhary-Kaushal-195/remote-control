@@ -416,16 +416,11 @@ function animate() {
 
     if (window.updateHUD) {
         const rawSpeed = Math.abs(speed * 3.6);
-        if (tel) {
-            // Read logistics from authoritative backend
-            if (tel.fuel_level !== undefined) fuelLevel = tel.fuel_level;
-            if (tel.coolant_temp !== undefined) engineTemp = tel.coolant_temp;
-        } else {
-            // Fallback local calculations if disconnected
-            if (rawSpeed > 1) fuelLevel -= 0.001;
-            if (rawSpeed > 1 && engineTemp < 90) engineTemp += 0.002;
-            else if (engineTemp > 20) engineTemp -= 0.001;
-        }
+        // Local calculations for fuel and temp
+        if (rawSpeed > 1) fuelLevel -= 0.001;
+        if (rawSpeed > 1 && engineTemp < 90) engineTemp += 0.002;
+        else if (engineTemp > 20) engineTemp -= 0.001;
+
         window.updateHUD(rawSpeed, rpm, engineTemp, fuelLevel, engineData, window.manualGearIndex);
         if (window.sendTelemetryData) {
             let currentGear = engineData ? engineData.gear : (window.manualGearIndex || 1);
