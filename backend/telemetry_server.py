@@ -996,9 +996,11 @@ class VehicleDynamics:
         """
         velocities = []
 
-        # Front-left
-        fx = self.vx + self.yaw_rate * self.front_axle_to_cog
-        fy = self.vy - self.yaw_rate * self.track_width * 0.5
+        # Front-left (i=0)
+        # r_x = front_axle_to_cog, r_y = track_width / 2
+        # v = v_cg + w x r => vx_tire = vx - w * r_y, vy_tire = vy + w * r_x
+        fx = self.vx - self.yaw_rate * self.track_width * 0.5
+        fy = self.vy + self.yaw_rate * self.front_axle_to_cog
         # Rotate into tire frame (steered)
         cos_s = math.cos(steer_angle_rad)
         sin_s = math.sin(steer_angle_rad)
@@ -1006,21 +1008,24 @@ class VehicleDynamics:
         vy_fl = -fx * sin_s + fy * cos_s
         velocities.append((vx_fl, vy_fl))
 
-        # Front-right
-        fx = self.vx + self.yaw_rate * self.front_axle_to_cog
-        fy = self.vy + self.yaw_rate * self.track_width * 0.5
+        # Front-right (i=1)
+        # r_x = front_axle_to_cog, r_y = -track_width / 2
+        fx = self.vx + self.yaw_rate * self.track_width * 0.5
+        fy = self.vy + self.yaw_rate * self.front_axle_to_cog
         vx_fr = fx * cos_s + fy * sin_s
         vy_fr = -fx * sin_s + fy * cos_s
         velocities.append((vx_fr, vy_fr))
 
-        # Rear-left (no steering)
-        rx = self.vx - self.yaw_rate * self.rear_axle_to_cog
-        ry = self.vy - self.yaw_rate * self.track_width * 0.5
+        # Rear-left (no steering) (i=2)
+        # r_x = -rear_axle_to_cog, r_y = track_width / 2
+        rx = self.vx - self.yaw_rate * self.track_width * 0.5
+        ry = self.vy - self.yaw_rate * self.rear_axle_to_cog
         velocities.append((rx, ry))
 
-        # Rear-right
-        rx = self.vx - self.yaw_rate * self.rear_axle_to_cog
-        ry = self.vy + self.yaw_rate * self.track_width * 0.5
+        # Rear-right (i=3)
+        # r_x = -rear_axle_to_cog, r_y = -track_width / 2
+        rx = self.vx + self.yaw_rate * self.track_width * 0.5
+        ry = self.vy - self.yaw_rate * self.rear_axle_to_cog
         velocities.append((rx, ry))
 
         return velocities
@@ -1155,6 +1160,8 @@ class ForceVehicleSimulator:
         drift_mode = inputs.get("drift_mode", False)
         grip_level = inputs.get("grip_level", 1.0)
         
+        transmission_mode = inputs.get("transmission_mode", "automatic")
+        
         for tire in self.tires:
             tire.drift_mode = drift_mode
             tire.grip_level = grip_level
@@ -1162,10 +1169,41 @@ class ForceVehicleSimulator:
         # Update drivetrain layout if changed
         self.drivetrain.set_layout(drivetrain_type)
 
-        # Handle gear changes from frontend
-        if gear_request is not None and not self.transmission.is_shifting:
-            if gear_request != self.transmission.gear:
-                self.transmission.shift_to(gear_request)
+        # Handle gear changes
+        if transmission_mode == "automatic":
+            # In automatic mode, the frontend's gear_request only sets Drive/Neutral/Reverse
+            if gear_request is not None and not self.transmission.is_shifting:
+                # If we want Neutral or Reverse, trust the frontend
+                if gear_request in [-1, 0]:
+                    if self.transmission.gear != gear_request:
+                        self.transmission.shift_to(gear_request)
+                # If we want forward drive, shift to 1st if currently in neutral/reverse
+                elif gear_request >= 1 and self.transmission.gear <= 0:
+                    self.transmission.shift_to(1)
+
+            # Auto-shifting logic (only active when in forward gears)
+            if self.transmission.gear >= 1 and not self.transmission.is_shifting:
+                # Upshift near rev limit
+                if self.engine.rpm > self.engine.rev_limiter - 300:
+                    next_gear = self.transmission.gear + 1
+                    if next_gear in self.transmission.gear_ratios:
+                        self.transmission.shift_to(next_gear)
+                
+                # Downshift if RPM drops too low
+                elif self.engine.rpm < 4000 and self.transmission.gear > 1:
+                    # Prevent downshifting if it would over-rev the engine
+                    lower_gear = self.transmission.gear - 1
+                    lower_ratio = self.transmission.gear_ratios[lower_gear] * self.transmission.final_drive
+                    current_ratio = self.transmission.get_total_ratio()
+                    expected_rpm = self.engine.rpm * (lower_ratio / current_ratio)
+                    
+                    if expected_rpm < self.engine.rev_limiter - 800:
+                        self.transmission.shift_to(lower_gear)
+        else:
+            # Manual mode: explicitly follow frontend gear requests
+            if gear_request is not None and not self.transmission.is_shifting:
+                if gear_request != self.transmission.gear:
+                    self.transmission.shift_to(gear_request)
 
         # --- Steering ---
         # Convert input (-1 to 1) to actual wheel angle
@@ -1303,9 +1341,10 @@ class ForceVehicleSimulator:
                 total_fy += fy_car
 
                 # Yaw moment from front tire forces
+                # mz = r x F = r_x * F_y - r_y * F_x
                 arm_x = self.dynamics.front_axle_to_cog
                 arm_y = self.dynamics.track_width * 0.5 * (1 if i == 0 else -1)
-                total_mz += fy_car * arm_x + fx_car * arm_y
+                total_mz += fy_car * arm_x - fx_car * arm_y
             else:
                 # Rear wheels - not steered
                 total_fx += tire.force_long
@@ -1314,7 +1353,7 @@ class ForceVehicleSimulator:
                 # Yaw moment from rear tire forces
                 arm_x = -self.dynamics.rear_axle_to_cog
                 arm_y = self.dynamics.track_width * 0.5 * (1 if i == 2 else -1)
-                total_mz += tire.force_lat * arm_x + tire.force_long * arm_y
+                total_mz += tire.force_lat * arm_x - tire.force_long * arm_y
 
         # === 10. AERODYNAMIC DRAG & ROLLING RESISTANCE (opposes motion) ===
         speed = math.sqrt(self.dynamics.vx**2 + self.dynamics.vy**2)
