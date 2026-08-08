@@ -249,24 +249,10 @@ function animate() {
     if (window.getEngineData) engineData = window.getEngineData();
 
     // ============================================================
-    // PHYSICS ENGINE DRIVEN MOVEMENT
-    // Python is the single source of truth for speed, heading, yaw.
-    // JS only renders what Python tells it.
+    // FRONTEND ARCADE PHYSICS
     // ============================================================
-    const tel = window.advancedTelemetry;
 
-    if (tel && tel.speed_kph !== undefined) {
-        // === Read authoritative state from Python ===
-        speed = tel.speed_ms || 0;
-        rpm = tel.rpm || 800;
-
-        // Map backend world coordinates (X forward, Z left) to Three.js (Z forward, X left)
-        if (tel.pos_x !== undefined) car.position.z = tel.pos_x;
-        if (tel.pos_z !== undefined) car.position.x = tel.pos_z;
-        if (tel.heading !== undefined) car.rotation.y = tel.heading;
-
-    } else if (engineData) {
-        // === Fallback: old arcade physics (when Python server not connected) ===
+    if (engineData) {
         const maxGearSpeedsKPH = {
             '-1': 60, '0': 0, '1': 100, '2': 180,
             '3': 260, '4': 340, '5': 420, '6': 500
@@ -301,11 +287,10 @@ function animate() {
 
         rpm = engineData.rpm;
 
-        // Old arcade movement (fallback)
         car.translateZ(speed * dt * 3.5);
         car.rotation.y -= (window.wheelAngle / 180) * 0.05 * (speed * 0.2);
     } else {
-        // === Ultra-fallback: no engine, no server ===
+        // === Ultra-fallback: no engine ===
         if (window.inputs && window.inputs.fwd) speed += 0.025;
         else if (window.inputs && window.inputs.bwd) speed -= 0.015;
         speed *= 0.99;
@@ -314,15 +299,10 @@ function animate() {
         car.rotation.y -= (window.wheelAngle / 180) * 0.05 * (speed * 0.2);
     }
 
-    // === Read smoke/drift data from physics engine ===
+    // === Smoke/drift data (frontend only - no backend) ===
     let slipAngle = 0;
     let wheelspin = 0;
     let brakeLock = 0;
-    if (tel) {
-        slipAngle = tel.slip_angle || 0;
-        wheelspin = tel.wheelspin || 0;
-        brakeLock = tel.brake_lock || 0;
-    }
 
     wheels.forEach((w, i) => {
         w.roller.rotation.x += speed * dt * 5.0;
@@ -335,24 +315,7 @@ function animate() {
         if (i < 2) w.anchor.rotation.y = -(window.wheelAngle / 180) * 0.7;
     });
 
-    // --- SUSPENSION VISUALS (Bounce, Pitch, Roll) ---
-    if (tel && tel.susp_fl !== undefined) {
-        // Average suspension (0.5 is neutral). < 0.5 means jumping/airborne.
-        const avgSusp = (tel.susp_fl + tel.susp_fr + tel.susp_rl + tel.susp_rr) / 4.0;
-        
-        // Exaggerated bounce for jumps
-        car.position.y = (0.5 - avgSusp) * 0.6; // Multiplier scales the visual lift
-        
-        // Pitch (Brake Dive / Accel Squat)
-        const frontSusp = (tel.susp_fl + tel.susp_fr) / 2.0;
-        const rearSusp = (tel.susp_rl + tel.susp_rr) / 2.0;
-        car.rotation.x = (frontSusp - rearSusp) * 0.25; 
-        
-        // Roll (Body roll during cornering)
-        const leftSusp = (tel.susp_fl + tel.susp_rl) / 2.0;
-        const rightSusp = (tel.susp_fr + tel.susp_rr) / 2.0;
-        car.rotation.z = (rightSusp - leftSusp) * 0.25;
-    }
+
 
     car.updateMatrixWorld(true);
 

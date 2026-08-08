@@ -243,44 +243,7 @@ window.updateButtonGlow = function () {
     }
 };
 
-window.updateTelemetryUI = () => {
-    if (!window.advancedTelemetry) return;
-    const data = window.advancedTelemetry;
 
-    const el = (id) => document.getElementById(id);
-    if(el('tel-hp')) el('tel-hp').innerText = Math.round(data.engine_hp || 0);
-    if(el('tel-tq')) el('tel-tq').innerText = Math.round(data.engine_torque || 0);
-    
-    if(el('tel-tire-fl')) el('tel-tire-fl').innerText = Math.round(data.tire_temp_fl || 25);
-    if(el('tel-tire-fr')) el('tel-tire-fr').innerText = Math.round(data.tire_temp_fr || 25);
-    if(el('tel-tire-rl')) el('tel-tire-rl').innerText = Math.round(data.tire_temp_rl || 25);
-    if(el('tel-tire-rr')) el('tel-tire-rr').innerText = Math.round(data.tire_temp_rr || 25);
-
-    if(el('tel-grip-fl')) el('tel-grip-fl').innerText = Math.round(data.grip_usage_fl || 0) + '%';
-    if(el('tel-grip-fr')) el('tel-grip-fr').innerText = Math.round(data.grip_usage_fr || 0) + '%';
-    if(el('tel-grip-rl')) el('tel-grip-rl').innerText = Math.round(data.grip_usage_rl || 0) + '%';
-    if(el('tel-grip-rr')) el('tel-grip-rr').innerText = Math.round(data.grip_usage_rr || 0) + '%';
-
-    if(el('tel-susp-fl')) el('tel-susp-fl').innerText = Math.round((data.susp_fl || 0)*100);
-    if(el('tel-susp-fr')) el('tel-susp-fr').innerText = Math.round((data.susp_fr || 0)*100);
-    if(el('tel-susp-rl')) el('tel-susp-rl').innerText = Math.round((data.susp_rl || 0)*100);
-    if(el('tel-susp-rr')) el('tel-susp-rr').innerText = Math.round((data.susp_rr || 0)*100);
-
-    if(el('tel-aero')) el('tel-aero').innerText = Math.round(data.aero_downforce || 0) + ' kg';
-    if(el('tel-glat')) el('tel-glat').innerText = (data.g_lat || 0).toFixed(2) + ' G';
-    if(el('tel-oil')) el('tel-oil').innerText = Math.round(data.oil_temp || 80) + ' °C';
-
-    if(el('tel-slip')) {
-        let deg = (data.slip_angle || 0) * (180 / Math.PI);
-        el('tel-slip').innerText = Math.abs(deg).toFixed(1) + '°';
-        el('tel-slip').style.color = Math.abs(deg) > 10 ? '#ff00ff' : '#ffffff';
-    }
-    if(el('tel-spin')) {
-        let spinPct = Math.min(100, Math.abs(data.wheelspin || 0) * 100);
-        el('tel-spin').innerText = Math.round(spinPct) + '%';
-        el('tel-spin').style.color = spinPct > 20 ? '#ffaa00' : '#ffffff';
-    }
-};
 
 document.addEventListener('DOMContentLoaded', () => {
     window.initHUD();
