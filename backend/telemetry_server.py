@@ -339,6 +339,7 @@ class Tire:
 
         # RPM for telemetry
         self.wheel_rpm = 0.0
+        self.grip_usage = 0.0  # Percentage of available grip used (0.0 to 1.0)
 
         # --- Thermal Model ---
         self.temperature = 25.0  # Celsius
@@ -473,6 +474,9 @@ class Tire:
         self.force_long = raw_long * peak_force
         self.force_lat = raw_lat * peak_force
         self.force_total = math.sqrt(self.force_long ** 2 + self.force_lat ** 2)
+        
+        # Calculate grip usage percentage (bounded to 1.0 max logically, but we keep it actual for accuracy)
+        self.grip_usage = (self.force_total / peak_force) if peak_force > 0 else 0.0
 
     def update_angular_velocity(self, drive_torque, brake_torque, car_speed_at_wheel, dt):
         """
@@ -1383,6 +1387,11 @@ class ForceVehicleSimulator:
             "tire_temp_fr": round(self.tires[1].temperature, 1),
             "tire_temp_rl": round(self.tires[2].temperature, 1),
             "tire_temp_rr": round(self.tires[3].temperature, 1),
+
+            "grip_usage_fl": round(self.tires[0].grip_usage * 100, 1),
+            "grip_usage_fr": round(self.tires[1].grip_usage * 100, 1),
+            "grip_usage_rl": round(self.tires[2].grip_usage * 100, 1),
+            "grip_usage_rr": round(self.tires[3].grip_usage * 100, 1),
 
             "slip_ratio_fl": round(self.tires[0].slip_ratio, 3),
             "slip_ratio_fr": round(self.tires[1].slip_ratio, 3),

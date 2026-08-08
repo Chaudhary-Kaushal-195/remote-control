@@ -256,6 +256,11 @@ window.updateTelemetryUI = () => {
     if(el('tel-tire-rl')) el('tel-tire-rl').innerText = Math.round(data.tire_temp_rl || 25);
     if(el('tel-tire-rr')) el('tel-tire-rr').innerText = Math.round(data.tire_temp_rr || 25);
 
+    if(el('tel-grip-fl')) el('tel-grip-fl').innerText = Math.round(data.grip_usage_fl || 0) + '%';
+    if(el('tel-grip-fr')) el('tel-grip-fr').innerText = Math.round(data.grip_usage_fr || 0) + '%';
+    if(el('tel-grip-rl')) el('tel-grip-rl').innerText = Math.round(data.grip_usage_rl || 0) + '%';
+    if(el('tel-grip-rr')) el('tel-grip-rr').innerText = Math.round(data.grip_usage_rr || 0) + '%';
+
     if(el('tel-susp-fl')) el('tel-susp-fl').innerText = Math.round((data.susp_fl || 0)*100);
     if(el('tel-susp-fr')) el('tel-susp-fr').innerText = Math.round((data.susp_fr || 0)*100);
     if(el('tel-susp-rl')) el('tel-susp-rl').innerText = Math.round((data.susp_rl || 0)*100);

@@ -335,6 +335,25 @@ function animate() {
         if (i < 2) w.anchor.rotation.y = -(window.wheelAngle / 180) * 0.7;
     });
 
+    // --- SUSPENSION VISUALS (Bounce, Pitch, Roll) ---
+    if (tel && tel.susp_fl !== undefined) {
+        // Average suspension (0.5 is neutral). < 0.5 means jumping/airborne.
+        const avgSusp = (tel.susp_fl + tel.susp_fr + tel.susp_rl + tel.susp_rr) / 4.0;
+        
+        // Exaggerated bounce for jumps
+        car.position.y = (0.5 - avgSusp) * 0.6; // Multiplier scales the visual lift
+        
+        // Pitch (Brake Dive / Accel Squat)
+        const frontSusp = (tel.susp_fl + tel.susp_fr) / 2.0;
+        const rearSusp = (tel.susp_rl + tel.susp_rr) / 2.0;
+        car.rotation.x = (frontSusp - rearSusp) * 0.25; 
+        
+        // Roll (Body roll during cornering)
+        const leftSusp = (tel.susp_fl + tel.susp_rl) / 2.0;
+        const rightSusp = (tel.susp_fr + tel.susp_rr) / 2.0;
+        car.rotation.z = (rightSusp - leftSusp) * 0.25;
+    }
+
     car.updateMatrixWorld(true);
 
     // --- DRIFT SMOKE PARTICLES ---
