@@ -1,3 +1,9 @@
+console.log(
+    "%c🏎️ Dr. Vice Racing %cby Kaushal Chaudhary\n🔗 https://github.com/Chaudhary-Kaushal-195/remote-control",
+    "background: #111; color: #0ffffa; font-size: 13px; font-weight: bold; padding: 4px 8px; border-radius: 4px; border: 1px solid #0ffffa;",
+    "color: #888; font-size: 11px;"
+);
+
 // Screen Orientation Lock (For Mobile Devices)
 if (screen.orientation && screen.orientation.lock) {
     screen.orientation.lock('landscape').catch(err => {

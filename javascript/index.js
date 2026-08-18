@@ -1,5 +1,11 @@
 
 
+console.log(
+    "%c🏎️ Dr. Vice Engine %cby Kaushal Chaudhary\n🔗 https://github.com/Chaudhary-Kaushal-195/remote-control",
+    "background: #111; color: #0ffffa; font-size: 13px; font-weight: bold; padding: 4px 8px; border-radius: 4px; border: 1px solid #0ffffa;",
+    "color: #888; font-size: 11px;"
+);
+
 function toggleSettings() {
     const modal = document.getElementById('settings-modal');
     const isVisible = modal.style.getComputedStyle ? getComputedStyle(modal).display === 'flex' : modal.style.display === 'flex';

@@ -1,3 +1,9 @@
+console.log(
+    "%c🤳 Dr. Control %cby Kaushal Chaudhary\n🔗 https://github.com/Chaudhary-Kaushal-195/remote-control",
+    "background: #111; color: #ff0055; font-size: 13px; font-weight: bold; padding: 4px 8px; border-radius: 4px; border: 1px solid #ff0055;",
+    "color: #888; font-size: 11px;"
+);
+
 // UNIVERSAL ORIENTATION ENGINE (Hill Climb Racing Style)
 window.lockAppOrientation = () => {
     if (screen.orientation && screen.orientation.lock) {
