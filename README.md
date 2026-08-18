@@ -12,12 +12,13 @@
   <b>A zero-install, ultra-low-latency 3D WebGL racing simulator powered by Three.js and real-time WebRTC peer-to-peer mobile phone steering.</b>
 </p>
 
-[🎮 Live Demo](#-quick-start) • [✨ Key Features](#-key-features) • [🏗️ Architecture](#-system-architecture) • [🚀 Getting Started](#-quick-start)
+[🌟 Overview](#overview) • [✨ Key Features](#features) • [🏗️ Architecture](#architecture) • [🚀 Quick Start](#quick-start) • [🎮 How to Play](#how-to-play)
 
 </div>
 
 ---
 
+<a id="overview"></a>
 ## 🌟 Overview
 
 **Dr. Vice** transforms any modern smartphone into a low-latency, motion-sensing wireless steering wheel for desktop 3D car racing—**with zero app installation required**. 
@@ -26,6 +27,7 @@ By scanning a dynamic QR code on the desktop game screen, a secure direct **WebR
 
 ---
 
+<a id="features"></a>
 ## ✨ Key Features
 
 ### 🤳 1. Instant Peer-to-Peer Mobile Controller
@@ -54,6 +56,7 @@ By scanning a dynamic QR code on the desktop game screen, a secure direct **WebR
 
 ---
 
+<a id="architecture"></a>
 ## 🏗️ System Architecture
 
 ```mermaid
@@ -99,6 +102,7 @@ flowchart TD
 
 ---
 
+<a id="quick-start"></a>
 ## 🚀 Quick Start & Local Setup
 
 ### Prerequisites
@@ -126,6 +130,7 @@ npm run build-audio  # Compile TypeScript into production bundle
 
 ---
 
+<a id="how-to-play"></a>
 ## 🎮 How to Play
 
 1. **Launch Desktop Game**: Open `pages/cargame.html` on your PC/Laptop browser.
