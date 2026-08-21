@@ -229,20 +229,30 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.addEventListener('mousedown', (e) => {
-        if (e.target === orbitZone && window.startOrbit) {
+        let hitControl = false;
+        if (e.target.closest('#gas')) { window.localInputs.fwd = true; dispatchKey('w', 'keydown'); hitControl = true; }
+        if (e.target.closest('#rev-btn')) { window.localInputs.bwd = true; dispatchKey('s', 'keydown'); hitControl = true; }
+        if (e.target.closest('#handbrake')) { window.localInputs.brake = true; window.localInputs.handbrake = true; dispatchKey('b', 'keydown'); hitControl = true; }
+        if (e.target.closest('#steer-left')) { window.localInputs.left = true; hitControl = true; }
+        if (e.target.closest('#steer-right')) { window.localInputs.right = true; hitControl = true; }
+        if (e.target.closest('.hud-btn, button, #remote-box, #cam-trigger-btn')) hitControl = true;
+
+        if (wheelZone) {
+            const r = wheelZone.getBoundingClientRect();
+            if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+                hitControl = true;
+            }
+        }
+
+        if (!hitControl && window.startOrbit) {
             window.startOrbit(e.clientX, e.clientY, 999);
         }
-        if (e.target.closest('#gas')) { window.localInputs.fwd = true; dispatchKey('w', 'keydown'); }
-        if (e.target.closest('#rev-btn')) { window.localInputs.bwd = true; dispatchKey('s', 'keydown'); }
-        if (e.target.closest('#handbrake')) { window.localInputs.brake = true; window.localInputs.handbrake = true; dispatchKey('b', 'keydown'); }
-        if (e.target.closest('#steer-left')) window.localInputs.left = true;
-        if (e.target.closest('#steer-right')) window.localInputs.right = true;
 
         if (window.syncMergedInputs) window.syncMergedInputs();
     });
 
     window.addEventListener('mousemove', (e) => {
-        if (window.orbitActive && window.moveOrbit) {
+        if (window.isOrbiting && window.moveOrbit) {
             window.moveOrbit(e.clientX, e.clientY);
         }
     });
@@ -254,18 +264,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('touchstart', (e) => {
         for (let t of e.changedTouches) {
-            if (t.target === orbitZone && window.startOrbit) {
-                window.startOrbit(t.clientX, t.clientY, t.identifier);
-                continue;
-            }
+            let hitControl = false;
 
-            if (t.target.closest('#gas')) { window.localInputs.fwd = true; dispatchKey('w', 'keydown'); }
-            if (t.target.closest('#rev-btn')) { window.localInputs.bwd = true; dispatchKey('s', 'keydown'); }
-            if (t.target.closest('#handbrake')) { window.localInputs.brake = true; window.localInputs.handbrake = true; dispatchKey('b', 'keydown'); }
-            if (t.target.closest('#steer-left')) window.localInputs.left = true;
-            if (t.target.closest('#steer-right')) window.localInputs.right = true;
-
-            if (window.syncMergedInputs) window.syncMergedInputs();
+            if (t.target.closest('#gas')) { window.localInputs.fwd = true; dispatchKey('w', 'keydown'); hitControl = true; }
+            if (t.target.closest('#rev-btn')) { window.localInputs.bwd = true; dispatchKey('s', 'keydown'); hitControl = true; }
+            if (t.target.closest('#handbrake')) { window.localInputs.brake = true; window.localInputs.handbrake = true; dispatchKey('b', 'keydown'); hitControl = true; }
+            if (t.target.closest('#steer-left')) { window.localInputs.left = true; hitControl = true; }
+            if (t.target.closest('#steer-right')) { window.localInputs.right = true; hitControl = true; }
+            if (t.target.closest('.hud-btn, button, #remote-box, #cam-trigger-btn')) hitControl = true;
 
             if (wheelZone) {
                 const r = wheelZone.getBoundingClientRect();
@@ -273,8 +279,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     activeId = t.identifier; lastAngle = getAngle(t.clientX, t.clientY);
                     window.activeTouchId = activeId;
                     window.activeLastAngle = lastAngle;
+                    hitControl = true;
                 }
             }
+
+            if (!hitControl && window.startOrbit) {
+                window.startOrbit(t.clientX, t.clientY, t.identifier);
+            }
+
+            if (window.syncMergedInputs) window.syncMergedInputs();
         }
     }, { passive: false });
 
