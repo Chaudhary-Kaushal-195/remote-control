@@ -113,121 +113,189 @@ document.addEventListener('keydown', (e) => {
 });
 
 window.scene = new THREE.Scene();
-window.scene.background = new THREE.Color(0x05000a);
-window.scene.fog = new THREE.FogExp2(0x05000a, 0.03);
+window.scene.background = new THREE.Color(0x060913);
+window.scene.fog = new THREE.FogExp2(0x060913, 0.0038);
 
-window.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1.0, 1000);
-window.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-window.renderer.setPixelRatio(window.devicePixelRatio);
+// Crisp, focused initial camera with 56 degree FOV (standard racing perspective)
+window.camera = new THREE.PerspectiveCamera(56, window.innerWidth / window.innerHeight, 0.2, 2500);
+window.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+window.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 window.renderer.setSize(window.innerWidth, window.innerHeight);
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('canvas-container').appendChild(window.renderer.domElement);
+// Responsive window resize handling
+window.addEventListener('resize', () => {
+    if (!window.camera || !window.renderer) return;
+    window.camera.aspect = window.innerWidth / window.innerHeight;
+    window.camera.updateProjectionMatrix();
+    window.renderer.setSize(window.innerWidth, window.innerHeight);
+    window.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('canvas-container');
+    if (container) container.appendChild(window.renderer.domElement);
+});
+
+// 4 Cinematic Camera Views
 window.cameraMode = 0;
-const cameraModes = ["NORMAL", "INSIDE", "ACTION"];
+const cameraModes = ["DYNAMIC CHASE", "CLOSE ACTION", "HOOD COCKPIT", "BUMPER RUSH"];
+const cameraIcons = ["🎥", "🏎️", "👀", "⚡"];
+
 window.cycleCamera = () => {
-    window.cameraMode = (window.cameraMode + 1) % 3;
+    window.cameraMode = (window.cameraMode + 1) % 4;
+    const modeName = cameraModes[window.cameraMode];
+    const modeIcon = cameraIcons[window.cameraMode];
+
+    const triggerBtn = document.getElementById('cam-trigger-btn');
+    if (triggerBtn) {
+        triggerBtn.title = `Camera: ${modeName}`;
+        triggerBtn.innerText = modeIcon;
+    }
     const btn = document.getElementById('cam-btn');
-    if (btn) btn.innerText = `🎥 VIEW: ${cameraModes[window.cameraMode]}`;
+    if (btn) btn.innerText = `${modeIcon} VIEW: ${modeName}`;
+
+    if (window.showGameNotification) {
+        window.showGameNotification(`${modeIcon} ${modeName}`, "#00ffff");
+    }
 };
 
-// Grass Terrain
-const grassMat = new THREE.MeshStandardMaterial({ color: 0x1f5c22, roughness: 1.0 });
+// Grass / Terrain Ground
+const grassMat = new THREE.MeshStandardMaterial({ color: 0x0e2014, roughness: 1.0, metalness: 0.0 });
 const grassGeo = new THREE.PlaneGeometry(100000, 100000);
 const grass = new THREE.Mesh(grassGeo, grassMat);
 grass.rotation.x = -Math.PI / 2;
 window.scene.add(grass);
 
-// Road
-const roadMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
-const roadGeo = new THREE.PlaneGeometry(30, 100000); // 30 wide highway
+// Road (30m wide highway)
+const roadMat = new THREE.MeshStandardMaterial({ color: 0x181a20, roughness: 0.75, metalness: 0.15 });
+const roadGeo = new THREE.PlaneGeometry(30, 100000);
 const road = new THREE.Mesh(roadGeo, roadMat);
 road.rotation.x = -Math.PI / 2;
-road.position.y = 0.01; // Slightly above grass
+road.position.y = 0.01;
 window.scene.add(road);
 
-// Road markings (white dashed line)
+// Road Neon Edge Curbs (Left & Right Glowing Strip Boundaries)
+const curbGeo = new THREE.PlaneGeometry(0.4, 100000);
+const curbMatL = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+const curbL = new THREE.Mesh(curbGeo, curbMatL);
+curbL.rotation.x = -Math.PI / 2;
+curbL.position.set(-14.8, 0.025, 0);
+window.scene.add(curbL);
+
+const curbMatR = new THREE.MeshBasicMaterial({ color: 0xff0077 });
+const curbR = new THREE.Mesh(curbGeo, curbMatR);
+curbR.rotation.x = -Math.PI / 2;
+curbR.position.set(14.8, 0.025, 0);
+window.scene.add(curbR);
+
+// Lane Markings (3-Lane Highway with Center and Sub-Lane Dashes)
 const lineCanvas = document.createElement('canvas');
-lineCanvas.width = 64; lineCanvas.height = 256;
+lineCanvas.width = 128; lineCanvas.height = 256;
 const ctx = lineCanvas.getContext('2d');
-ctx.fillStyle = '#222222'; ctx.fillRect(0,0,64,256);
-ctx.fillStyle = '#ffffff'; ctx.fillRect(28, 0, 8, 128); // Dashed line
+ctx.fillStyle = 'rgba(0,0,0,0)'; ctx.clearRect(0,0,128,256);
+// Center yellow/white dashed line
+ctx.fillStyle = '#ffffff';
+ctx.fillRect(60, 0, 8, 140);
+// Side lane dashes
+ctx.fillStyle = 'rgba(255,255,255,0.45)';
+ctx.fillRect(16, 0, 4, 140);
+ctx.fillRect(108, 0, 4, 140);
+
 const lineTex = new THREE.CanvasTexture(lineCanvas);
 lineTex.wrapS = lineTex.wrapT = THREE.RepeatWrapping;
-lineTex.repeat.set(1, 100000 / 5);
+lineTex.repeat.set(1, 100000 / 12);
 
-const lineMat = new THREE.MeshBasicMaterial({ map: lineTex });
-const lineGeo = new THREE.PlaneGeometry(1, 100000);
-const line = new THREE.Mesh(lineGeo, lineMat);
-line.rotation.x = -Math.PI / 2;
-line.position.y = 0.02;
-window.scene.add(line);
+const lineMat = new THREE.MeshBasicMaterial({ map: lineTex, transparent: true });
+const lineGeo = new THREE.PlaneGeometry(28, 100000);
+const laneLines = new THREE.Mesh(lineGeo, lineMat);
+laneLines.rotation.x = -Math.PI / 2;
+laneLines.position.y = 0.03;
+window.scene.add(laneLines);
+
+// Atmospheric Track Lighting
+const ambientLight = new THREE.AmbientLight(0xddeeff, 0.65);
+window.scene.add(ambientLight);
+
+const dirLight = new THREE.DirectionalLight(0xaaccff, 0.85);
+dirLight.position.set(50, 100, -30);
+window.scene.add(dirLight);
 
 // Scenery Group
 const sceneries = new THREE.Group();
 window.scene.add(sceneries);
+window.sceneries = sceneries;
 
 function createTree() {
     const tree = new THREE.Group();
-    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 2), new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 1 }));
-    trunk.position.y = 1; tree.add(trunk);
-    const leaves = new THREE.Mesh(new THREE.ConeGeometry(2.5, 4, 8), new THREE.MeshStandardMaterial({ color: 0x228b22, roughness: 0.8 }));
-    leaves.position.y = 3; tree.add(leaves);
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.5, 3), new THREE.MeshStandardMaterial({ color: 0x2e1d15, roughness: 1 }));
+    trunk.position.y = 1.5; tree.add(trunk);
+    const leaves = new THREE.Mesh(new THREE.ConeGeometry(2.2, 5, 8), new THREE.MeshStandardMaterial({ color: 0x144020, roughness: 0.9 }));
+    leaves.position.y = 4.2; tree.add(leaves);
     return tree;
 }
 
 function createRock() {
-    const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(1 + Math.random() * 2, 1), new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.9 }));
+    const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(1 + Math.random() * 2, 1), new THREE.MeshStandardMaterial({ color: 0x333b48, roughness: 0.9 }));
     rock.position.y = rock.geometry.parameters.radius * 0.5;
     return rock;
 }
 
-// Generate scenery
-for(let i=0; i<1500; i++) {
+// Generate roadside scenery
+for(let i = 0; i < 1200; i++) {
     let obj = (Math.random() > 0.3) ? createTree() : createRock();
     let side = Math.random() > 0.5 ? 1 : -1;
-    let x = side * (20 + Math.random() * 100);
-    let z = (Math.random() - 0.5) * 10000;
+    let x = side * (18 + Math.random() * 120);
+    let z = (Math.random() - 0.5) * 12000;
     obj.position.set(x, 0, z);
-    let scale = 0.8 + Math.random() * 0.6;
+    let scale = 0.8 + Math.random() * 0.7;
     obj.scale.set(scale, scale, scale);
     obj.rotation.y = Math.random() * Math.PI * 2;
     sceneries.add(obj);
 }
-window.scene.add(new THREE.AmbientLight(0xffffff, 1.0));
 
+// Orbit Controls & Free Camera Look
 window.orbitX = 0;
-window.orbitY = 0.5;
+window.orbitY = 0;
+window.isOrbiting = false;
+
 window.startOrbit = (x, y, id) => {
     window.isOrbiting = true;
     window.orbitTouchId = id;
     window.lastOrbitTouch = { x, y };
 };
 window.moveOrbit = (x, y) => {
-    if (window.isOrbiting) {
+    if (window.isOrbiting && window.lastOrbitTouch) {
         let dx = x - window.lastOrbitTouch.x;
         let dy = y - window.lastOrbitTouch.y;
         window.orbitX -= dx * 0.005;
-        window.orbitY = Math.max(0.1, Math.min(1.5, window.orbitY + dy * 0.005));
+        window.orbitY = Math.max(-0.6, Math.min(0.6, window.orbitY + dy * 0.005));
         window.lastOrbitTouch = { x, y };
     }
 };
 window.endOrbit = () => {
     window.isOrbiting = false;
     window.orbitTouchId = null;
+    window.lastOrbitTouch = null;
 };
 
 document.addEventListener('DOMContentLoaded', () => {
     const orbitZone = document.getElementById('orbit-zone');
     if (orbitZone) {
-        orbitZone.addEventListener('mousedown', () => window.isOrbiting = true);
-        window.addEventListener('mouseup', () => window.isOrbiting = false);
+        orbitZone.addEventListener('mousedown', (e) => {
+            window.isOrbiting = true;
+            window.lastOrbitTouch = { x: e.clientX, y: e.clientY };
+        });
+        window.addEventListener('mouseup', () => {
+            window.isOrbiting = false;
+            window.lastOrbitTouch = null;
+        });
         window.addEventListener('mousemove', (e) => {
-            if (window.isOrbiting) {
-                window.orbitX -= e.movementX * 0.005;
-                window.orbitY = Math.max(0.1, Math.min(1.5, window.orbitY + e.movementY * 0.005));
+            if (window.isOrbiting && window.lastOrbitTouch) {
+                let dx = e.clientX - window.lastOrbitTouch.x;
+                let dy = e.clientY - window.lastOrbitTouch.y;
+                window.orbitX -= dx * 0.005;
+                window.orbitY = Math.max(-0.6, Math.min(0.6, window.orbitY + dy * 0.005));
+                window.lastOrbitTouch = { x: e.clientX, y: e.clientY };
             }
         });
     }

@@ -13,6 +13,15 @@ window.triggerBackfireVisual = function (isBig) {
     backfireTick = isBigBackfire ? 20 : 8;
 };
 
+// --- PHYSICAL SPRING-DAMPER CAMERA SIMULATION STATE ---
+const physCamPos = new THREE.Vector3();
+const physCamVel = new THREE.Vector3();
+const physLookPos = new THREE.Vector3();
+const physLookVel = new THREE.Vector3();
+let physRoll = 0;
+let physRollVel = 0;
+let isPhysCamInit = false;
+
 const car = new THREE.Group();
 const paintMat = new THREE.MeshStandardMaterial({ color: 0xc1006e, roughness: 0.2, metalness: 0.8 });
 const cyanNeon = new THREE.MeshBasicMaterial({ color: 0x00ffff });
@@ -111,6 +120,31 @@ const flameGeo = new THREE.SphereGeometry(0.15, 8, 8);
 const flameMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0 });
 const flame = new THREE.Mesh(flameGeo, flameMat);
 exhaust.add(flame);
+
+// FRONT HEADLIGHTS & NIGHT RACING BEAMS
+const hlMat = new THREE.MeshBasicMaterial({ color: 0xe0ffff });
+const hlGeo = new THREE.BoxGeometry(0.45, 0.18, 0.08);
+const hlL = new THREE.Mesh(hlGeo, hlMat);
+hlL.position.set(0.72, 0.65, 2.11);
+car.add(hlL);
+const hlR = hlL.clone();
+hlR.position.set(-0.72, 0.65, 2.11);
+car.add(hlR);
+
+// Headlight forward spotlights for road illumination
+const spotL = new THREE.SpotLight(0xd0f4ff, 3.5, 90, Math.PI / 5.5, 0.35, 1.2);
+spotL.position.set(0.72, 0.65, 2.1);
+const targetL = new THREE.Object3D();
+targetL.position.set(0.72, 0, 40);
+car.add(spotL); car.add(targetL);
+spotL.target = targetL;
+
+const spotR = new THREE.SpotLight(0xd0f4ff, 3.5, 90, Math.PI / 5.5, 0.35, 1.2);
+spotR.position.set(-0.72, 0.65, 2.1);
+const targetR = new THREE.Object3D();
+targetR.position.set(-0.72, 0, 40);
+car.add(spotR); car.add(targetR);
+spotR.target = targetR;
 
 window.scene.add(car);
 window.car = car; // Store globally if needed
@@ -288,7 +322,14 @@ function animate() {
         rpm = engineData.rpm;
 
         car.translateZ(speed * dt * 3.5);
-        car.rotation.y -= (window.wheelAngle / 180) * 0.05 * (speed * 0.2);
+        
+        let turnMultiplier = speed * 0.2;
+        // Apply high-speed understeer (soft clamp) to prevent the car from spinning like a top at 400 KPH
+        if (turnMultiplier > 8.0) turnMultiplier = 8.0 + (turnMultiplier - 8.0) * 0.15;
+        else if (turnMultiplier < -8.0) turnMultiplier = -8.0 + (turnMultiplier + 8.0) * 0.15;
+
+        // Multiply by (dt * 60.0) to make the turn rate time-independent
+        car.rotation.y -= (window.wheelAngle / 180) * 0.05 * turnMultiplier * (dt * 60.0);
     } else {
         // === Ultra-fallback: no engine ===
         if (window.inputs && window.inputs.fwd) speed += 0.025;
@@ -296,7 +337,55 @@ function animate() {
         speed *= 0.99;
         rpm = Math.abs(speed) * 8000;
         car.translateZ(speed * dt * 3.5);
-        car.rotation.y -= (window.wheelAngle / 180) * 0.05 * (speed * 0.2);
+
+        let turnMultiplier = speed * 0.2;
+        if (turnMultiplier > 8.0) turnMultiplier = 8.0 + (turnMultiplier - 8.0) * 0.15;
+        else if (turnMultiplier < -8.0) turnMultiplier = -8.0 + (turnMultiplier + 8.0) * 0.15;
+
+        car.rotation.y -= (window.wheelAngle / 180) * 0.05 * turnMultiplier * (dt * 60.0);
+    }
+
+    // --- INFINITE WORLD & FLOATING ORIGIN: PREVENT HIGH-SPEED WEBGL JITTER ---
+    if (window.sceneries && window.sceneries.children) {
+        window.sceneries.children.forEach(obj => {
+            // Wrap trees infinitely around the car
+            const dz = (obj.position.z + window.sceneries.position.z) - car.position.z;
+            if (dz > 6000) obj.position.z -= 12000;
+            if (dz < -6000) obj.position.z += 12000;
+        });
+    }
+
+    // When the car travels far from 0,0,0, float precision breaks down causing the "terrain shake" bug.
+    // We seamlessly teleport the entire world back towards the origin to fix this!
+    if (Math.abs(car.position.x) > 3000 || Math.abs(car.position.z) > 3000) {
+        const shiftX = car.position.x;
+        // Snap to nearest multiple of 12 to prevent lane lines from visually jumping
+        const shiftZ = Math.round(car.position.z / 12) * 12;
+
+        car.position.x -= shiftX;
+        car.position.z -= shiftZ;
+
+        // Shift camera tracking positions instantly
+        physCamPos.x -= shiftX;
+        physCamPos.z -= shiftZ;
+        physLookPos.x -= shiftX;
+        physLookPos.z -= shiftZ;
+
+        // Shift all scenery and environment meshes (road, grass, etc)
+        if (window.scene && window.scene.children) {
+            window.scene.children.forEach(child => {
+                if (child !== car && child.position && !child.isLight) {
+                    child.position.x -= shiftX;
+                    child.position.z -= shiftZ;
+                }
+            });
+        }
+        
+        // Shift any existing smoke particles
+        smokeParticles.forEach(p => {
+            p.position.x -= shiftX;
+            p.position.z -= shiftZ;
+        });
     }
 
     // === Smoke/drift data (frontend only - no backend) ===
@@ -306,7 +395,7 @@ function animate() {
 
     wheels.forEach((w, i) => {
         w.roller.rotation.x += speed * dt * 5.0;
-        
+
         // Spin rear wheels during a burnout
         if (i >= 2 && Math.abs(wheelspin) > 0.1) {
             w.roller.rotation.x += wheelspin * dt * 50.0;
@@ -350,7 +439,7 @@ function animate() {
 
         [rw1, rw2].forEach(pos => {
             // Create a few particles per wheel for density
-            for(let k = 0; k < 2; k++) {
+            for (let k = 0; k < 2; k++) {
                 const smoke = new THREE.Mesh(smokeGeo, smokeMat.clone());
                 smoke.position.copy(pos);
                 // Start slightly above ground
@@ -369,49 +458,125 @@ function animate() {
         });
     }
 
-    let camTarget = new THREE.Vector3();
-    let camPos = new THREE.Vector3();
-
+    // ============================================================
+    // CLEAN RACING CHASE CAMERA LOGIC
+    // ============================================================
     let kph = Math.abs(speed * 3.6);
-    let speedOffset = Math.min(kph / 150, 1.0) * 2.5;
-    let fovTightness = 0.12 + Math.min(kph / 500, 1.0) * 0.8;
-
-    if (window.cameraMode === 0) {
-        camPos.set(0, 4 + (speedOffset * 0.2), -9 - speedOffset);
-        camTarget.set(0, 0.5, 0);
-    } else if (window.cameraMode === 1) {
-        camPos.set(0, 1.3, 0.5);
-        camTarget.set(0, 1.2, 5);
-    } else {
-        camPos.set(0, 2 + (speedOffset * 0.1), -6 - (speedOffset * 0.5));
-        camTarget.set(0, 0.5, 0);
-    }
-
-    if (window.orbitX === undefined) window.orbitX = 0;
-    const orbitMatrix = new THREE.Matrix4().makeRotationY(window.orbitX);
-    camPos.applyMatrix4(orbitMatrix);
-
-    const worldPos = camPos.applyMatrix4(car.matrixWorld);
-    const worldTarget = camTarget.applyMatrix4(car.matrixWorld);
-
-    if (!window.actualCamPos) {
-        window.actualCamPos = worldPos.clone();
-        window.actualCamTarget = worldTarget.clone();
-    } else {
-        // Fast snap for inside cam, smooth lag for chase cams to show drifting
-        let lerpFactor = (window.cameraMode === 1) ? 1.0 : (dt * 10.0);
-        window.actualCamPos.lerp(worldPos, lerpFactor);
-        window.actualCamTarget.lerp(worldTarget, lerpFactor);
-    }
-
-    if (window.cameraMode === 1) {
-        window.camera.position.copy(window.actualCamPos);
-        window.camera.lookAt(window.actualCamTarget);
-    } else {
-        window.camera.position.copy(window.actualCamPos);
-        window.camera.lookAt(window.actualCamTarget);
-    }
+    let speedFactor = Math.min(kph / 360, 1.0);
     
+    // Explicit pullback: closer at rest, smoothly increases distance at speed
+    let speedPullback = speedFactor * 1.5;
+    let speedElevation = speedFactor * 0.4;
+
+    // Dynamic FOV with smooth speed expansion
+    const baseFov = 56;
+    const maxFov = 61;
+    const targetFov = baseFov + speedFactor * (maxFov - baseFov);
+    if (!window.currentFov) window.currentFov = baseFov;
+    window.currentFov += (targetFov - window.currentFov) * Math.min(1.0, dt * 5.0);
+    if (window.camera && Math.abs(window.camera.fov - window.currentFov) > 0.05) {
+        window.camera.fov = window.currentFov;
+        window.camera.updateProjectionMatrix();
+    }
+
+
+
+    const mode = window.cameraMode || 0;
+
+    // Local target camera offsets (+Z forward, -Z backward, +Y up)
+    const localIdealPos = new THREE.Vector3();
+    const localIdealLook = new THREE.Vector3();
+
+    if (mode === 0) {
+        // --- MODE 0: DYNAMIC CHASE ---
+        localIdealPos.set(0, 3.5 + speedElevation, -7.5 - speedPullback);
+        localIdealLook.set(0, 0.0, 15.0);
+    } else if (mode === 1) {
+        // --- MODE 1: CLOSE ACTION ---
+        localIdealPos.set(0, 2.5 + (speedElevation * 0.7), -5.5 - (speedPullback * 0.7));
+        localIdealLook.set(0, 0.2, 12.0);
+    } else if (mode === 2) {
+        // --- MODE 2: HOOD / COCKPIT ---
+        localIdealPos.set(0, 1.35, 0.65);
+        localIdealLook.set(0, 0.90, 35.0);
+    } else if (mode === 3) {
+        // --- MODE 3: BUMPER RUSH ---
+        localIdealPos.set(0, 0.50, 2.2);
+        localIdealLook.set(0, 0.40, 40.0);
+    }
+
+    // Apply Orbit Drag (Free look) & Smooth Auto-Recenter
+    if (window.orbitX === undefined) window.orbitX = 0;
+    if (window.orbitY === undefined) window.orbitY = 0;
+
+    if (!window.isOrbiting) {
+        window.orbitX *= 0.92;
+        window.orbitY *= 0.92;
+    }
+
+    if (Math.abs(window.orbitX) > 0.0001 || Math.abs(window.orbitY) > 0.0001) {
+        const orbitEuler = new THREE.Euler((window.orbitY || 0) * 0.4, window.orbitX || 0, 0, 'YXZ');
+        localIdealPos.applyEuler(orbitEuler);
+    }
+
+    // Initialize tracking state
+    if (!window.physCamRot || window.lastCameraMode !== mode) {
+        window.physCamRot = car.quaternion.clone();
+        physCamPos.copy(car.position);
+        physLookPos.copy(car.position);
+        physRoll = 0;
+        physRollVel = 0;
+        window.lastCameraMode = mode;
+    }
+
+    let idealWorldPos = new THREE.Vector3();
+    let idealWorldLook = new THREE.Vector3();
+
+    if (mode === 2 || mode === 3) {
+        // Rigid attachment for First Person / Bumper views
+        window.physCamRot.copy(car.quaternion);
+        window.camera.up.set(0, 1, 0);
+        
+        idealWorldPos.copy(localIdealPos).applyQuaternion(car.quaternion).add(car.position);
+        idealWorldLook.copy(localIdealLook).applyQuaternion(car.quaternion).add(car.position);
+        
+        physCamPos.copy(idealWorldPos);
+        physLookPos.copy(idealWorldLook);
+    } else {
+        // --- CHASE CAMERA INERTIA LOGIC ---
+        // We use a softer stiffness for the underlying physics so it never jitters on frame drops.
+        const turnStiffness = (mode === 1) ? 28.0 : 22.0; 
+        window.physCamRot.slerp(car.quaternion, 1.0 - Math.exp(-dt * turnStiffness));
+
+        // To reduce the extreme side-angle without causing high-stiffness jitter,
+        // we blend the smooth lagging rotation back towards the car's exact rotation.
+        // 0.25 means we only show 25% of the total lag (massively reducing the side-view angle).
+        const renderCamRot = new THREE.Quaternion();
+        renderCamRot.copy(car.quaternion).slerp(window.physCamRot, 0.25);
+
+        // Transform position by this reduced lag rotation
+        idealWorldPos.copy(localIdealPos).applyQuaternion(renderCamRot).add(car.position);
+        
+        // Transform look target ALSO by the reduced lag rotation so the car stays centered
+        idealWorldLook.copy(localIdealLook).applyQuaternion(renderCamRot).add(car.position);
+
+        // Rigidly lock position to the calculated ideal targets to completely eliminate high-speed jitter
+        // (Inertia is already handled rotationally by physCamRot lagging)
+        physCamPos.copy(idealWorldPos);
+        physLookPos.copy(idealWorldLook);
+
+        // Dynamic Centrifugal Camera Roll on turns
+        const turnG = (window.wheelAngle / 180) * (kph / 240);
+        const targetRoll = THREE.MathUtils.clamp(-turnG * 0.04, -0.06, 0.06); 
+        // Use unconditionally stable exponential lerp to fix violent shaking on frame drops
+        physRoll += (targetRoll - physRoll) * (1.0 - Math.exp(-dt * 15.0));
+
+        window.camera.up.set(Math.sin(physRoll), Math.cos(physRoll), 0);
+    }
+
+    window.camera.position.copy(physCamPos);
+    window.camera.lookAt(physLookPos);
+
     window.renderer.render(window.scene, window.camera);
 
     if (window.updateHUD) {

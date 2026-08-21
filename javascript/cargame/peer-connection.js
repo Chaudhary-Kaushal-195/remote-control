@@ -29,6 +29,7 @@ window.syncMergedInputs = () => {
     if (window.updateButtonGlow) {
         window.updateButtonGlow();
     }
+
 };
 
 window.setupRemote = (showQR = false) => {
@@ -43,11 +44,14 @@ window.setupRemote = (showQR = false) => {
         if (showQR) document.getElementById('qr-overlay').style.display = 'flex';
         return;
     }
+
     if (window.location.protocol === 'file:') {
         alert("CRITICAL: You are running this as a local file. Your phone CANNOT connect to a 'file://' link. \n\n Please use a local webserver instead!");
         return;
     }
+
     window.peer = new Peer();
+    
     window.peer.on('open', (id) => {
         window.lastPeerId = id;
         console.log('Laptop Peer ID:', id);
