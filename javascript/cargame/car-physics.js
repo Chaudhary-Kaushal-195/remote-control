@@ -323,10 +323,10 @@ function animate() {
 
         car.translateZ(speed * dt * 3.5);
         
-        let turnMultiplier = speed * 0.2;
-        // Apply high-speed understeer (soft clamp) to prevent the car from spinning like a top at 400 KPH
-        if (turnMultiplier > 8.0) turnMultiplier = 8.0 + (turnMultiplier - 8.0) * 0.15;
-        else if (turnMultiplier < -8.0) turnMultiplier = -8.0 + (turnMultiplier + 8.0) * 0.15;
+        let turnMultiplier = speed * 0.1;
+        // Apply high-speed understeer (soft clamp) to prevent violent shaking at high speeds
+        if (turnMultiplier > 2.5) turnMultiplier = 2.5 + (turnMultiplier - 2.5) * 0.1;
+        else if (turnMultiplier < -2.5) turnMultiplier = -2.5 + (turnMultiplier + 2.5) * 0.1;
 
         // Multiply by (dt * 60.0) to make the turn rate time-independent
         car.rotation.y -= (window.wheelAngle / 180) * 0.05 * turnMultiplier * (dt * 60.0);
@@ -338,9 +338,9 @@ function animate() {
         rpm = Math.abs(speed) * 8000;
         car.translateZ(speed * dt * 3.5);
 
-        let turnMultiplier = speed * 0.2;
-        if (turnMultiplier > 8.0) turnMultiplier = 8.0 + (turnMultiplier - 8.0) * 0.15;
-        else if (turnMultiplier < -8.0) turnMultiplier = -8.0 + (turnMultiplier + 8.0) * 0.15;
+        let turnMultiplier = speed * 0.1;
+        if (turnMultiplier > 2.5) turnMultiplier = 2.5 + (turnMultiplier - 2.5) * 0.1;
+        else if (turnMultiplier < -2.5) turnMultiplier = -2.5 + (turnMultiplier + 2.5) * 0.1;
 
         car.rotation.y -= (window.wheelAngle / 180) * 0.05 * turnMultiplier * (dt * 60.0);
     }
@@ -571,11 +571,16 @@ function animate() {
         // Use unconditionally stable exponential lerp to fix violent shaking on frame drops
         physRoll += (targetRoll - physRoll) * (1.0 - Math.exp(-dt * 15.0));
 
-        window.camera.up.set(Math.sin(physRoll), Math.cos(physRoll), 0);
+        window.camera.up.set(0, 1, 0);
     }
 
     window.camera.position.copy(physCamPos);
     window.camera.lookAt(physLookPos);
+
+    // Apply camera roll around local Z axis after lookAt ensures proper tilting regardless of world heading
+    if (mode === 0 || mode === 1) {
+        window.camera.rotateZ(physRoll);
+    }
 
     window.renderer.render(window.scene, window.camera);
 
