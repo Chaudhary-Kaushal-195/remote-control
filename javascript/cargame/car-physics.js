@@ -517,6 +517,7 @@ function animate() {
     if (Math.abs(window.orbitX) > 0.0001 || Math.abs(window.orbitY) > 0.0001) {
         const orbitEuler = new THREE.Euler((window.orbitY || 0) * 0.4, window.orbitX || 0, 0, 'YXZ');
         localIdealPos.applyEuler(orbitEuler);
+        localIdealLook.applyEuler(orbitEuler);
     }
 
     // Initialize tracking state
