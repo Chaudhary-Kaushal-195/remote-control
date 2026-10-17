@@ -374,10 +374,21 @@
             </LinearLayout>
 
             <TextView
+                android:id="@+id/tvDiscoveryStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="💡 TIP: Make sure phone and laptop are on the same Wi-Fi."
+                android:layout_marginTop="10dp"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.05"
+                android:text="🔍 Searching for Dr. Vice game on Wi-Fi / Hotspot..."
+                android:textColor="@color/accent_primary"
+                android:textSize="11sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="💡 Auto-connects when game is detected. Or scan QR / enter IP manually."
                 android:textColor="@color/gray_text"
                 android:textSize="10sp" />
 

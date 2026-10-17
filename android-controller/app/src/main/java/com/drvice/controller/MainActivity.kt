@@ -22,6 +22,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.drvice.controller.camera.QrScannerHelper
 import com.drvice.controller.databinding.ActivityMainBinding
 import com.drvice.controller.databinding.DialogSettingsBinding
+import com.drvice.controller.discovery.LanDiscoveryManager
 import com.drvice.controller.haptics.HapticFeedbackManager
 import com.drvice.controller.sensor.MotionSensorManager
 import com.drvice.controller.transport.ControllerMode
@@ -39,6 +40,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var motionSensors: MotionSensorManager
     private lateinit var transportManager: TransportManager
     private lateinit var qrScanner: QrScannerHelper
+    private lateinit var discoveryManager: LanDiscoveryManager
 
     private var activeTransport: IControllerTransport? = null
     private var steeringMode: String = "gyro" // "gyro", "wheel", "buttons"
@@ -87,6 +89,7 @@ class MainActivity : AppCompatActivity() {
             context = this,
             onConnected = {
                 runOnUiThread {
+                    discoveryManager.stopDiscovery()
                     binding.btnConnectManual.isEnabled = true
                     binding.btnConnectManual.text = "CONNECT"
                     binding.overlayPairing.visibility = View.GONE
@@ -101,6 +104,8 @@ class MainActivity : AppCompatActivity() {
                     binding.btnConnectManual.text = "CONNECT"
                     binding.tvStatus.text = "STATUS: STANDBY"
                     binding.overlayPairing.visibility = View.VISIBLE
+                    binding.tvDiscoveryStatus.text = "🔍 Searching for Dr. Vice game on Wi-Fi / Hotspot..."
+                    discoveryManager.startDiscovery()
                     Toast.makeText(this, "Disconnected from desktop host", Toast.LENGTH_SHORT).show()
                 }
             },
@@ -142,6 +147,18 @@ class MainActivity : AppCompatActivity() {
         if (savedHost.isNotEmpty()) {
             binding.etHostId.setText(savedHost)
         }
+
+        // 7. Setup Zero-Config UDP LAN Auto-Discovery
+        discoveryManager = LanDiscoveryManager(this) { ip, port, hostName ->
+            if (activeTransport?.isConnected != true && binding.overlayPairing.visibility == View.VISIBLE) {
+                binding.tvDiscoveryStatus.text = "🟢 FOUND: $hostName ($ip)! Connecting..."
+                binding.tvDiscoveryStatus.setTextColor(ContextCompat.getColor(this, R.color.accent_primary))
+                val target = "$ip:$port"
+                binding.etHostId.setText(target)
+                connectToHost(target)
+            }
+        }
+        discoveryManager.startDiscovery()
 
         setupInputListeners()
         applySteeringUiMode()
@@ -447,18 +464,23 @@ class MainActivity : AppCompatActivity() {
         if (steeringMode == "gyro") {
             motionSensors.start()
         }
+        if (activeTransport?.isConnected != true && binding.overlayPairing.visibility == View.VISIBLE) {
+            discoveryManager.startDiscovery()
+        }
     }
 
     override fun onPause() {
         super.onPause()
         motionSensors.stop()
         qrScanner.stopScanning()
+        discoveryManager.stopDiscovery()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         motionSensors.stop()
         qrScanner.release()
+        discoveryManager.release()
         transportManager.activeTransport.disconnect()
     }
 
