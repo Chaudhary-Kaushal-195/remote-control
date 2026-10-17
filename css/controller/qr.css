@@ -70,21 +70,7 @@
 
 /* ─── SCAN BUTTON (Connection Overlay) ─── */
 .scan-btn {
-    background: rgba(255, 255, 255, 0.95) !important;
-    color: #000 !important;
-    font-weight: 900 !important;
-    font-family: inherit;
-    border-radius: var(--radius-md) !important;
-    padding: 14px 36px !important;
-    margin-bottom: 16px;
-    margin-top: 8px;
-    border: none !important;
-    font-size: 17px !important;
-    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
-    transition: transform 0.15s, box-shadow 0.15s;
-}
-
-.scan-btn:active {
-    transform: scale(0.95) !important;
-    box-shadow: 0 0 25px rgba(255, 255, 255, 0.4) !important;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
 }

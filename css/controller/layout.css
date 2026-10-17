@@ -51,68 +51,172 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: var(--bg-deep);
+    background: radial-gradient(circle at center, #141722 0%, #080a0f 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    justify-content: safe center;
     z-index: 500;
     text-align: center;
-    padding: 20px;
+    padding: max(8px, env(safe-area-inset-top, 8px)) max(16px, env(safe-area-inset-right, 16px)) max(8px, env(safe-area-inset-bottom, 8px)) max(16px, env(safe-area-inset-left, 16px));
     box-sizing: border-box;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 #overlay h1 {
-    font-size: 32px;
-    margin: 0 0 5px 0;
+    font-size: clamp(20px, 4.5vh, 26px) !important;
+    margin: 0 0 2px 0 !important;
     color: var(--accent-primary);
-    text-shadow: none;
-    letter-spacing: 3px;
+    text-shadow: 0 0 14px rgba(255, 255, 255, 0.35);
+    letter-spacing: 2.5px;
+    line-height: 1.1;
+    font-weight: 900;
 }
 
-input[type="text"] {
+#overlay > p:nth-of-type(1) {
+    font-size: clamp(9px, 2.2vh, 11px) !important;
+    margin: 0 0 8px 0 !important;
+    letter-spacing: 1.5px;
+    color: var(--accent-secondary);
+    opacity: 0.75 !important;
+    line-height: 1.1;
+}
+
+/* Scan QR button */
+#overlay .scan-btn {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: none !important;
+    padding: 8px 26px !important;
+    font-size: clamp(12px, 2.8vh, 14px) !important;
+    font-weight: 900 !important;
+    border-radius: var(--radius-sm) !important;
+    cursor: pointer;
+    margin: 2px 0 !important;
+    width: auto !important;
+    min-width: 220px;
+    max-width: 85%;
+    height: 38px !important;
+    max-height: 38px;
+    box-shadow: 0 3px 12px rgba(255, 255, 255, 0.2) !important;
+    transition: transform 0.15s, box-shadow 0.15s;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+#overlay .scan-btn:active {
+    transform: scale(0.95) !important;
+    box-shadow: 0 0 18px rgba(255, 255, 255, 0.4) !important;
+}
+
+/* — OR — divider */
+#overlay > div:not(#reader-container) {
+    margin: 4px 0 !important;
+    font-size: 10px !important;
+    opacity: 0.45 !important;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    user-select: none;
+}
+
+/* ID text input */
+#overlay input[type="text"] {
     background: var(--bg-glass-light);
     border: 1px solid var(--border-dim);
     color: #fff;
-    padding: 14px 20px;
-    font-size: 20px;
+    padding: 6px 14px;
+    font-size: clamp(12px, 2.8vh, 14px);
     text-align: center;
-    border-radius: var(--radius-md);
-    width: 280px;
+    border-radius: var(--radius-sm);
+    width: 240px;
     max-width: 85%;
-    margin: 10px 0;
+    height: 36px;
+    margin: 2px 0 6px 0;
     outline: none;
     font-family: inherit;
     font-weight: bold;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    letter-spacing: 1px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    box-sizing: border-box;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-input[type="text"]:focus {
+#overlay input[type="text"]:focus {
     border-color: var(--accent-primary);
-    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
 }
 
-/* Generic overlay buttons */
-#overlay button {
+/* Connect Manually button */
+#overlay button:not(.scan-btn):not(.modal-close-btn) {
     background: rgba(255, 255, 255, 0.95);
     color: #000;
     border: none;
-    padding: 14px 36px;
-    font-size: 18px;
+    padding: 8px 26px;
+    font-size: clamp(12px, 2.8vh, 14px);
     font-weight: 900;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    margin: 8px 0;
+    margin: 2px 0;
+    width: auto;
+    min-width: 220px;
     max-width: 85%;
+    height: 38px;
+    max-height: 38px;
     transition: transform 0.15s, box-shadow 0.15s;
-    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.15);
-    font-family: 'Inter', sans-serif;
+    box-shadow: 0 3px 12px rgba(255, 255, 255, 0.15);
+    font-family: inherit;
+    letter-spacing: 0.5px;
+    box-sizing: border-box;
 }
 
-#overlay button:active {
+#overlay button:not(.scan-btn):not(.modal-close-btn):active {
     transform: scale(0.95);
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 18px rgba(255, 255, 255, 0.4);
+}
+
+/* Bottom tip notice */
+#overlay > p:nth-of-type(2) {
+    font-size: clamp(8px, 1.9vh, 10px) !important;
+    margin-top: 8px !important;
+    margin-bottom: 0 !important;
+    color: rgba(255, 255, 255, 0.55) !important;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+}
+
+/* Ultra-compact viewports (e.g. mobile landscape under 320px height) */
+@media (max-height: 340px) {
+    #overlay h1 {
+        font-size: 18px !important;
+    }
+    #overlay > p:nth-of-type(1) {
+        margin-bottom: 4px !important;
+        font-size: 9px !important;
+    }
+    #overlay .scan-btn,
+    #overlay button:not(.scan-btn):not(.modal-close-btn) {
+        height: 32px !important;
+        padding: 4px 18px !important;
+        font-size: 11px !important;
+    }
+    #overlay input[type="text"] {
+        height: 30px !important;
+        font-size: 12px !important;
+        margin-bottom: 4px !important;
+    }
+    #overlay > div:not(#reader-container) {
+        margin: 2px 0 !important;
+        font-size: 9px !important;
+    }
+    #overlay > p:nth-of-type(2) {
+        margin-top: 5px !important;
+        font-size: 8px !important;
+    }
 }
 
 /* ─── TOP HUB BUTTONS ─── */
