@@ -232,8 +232,8 @@ window.setupRemoteWheel = () => {
     // Auto-center animation
     const animateAutoCenter = () => {
         if (window.activeWheelTouchId === null && window.currentSteeringMode === 'wheel') {
-            if (Math.abs(window.remoteWheelAngle) > 0.5) {
-                window.remoteWheelAngle *= 0.94;
+            if (Math.abs(window.remoteWheelAngle) > 0.8) {
+                window.remoteWheelAngle *= 0.72; // Snappy centering matching default laptop feel
                 if (wheelInner) wheelInner.style.transform = `rotate(${window.remoteWheelAngle}deg)`;
                 if (window.conn && window.conn.open) {
                     window.conn.send({ type: 'gyro', tilt: window.remoteWheelAngle });

@@ -172,7 +172,8 @@ function animate() {
     // Once gyroActive is set it was never cleared, causing the wheel to stay locked
     // to the last tilt value even after the user released the phone wheel.
     const gyroFresh = window.lastGyroTime && (Date.now() - window.lastGyroTime < 300);
-    const useRemoteGyro = isPhoneConnected && gyroFresh && window.activeInputSource === 'phone';
+    const isRemoteAnalog = (steeringMode === 'wheel' || steeringMode === 'gyro');
+    const useRemoteGyro = isPhoneConnected && gyroFresh && window.activeInputSource === 'phone' && isRemoteAnalog;
     const useLocalGyro = steeringMode === 'gyro' && window.gyroActive && !isPhoneConnected;
     const useGyro = useRemoteGyro || useLocalGyro;
     const useGamepad = steeringMode === 'gamepad' && window.gamepadConnected && window.activeInputSource === 'gamepad';
@@ -181,11 +182,18 @@ function animate() {
     let hasInput = false;
 
     if (useGyro) {
-        window.wheelAngle = window.wheelAngle * 0.9 + window.gyroTilt * 0.1;
-        // BUG FIX: Widened deadzone from 1 to 5 degrees.
-        // Phone gyro sensors drift, so even when level the reading can be 2-4°,
-        // which was making hasInput=true permanently and blocking auto-center.
-        hasInput = Math.abs(window.gyroTilt) > 5;
+        // Fast, tight steering response (tracks phone wheel & gyro crisp and directly)
+        const responseFactor = 0.65;
+        window.wheelAngle = window.wheelAngle * (1 - responseFactor) + window.gyroTilt * responseFactor;
+
+        // Snappy deadzone: when tilt is near center (<= 2 deg), snap to center quickly
+        if (Math.abs(window.gyroTilt) <= 2) {
+            window.wheelAngle *= 0.72;
+            if (Math.abs(window.wheelAngle) < 0.2) window.wheelAngle = 0;
+            hasInput = false;
+        } else {
+            hasInput = true;
+        }
     } else if (useGamepad) {
         const axisValue = window.gamepadSteerAxis || 0;
         const deadzone = 0.2;
@@ -194,7 +202,7 @@ function animate() {
             const sign = Math.sign(axisValue);
             const activeAxis = (Math.abs(axisValue) - deadzone) / (1.0 - deadzone);
             const target = sign * activeAxis * 120;
-            window.wheelAngle = window.wheelAngle * 0.8 + target * 0.2;
+            window.wheelAngle = window.wheelAngle * 0.7 + target * 0.3;
             hasInput = true;
         } else {
             hasInput = false;
@@ -205,22 +213,23 @@ function animate() {
     }
 
     // Keyboard / Binary Buttons Override (Digital fallback)
-    // Only apply if we aren't already using the gamepad's analog stick 
-    if (!useGamepad) {
+    // Only apply if we aren't already using analog steering inputs
+    if (!useGamepad && !useRemoteGyro) {
+        const buttonTurnSpeed = 8;
         if (window.inputs && window.inputs.left) {
-            window.wheelAngle = Math.max(-180, window.wheelAngle - 5);
+            window.wheelAngle = Math.max(-180, window.wheelAngle - buttonTurnSpeed);
             hasInput = true;
         } else if (window.inputs && window.inputs.right) {
-            window.wheelAngle = Math.min(180, window.wheelAngle + 5);
+            window.wheelAngle = Math.min(180, window.wheelAngle + buttonTurnSpeed);
             hasInput = true;
         }
     }
 
     // UNIVERSAL AUTO-CENTER
-    // If no active input is detected from the current hardware, return to center
+    // If no active input is detected from the current hardware, return to center quickly
     if (!hasInput) {
-        const centerSpeed = 0.88;
-        if (Math.abs(window.wheelAngle) > 0.1) {
+        const centerSpeed = 0.72; // Snappy return matching default laptop keyboard feel
+        if (Math.abs(window.wheelAngle) > 0.2) {
             window.wheelAngle *= centerSpeed;
         } else {
             window.wheelAngle = 0;
