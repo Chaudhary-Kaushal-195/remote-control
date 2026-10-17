@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Dr. Control</string>
+    <string name="connecting">Searching for Laptop…</string>
+    <string name="connected">Status: Connected</string>
+    <string name="disconnected">Status: Standby</string>
+</resources>

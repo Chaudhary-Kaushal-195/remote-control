@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_deep">#080A0F</color>
+    <color name="card_bg">#121620</color>
+    <color name="card_stroke">#2A344A</color>
+    <color name="accent_primary">#0FFFFA</color>
+    <color name="accent_pink">#FF0055</color>
+    <color name="accent_green">#00FF88</color>
+    <color name="pedal_gas_start">#114D32</color>
+    <color name="pedal_gas_end">#082417</color>
+    <color name="pedal_brake_start">#5C1318</color>
+    <color name="pedal_brake_end">#2E0A0C</color>
+    <color name="pedal_rev_start">#262B36</color>
+    <color name="pedal_rev_end">#12141A</color>
+    <color name="glass_surface">#18FFFFFF</color>
+    <color name="glass_stroke">#30FFFFFF</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="gray_text">#88FFFFFF</color>
+</resources>

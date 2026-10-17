@@ -119,47 +119,7 @@ window.setupRemote = (showQR = false) => {
             window.showGameNotification("REMOTE CONNECTED ✅");
         });
         window.conn.on('data', (data) => {
-            if (data.type === 'gyro') {
-                // Always store gyro/wheel tilt from the remote
-                window.gyroTilt = (data.tilt || 0);
-                window.gyroActive = true;
-                // Timestamp for stale-detection — auto-center when phone stops sending
-                window.lastGyroTime = Date.now();
-            }
-            if (data.type === 'pedal') {
-                const val = data.intensity !== undefined ? data.intensity : (data.active ? 1.0 : 0.0);
-                window.remoteInputs[data.pedal] = val;
-                window.syncMergedInputs();
-            }
-            if (data.type === 'gearShift') {
-                window.requestGearShift(data.direction);
-            }
-            if (data.type === 'pause') {
-                if (window.togglePause) window.togglePause();
-            }
-            if (data.type === 'updateSettings') {
-                // Sync settings from remote
-                window.gameSettings = Object.assign(window.gameSettings, data.settings);
-                localStorage.setItem('drViceSettings', JSON.stringify(window.gameSettings));
-                if (window.loadSettingsToModal) window.loadSettingsToModal();
-                if (window.applyHUDVisibility) window.applyHUDVisibility();
-                if (window.setEngineVolume) window.setEngineVolume(window.gameSettings.engineVol);
-
-                // Send back confirmation to sync other remote if connected
-                window.conn.send({ type: 'config', config: window.gameSettings });
-            }
-            if (data.type === 'keydown') {
-                const keyMap = { 'ArrowUp': 38, 'ArrowDown': 40, 'w': 87, 's': 83, 'a': 65, 'd': 68, 'b': 66, ' ': 32, 'c': 67 };
-                const kc = keyMap[data.key] || 0;
-                const ev = new KeyboardEvent('keydown', { key: data.key, code: data.key, keyCode: kc, which: kc, bubbles: true, cancelable: true });
-                window.dispatchEvent(ev);
-            }
-            if (data.type === 'keyup') {
-                const keyMap = { 'ArrowUp': 38, 'ArrowDown': 40, 'w': 87, 's': 83, 'a': 65, 'd': 68, 'b': 66, ' ': 32, 'c': 67 };
-                const kc = keyMap[data.key] || 0;
-                const ev = new KeyboardEvent('keyup', { key: data.key, code: data.key, keyCode: kc, which: kc, bubbles: true, cancelable: true });
-                window.dispatchEvent(ev);
-            }
+            window.handleIncomingControllerData(data);
         });
         window.conn.on('close', () => {
             window.showGameNotification("REMOTE DISCONNECTED ❌", "#ff0055");
@@ -176,6 +136,121 @@ window.setupRemote = (showQR = false) => {
         });
     });
 };
+
+// Unified Data Processing for Both WebRTC and Pure Native WebSocket LAN Controller
+window.handleIncomingControllerData = (data) => {
+    if (data.type === 'gyro') {
+        window.gyroTilt = (data.tilt || 0);
+        window.gyroActive = true;
+        window.lastGyroTime = Date.now();
+    }
+    if (data.type === 'pedal') {
+        const val = data.intensity !== undefined ? data.intensity : (data.active ? 1.0 : 0.0);
+        window.remoteInputs[data.pedal] = val;
+        window.syncMergedInputs();
+    }
+    if (data.type === 'gearShift') {
+        window.requestGearShift(data.direction);
+    }
+    if (data.type === 'pause') {
+        if (window.togglePause) window.togglePause();
+    }
+    if (data.type === 'updateSettings') {
+        window.gameSettings = Object.assign(window.gameSettings, data.settings);
+        localStorage.setItem('drViceSettings', JSON.stringify(window.gameSettings));
+        if (window.loadSettingsToModal) window.loadSettingsToModal();
+        if (window.applyHUDVisibility) window.applyHUDVisibility();
+        if (window.setEngineVolume) window.setEngineVolume(window.gameSettings.engineVol);
+
+        if (window.conn && window.conn.open) {
+            window.conn.send({ type: 'config', config: window.gameSettings });
+        }
+        if (window.bridgeWs && window.bridgeWs.readyState === WebSocket.OPEN) {
+            window.bridgeWs.send(JSON.stringify({ type: 'config', config: window.gameSettings }));
+        }
+    }
+    if (data.type === 'keydown') {
+        const keyMap = { 'ArrowUp': 38, 'ArrowDown': 40, 'w': 87, 's': 83, 'a': 65, 'd': 68, 'b': 66, ' ': 32, 'c': 67 };
+        const kc = keyMap[data.key] || 0;
+        const ev = new KeyboardEvent('keydown', { key: data.key, code: data.key, keyCode: kc, which: kc, bubbles: true, cancelable: true });
+        window.dispatchEvent(ev);
+    }
+    if (data.type === 'keyup') {
+        const keyMap = { 'ArrowUp': 38, 'ArrowDown': 40, 'w': 87, 's': 83, 'a': 65, 'd': 68, 'b': 66, ' ': 32, 'c': 67 };
+        const kc = keyMap[data.key] || 0;
+        const ev = new KeyboardEvent('keyup', { key: data.key, code: data.key, keyCode: kc, which: kc, bubbles: true, cancelable: true });
+        window.dispatchEvent(ev);
+    }
+};
+
+// Automatic Local Native LAN WebSocket Bridge for Dr. Vice Controller
+window.updateQrWithLanIp = (ip, port) => {
+    const qrContainer = document.getElementById('qr-code');
+    const qrOverlay = document.getElementById('qr-overlay');
+    if (!qrOverlay) return;
+
+    let ipBanner = document.getElementById('bridge-ip-banner');
+    if (!ipBanner) {
+        ipBanner = document.createElement('div');
+        ipBanner.id = 'bridge-ip-banner';
+        ipBanner.style.cssText = 'margin:12px auto; padding:10px 18px; background:rgba(0, 255, 250, 0.12); border:1px solid #0ffffa; border-radius:12px; font-family:"Orbitron", sans-serif; font-size:14px; color:#ffffff; text-align:center; letter-spacing:1px; max-width:320px;';
+        const pTag = qrOverlay.querySelector('p');
+        if (pTag) {
+            qrOverlay.insertBefore(ipBanner, pTag);
+        } else {
+            qrOverlay.appendChild(ipBanner);
+        }
+    }
+    ipBanner.innerHTML = `<span style="font-size:11px; opacity:0.8;">NATIVE CONTROLLER IP:</span><br><b style="color:#0ffffa; font-size:18px;">${ip}</b><div style="font-size:10px; opacity:0.7; margin-top:4px;">Port: ${port} | Direct Hotspot &amp; Wi-Fi Ready</div>`;
+
+    if (qrContainer && typeof QRCode !== 'undefined') {
+        const qrContent = `ws://${ip}:${port}`;
+        qrContainer.innerHTML = "";
+        new QRCode(qrContainer, {
+            text: qrContent,
+            width: 200,
+            height: 200,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    }
+};
+
+window.initLocalBridge = () => {
+    try {
+        const host = window.location.hostname || 'localhost';
+        const ws = new WebSocket('ws://' + host + ':8080');
+        ws.onopen = () => {
+            console.log('🎮 Connected to Native Controller LAN Bridge on port 8080');
+            window.bridgeWs = ws;
+        };
+        ws.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.type === 'bridgeInfo') {
+                    window.bridgeLanIp = data.localIp;
+                    window.bridgePort = data.port;
+                    window.updateQrWithLanIp(data.localIp, data.port);
+                } else if (data.type === 'controllerReady') {
+                    window.updateControllerUI(true);
+                    if (window.activateInputSource) window.activateInputSource('phone');
+                    window.syncMergedInputs();
+                    window.showGameNotification("NATIVE CONTROLLER CONNECTED ✅");
+                    // Send game config to phone
+                    ws.send(JSON.stringify({ type: 'config', config: window.gameSettings }));
+                } else {
+                    window.handleIncomingControllerData(data);
+                }
+            } catch(e) {}
+        };
+        ws.onclose = () => {
+            window.bridgeWs = null;
+            setTimeout(window.initLocalBridge, 3000);
+        };
+    } catch(e) {}
+};
+window.initLocalBridge();
 
 window.showGameNotification = (text, color = "#0ffffa") => {
     let notify = document.getElementById('game-notify');
