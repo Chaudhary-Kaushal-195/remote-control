@@ -114,6 +114,8 @@ class MainActivity : AppCompatActivity() {
                     binding.btnConnectManual.isEnabled = true
                     binding.btnConnectManual.text = "CONNECT"
                     binding.tvStatus.text = "LINK ERROR"
+                    binding.tvDiscoveryStatus.text = "🔍 Searching for Dr. Vice game on Wi-Fi / Hotspot..."
+                    discoveryManager.startDiscovery()
                     Toast.makeText(this, "Connection Error: $err", Toast.LENGTH_LONG).show()
                 }
             },
@@ -138,6 +140,7 @@ class MainActivity : AppCompatActivity() {
                 binding.scannerOverlay.visibility = View.GONE
                 val hostId = extractHostId(rawResult)
                 binding.etHostId.setText(hostId)
+                discoveryManager.stopDiscovery()
                 connectToHost(hostId)
             }
         )
@@ -151,6 +154,7 @@ class MainActivity : AppCompatActivity() {
         // 7. Setup Zero-Config UDP LAN Auto-Discovery
         discoveryManager = LanDiscoveryManager(this) { ip, port, hostName ->
             if (activeTransport?.isConnected != true && binding.overlayPairing.visibility == View.VISIBLE) {
+                discoveryManager.stopDiscovery()
                 binding.tvDiscoveryStatus.text = "🟢 FOUND: $hostName ($ip)! Connecting..."
                 binding.tvDiscoveryStatus.setTextColor(ContextCompat.getColor(this, R.color.accent_primary))
                 val target = "$ip:$port"

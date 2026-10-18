@@ -46,6 +46,8 @@ console.log('====================================================');
 
 const clients = new Set();
 
+let lastWarnTime = 0;
+
 wss.on('connection', (ws, req) => {
     clients.add(ws);
     const clientIp = req.socket.remoteAddress;
@@ -61,9 +63,19 @@ wss.on('connection', (ws, req) => {
     ws.on('message', (message) => {
         // Broadcast input events from phone to cargame.html (and feedback back to phone)
         const msgStr = message.toString();
+        let forwardCount = 0;
         for (const client of clients) {
             if (client !== ws && client.readyState === WebSocket.OPEN) {
                 client.send(msgStr);
+                forwardCount++;
+            }
+        }
+
+        if (forwardCount === 0 && clients.size <= 1) {
+            const now = Date.now();
+            if (now - lastWarnTime > 8000) {
+                console.warn('⚠️ [BRIDGE WARNING] Phone is sending inputs, but Desktop Game (cargame.html) is not connected yet! Please open http://localhost:3000/pages/cargame.html in your browser.');
+                lastWarnTime = now;
             }
         }
     });
@@ -71,6 +83,11 @@ wss.on('connection', (ws, req) => {
     ws.on('close', () => {
         clients.delete(ws);
         console.log(`[DISCONNECTED] Client left. Total active: ${clients.size}`);
+        for (const client of clients) {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify({ type: 'controllerDisconnected' }));
+            }
+        }
     });
 
     ws.on('error', (err) => {

@@ -35,21 +35,30 @@ class DesktopNativeTransport(
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private val client = OkHttpClient.Builder()
-        .connectTimeout(5, TimeUnit.SECONDS)
+        .connectTimeout(4, TimeUnit.SECONDS)
+        .pingInterval(3, TimeUnit.SECONDS) // Ping every 3s to keep connection alive
         .readTimeout(0, TimeUnit.MILLISECONDS) // Keep-alive for streaming
         .build()
 
     private var webSocket: WebSocket? = null
+    private var isConnecting: Boolean = false
 
     override fun connect(target: String, onConnected: () -> Unit, onError: (String) -> Unit) {
+        if (isConnected || isConnecting) {
+            Log.d(TAG, "Already connected or connecting, skipping duplicate request.")
+            return
+        }
+
         val cleanTarget = target.trim()
         val wsUrl = resolveWebSocketUrl(cleanTarget)
 
         Log.i(TAG, "Connecting native WebSocket to: $wsUrl")
+        isConnecting = true
 
         val request = try {
             Request.Builder().url(wsUrl).build()
         } catch (e: Exception) {
+            isConnecting = false
             onError("Invalid host address: $cleanTarget")
             return
         }
@@ -59,6 +68,7 @@ class DesktopNativeTransport(
             override fun onOpen(ws: WebSocket, response: Response) {
                 Log.i(TAG, "Native WebSocket connected to desktop game: $wsUrl")
                 isConnected = true
+                isConnecting = false
                 mainHandler.post {
                     this@DesktopNativeTransport.onConnected()
                     onConnected()
@@ -102,6 +112,7 @@ class DesktopNativeTransport(
             override fun onClosed(ws: WebSocket, code: Int, reason: String) {
                 Log.w(TAG, "Native WebSocket closed: $reason ($code)")
                 isConnected = false
+                isConnecting = false
                 mainHandler.post {
                     this@DesktopNativeTransport.onDisconnected()
                 }
@@ -110,6 +121,7 @@ class DesktopNativeTransport(
             override fun onFailure(ws: WebSocket, t: Throwable, response: Response?) {
                 Log.e(TAG, "Native WebSocket connection failed: ${t.message}", t)
                 isConnected = false
+                isConnecting = false
                 mainHandler.post {
                     val err = t.message ?: "Connection failed"
                     this@DesktopNativeTransport.onError(err)
@@ -121,6 +133,7 @@ class DesktopNativeTransport(
 
     override fun disconnect() {
         isConnected = false
+        isConnecting = false
         webSocket?.close(1000, "User disconnected")
         webSocket = null
     }

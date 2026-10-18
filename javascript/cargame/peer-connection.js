@@ -139,6 +139,26 @@ window.setupRemote = (showQR = false) => {
 
 // Unified Data Processing for Both WebRTC and Pure Native WebSocket LAN Controller
 window.handleIncomingControllerData = (data) => {
+    // Ensure window.conn proxy is active so car-physics and syncMergedInputs know phone is driving
+    if (!window.conn || !window.conn.open) {
+        window.conn = {
+            open: true,
+            isNativeBridge: true,
+            send: (payload) => {
+                if (window.bridgeWs && window.bridgeWs.readyState === WebSocket.OPEN) {
+                    window.bridgeWs.send(typeof payload === 'string' ? payload : JSON.stringify(payload));
+                }
+            },
+            close: () => {
+                if (window.conn && window.conn.isNativeBridge) {
+                    window.conn = null;
+                }
+            }
+        };
+        if (window.activateInputSource) window.activateInputSource('phone');
+        if (window.updateControllerUI) window.updateControllerUI(true);
+    }
+
     if (data.type === 'gyro') {
         window.gyroTilt = (data.tilt || 0);
         window.gyroActive = true;
@@ -233,12 +253,35 @@ window.initLocalBridge = () => {
                     window.bridgePort = data.port;
                     window.updateQrWithLanIp(data.localIp, data.port);
                 } else if (data.type === 'controllerReady') {
+                    window.conn = {
+                        open: true,
+                        isNativeBridge: true,
+                        send: (payload) => {
+                            if (window.bridgeWs && window.bridgeWs.readyState === WebSocket.OPEN) {
+                                window.bridgeWs.send(typeof payload === 'string' ? payload : JSON.stringify(payload));
+                            }
+                        },
+                        close: () => {
+                            if (window.conn && window.conn.isNativeBridge) {
+                                window.conn = null;
+                            }
+                        }
+                    };
                     window.updateControllerUI(true);
                     if (window.activateInputSource) window.activateInputSource('phone');
                     window.syncMergedInputs();
                     window.showGameNotification("NATIVE CONTROLLER CONNECTED ✅");
                     // Send game config to phone
                     ws.send(JSON.stringify({ type: 'config', config: window.gameSettings }));
+                } else if (data.type === 'controllerDisconnected') {
+                    if (window.conn && window.conn.isNativeBridge) {
+                        window.conn = null;
+                        if (window.updateControllerUI) window.updateControllerUI(false);
+                        if (window.activateInputSource) window.activateInputSource('keyboard');
+                        window.remoteInputs = { fwd: false, bwd: false, handbrake: false, brake: false, left: false, right: false };
+                        window.syncMergedInputs();
+                        window.showGameNotification("NATIVE CONTROLLER DISCONNECTED ❌", "#ff0055");
+                    }
                 } else {
                     window.handleIncomingControllerData(data);
                 }
@@ -246,6 +289,13 @@ window.initLocalBridge = () => {
         };
         ws.onclose = () => {
             window.bridgeWs = null;
+            if (window.conn && window.conn.isNativeBridge) {
+                window.conn = null;
+                if (window.updateControllerUI) window.updateControllerUI(false);
+                if (window.activateInputSource) window.activateInputSource('keyboard');
+                window.remoteInputs = { fwd: false, bwd: false, handbrake: false, brake: false, left: false, right: false };
+                window.syncMergedInputs();
+            }
             setTimeout(window.initLocalBridge, 3000);
         };
     } catch(e) {}
