@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. Vice Android WebRTC Bridge</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+</head>
+<body>
+<script>
+    let peer = null;
+    let conn = null;
+
+    window.connectToPeer = function(hostId) {
+        console.log("[Bridge] connectToPeer requested with hostId:", hostId);
+        try {
+            if (peer) {
+                try { peer.destroy(); } catch(e) {}
+                peer = null;
+                conn = null;
+            }
+
+            peer = new Peer();
+
+            peer.on('open', function(myId) {
+                console.log("[Bridge] Peer opened successfully with ID:", myId);
+                conn = peer.connect(hostId, { reliable: true });
+
+                conn.on('open', function() {
+                    console.log("[Bridge] WebRTC DataChannel OPEN to host:", hostId);
+                    if (window.AndroidBridge) {
+                        window.AndroidBridge.onConnected(hostId);
+                    }
+                });
+
+                conn.on('data', function(data) {
+                    if (window.AndroidBridge) {
+                        const jsonStr = (typeof data === 'string') ? data : JSON.stringify(data);
+                        window.AndroidBridge.onData(jsonStr);
+                    }
+                });
+
+                conn.on('close', function() {
+                    console.log("[Bridge] WebRTC DataChannel closed");
+                    if (window.AndroidBridge) {
+                        window.AndroidBridge.onDisconnected();
+                    }
+                });
+
+                conn.on('error', function(err) {
+                    console.error("[Bridge] DataChannel error:", err);
+                    if (window.AndroidBridge) {
+                        window.AndroidBridge.onError(err ? (err.type || err.message || String(err)) : "Channel error");
+                    }
+                });
+            });
+
+            peer.on('error', function(err) {
+                console.error("[Bridge] Peer error:", err);
+                if (window.AndroidBridge) {
+                    window.AndroidBridge.onError(err ? (err.type || err.message || String(err)) : "Peer error");
+                }
+            });
+
+            peer.on('disconnected', function() {
+                console.warn("[Bridge] Peer disconnected from signaling server");
+                if (peer && !peer.destroyed) {
+                    peer.reconnect();
+                }
+            });
+
+        } catch(e) {
+            console.error("[Bridge] Exception in connectToPeer:", e);
+            if (window.AndroidBridge) {
+                window.AndroidBridge.onError(e.message || String(e));
+            }
+        }
+    };
+
+    window.sendPacket = function(packet) {
+        if (conn && conn.open) {
+            conn.send(packet);
+        }
+    };
+
+    window.disconnectPeer = function() {
+        console.log("[Bridge] disconnectPeer called");
+        if (conn) {
+            try { conn.close(); } catch(e) {}
+            conn = null;
+        }
+        if (peer) {
+            try { peer.destroy(); } catch(e) {}
+            peer = null;
+        }
+    };
+</script>
+</body>
+</html>

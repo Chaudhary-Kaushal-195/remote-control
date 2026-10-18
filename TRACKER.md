@@ -1,8 +1,8 @@
 # Task Backlog & Execution Progress — Dr. Vice
 
 ## Current Status
-- **Active Task**: Startup Protocol & Six-File Documentation Synchronization
-- **Status**: Complete & Verified
+- **Active Task**: Native Android Controller WebRTC (PeerJS) Transport
+- **Status**: [x] Completed and verified
 
 ## Progress Checklist
 
@@ -12,7 +12,7 @@
 - [x] WebRTC DataChannel P2P mobile phone controller pairing via PeerJS
 - [x] Node.js LAN controller bridge with UDP beacon discovery (`bridge.js`)
 - [x] TypeScript granular audio engine with RPM curve pitch shifting
-- [x] Native Android companion controller application (`android-controller/`)
+- [x] Native Android companion controller application (`android-controller/` WebRTC support)
 
 ### Documentation & Autonomous Engineering Protocol
 - [x] Initialize mandatory 6 root documentation files:

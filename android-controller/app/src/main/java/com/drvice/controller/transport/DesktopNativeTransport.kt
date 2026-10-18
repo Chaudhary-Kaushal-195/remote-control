@@ -181,7 +181,7 @@ class DesktopNativeTransport(
         // Not used for desktop JSON protocol
     }
 
-    fun sendCameraCycle() {
+    override fun sendCameraCycle() {
         if (!isConnected) return
         val keydown = JSONObject().apply {
             put("type", "keydown")
@@ -195,7 +195,7 @@ class DesktopNativeTransport(
         mainHandler.postDelayed({ sendJson(keyup) }, 50)
     }
 
-    fun sendPauseToggle() {
+    override fun sendPauseToggle() {
         if (!isConnected) return
         val json = JSONObject().apply {
             put("type", "pause")
@@ -203,7 +203,7 @@ class DesktopNativeTransport(
         sendJson(json)
     }
 
-    fun sendSettingsUpdate(steering: String, transmission: String) {
+    override fun sendSettingsUpdate(steering: String, transmission: String) {
         if (!isConnected) return
         val json = JSONObject().apply {
             put("type", "updateSettings")

@@ -16,4 +16,8 @@ interface IControllerTransport {
     fun sendGearShift(direction: String)
     fun sendAuxCommand(channel: Int, value: Float)
     fun sendRawPacket(data: ByteArray)
+
+    fun sendCameraCycle() {}
+    fun sendPauseToggle() {}
+    fun sendSettingsUpdate(steering: String, transmission: String) {}
 }

@@ -226,11 +226,11 @@ class MainActivity : AppCompatActivity() {
         }
         binding.btnCamera.setOnClickListener {
             haptics.tapLight()
-            transportManager.desktopTransport.sendCameraCycle()
+            activeTransport?.sendCameraCycle()
         }
         binding.btnPause.setOnClickListener {
             haptics.tapMedium()
-            transportManager.desktopTransport.sendPauseToggle()
+            activeTransport?.sendPauseToggle()
             val isPaused = binding.btnPause.text.contains("▶")
             binding.btnPause.text = if (isPaused) "⏸" else "▶"
         }
@@ -287,23 +287,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun extractHostId(input: String): String {
         val text = input.trim()
-        if (text.startsWith("http://") || text.startsWith("https://") || text.startsWith("ws://") || text.startsWith("wss://")) {
-            return try {
-                val uri = java.net.URI(text)
-                val host = uri.host ?: ""
-                if (host.isNotEmpty() && host != "localhost" && host != "127.0.0.1") {
-                    val port = if (uri.port > 0 && uri.port != 3000 && uri.port != 80) uri.port else 8080
-                    "$host:$port"
-                } else {
-                    text
-                }
-            } catch (e: Exception) {
-                text
-            }
+
+        // 1. If it has hostId query parameter (PeerJS WebRTC QR code)
+        if (text.contains("hostId=")) {
+            return text.substringAfter("hostId=").substringBefore("&").trim()
         }
+
+        // 2. If it is direct WebSocket URL from bridge.js (e.g., ws://192.168.1.15:8080)
+        if (text.startsWith("ws://") || text.startsWith("wss://")) {
+            return text
+        }
+
+        // 3. If it has ip parameter
         if (text.contains("ip=")) {
             return text.substringAfter("ip=").substringBefore("&").trim()
         }
+
+        // 4. If user entered host:port directly or raw ID
         return text
     }
 
@@ -321,7 +321,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun connectToHost(hostId: String) {
-        binding.tvStatus.text = "STATUS: CONNECTING [$hostId]..."
+        if (transportManager.currentMode == ControllerMode.DESKTOP_GAME) {
+            activeTransport = transportManager.selectDesktopTransportForTarget(hostId)
+        }
+
+        binding.tvStatus.text = "STATUS: CONNECTING [${activeTransport?.transportName ?: hostId}]..."
         binding.btnConnectManual.isEnabled = false
         binding.btnConnectManual.text = "CONNECTING..."
 
@@ -343,7 +347,7 @@ class MainActivity : AppCompatActivity() {
                 binding.btnConnectManual.text = "CONNECT"
                 binding.tvStatus.text = "STATUS: ERROR ($error)"
                 val msg = if (error.contains("peer-unavailable")) {
-                    "Laptop ID '$hostId' not found.\nClick 'REMOTE' on your laptop to generate a fresh connection code!"
+                    "Laptop ID '$hostId' not found.\nClick 'SYNC PHONE' or 'REMOTE' on your laptop to generate a fresh connection code!"
                 } else {
                     "Connection error: $error"
                 }
@@ -448,7 +452,7 @@ class MainActivity : AppCompatActivity() {
             transmissionMode = selectedTrans
             applySteeringUiMode()
             applyTransmissionUiMode()
-            transportManager.desktopTransport.sendSettingsUpdate(steeringMode, transmissionMode)
+            activeTransport?.sendSettingsUpdate(steeringMode, transmissionMode)
             dialog.dismiss()
         }
 
